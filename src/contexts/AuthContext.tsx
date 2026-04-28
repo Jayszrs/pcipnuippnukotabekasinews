@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, useState, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Session, User } from "@supabase/supabase-js";
 
@@ -17,34 +17,51 @@ interface AuthCtx {
 
 const Ctx = createContext<AuthCtx | undefined>(undefined);
 
+const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [role, setRole] = useState<Role | null>(null);
   const [loading, setLoading] = useState(true);
   const [roleLoading, setRoleLoading] = useState(false);
+  const roleRequestRef = useRef(0);
 
   const fetchRole = async (userId: string) => {
+    const requestId = ++roleRequestRef.current;
     setRoleLoading(true);
-    const { data, error } = await supabase
-      .from("user_roles")
-      .select("role")
-      .eq("user_id", userId);
-    if (error) {
+    setRole(null);
+
+    for (const delay of [0, 600, 1500, 3000]) {
+      if (delay) await wait(delay);
+
+      const { data, error } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId);
+
+      if (requestId !== roleRequestRef.current) return;
+
+      if (!error) {
+        if (data && data.length > 0) {
+          const roles = data.map((r) => r.role as Role);
+          const best: Role = roles.includes("admin")
+            ? "admin"
+            : roles.includes("editor")
+            ? "editor"
+            : "user";
+          setRole(best);
+        } else {
+          setRole("user");
+        }
+        setRoleLoading(false);
+        return;
+      }
+
       console.error("fetchRole error:", error);
-      setRole("user");
-    } else if (data && data.length > 0) {
-      const roles = data.map((r) => r.role as Role);
-      const best: Role = roles.includes("admin")
-        ? "admin"
-        : roles.includes("editor")
-        ? "editor"
-        : "user";
-      setRole(best);
-    } else {
-      setRole("user");
     }
-    setRoleLoading(false);
+
+    if (requestId === roleRequestRef.current) setRoleLoading(false);
   };
 
   useEffect(() => {
@@ -57,7 +74,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         // Defer Supabase call to avoid deadlock
         setTimeout(() => fetchRole(sess.user.id), 0);
       } else {
+        roleRequestRef.current += 1;
         setRole(null);
+        setRoleLoading(false);
       }
     });
 
