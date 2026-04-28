@@ -98,7 +98,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <Ctx.Provider value={{ user, session, role, loading, signIn, signUp, signOut }}>
+    <Ctx.Provider value={{ user, session, role, loading, roleLoading, signIn, signUp, signOut }}>
       {children}
     </Ctx.Provider>
   );
