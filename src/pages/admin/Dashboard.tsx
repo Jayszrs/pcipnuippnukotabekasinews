@@ -21,24 +21,44 @@ interface NewsRow {
 }
 
 const Dashboard = () => {
+  const { user, loading: authLoading } = useAuth();
   const [news, setNews] = useState<NewsRow[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const load = async () => {
+  const load = async (showError = true) => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from("news")
-      .select("id,title,slug,category,status,views,image_url,video_url,published_at,created_at,author_name")
-      .order("created_at", { ascending: false });
-    if (error) toast.error("Gagal memuat berita", { description: error.message });
-    else setNews((data ?? []) as NewsRow[]);
+    // Retry hingga 3x untuk mengatasi koneksi awal yang belum siap
+    let lastError: any = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const { data, error } = await supabase
+        .from("news")
+        .select("id,title,slug,category,status,views,image_url,video_url,published_at,created_at,author_name")
+        .order("created_at", { ascending: false });
+
+      if (!error) {
+        setNews((data ?? []) as NewsRow[]);
+        setLoading(false);
+        return;
+      }
+      lastError = error;
+      if (attempt < 2) await new Promise((r) => setTimeout(r, 300 + attempt * 500));
+    }
+    if (showError && lastError) {
+      toast.error("Gagal memuat berita", { description: lastError.message });
+    }
     setLoading(false);
   };
 
   useEffect(() => {
     document.title = "Dashboard — IPNU IPPNU Bekasi";
+    // Tunggu auth siap sebelum query (RLS butuh auth.uid())
+    if (authLoading) return;
+    if (!user) {
+      setLoading(false);
+      return;
+    }
     load();
-  }, []);
+  }, [authLoading, user]);
 
   const handleDelete = async (id: string, title: string) => {
     if (!confirm(`Hapus berita "${title}"?`)) return;
