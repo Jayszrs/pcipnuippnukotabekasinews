@@ -21,16 +21,29 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [session, setSession] = useState<Session | null>(null);
   const [role, setRole] = useState<Role | null>(null);
   const [loading, setLoading] = useState(true);
+  const [roleLoading, setRoleLoading] = useState(false);
 
   const fetchRole = async (userId: string) => {
-    const { data } = await supabase
+    setRoleLoading(true);
+    const { data, error } = await supabase
       .from("user_roles")
       .select("role")
-      .eq("user_id", userId)
-      .order("role", { ascending: true })
-      .limit(1)
-      .maybeSingle();
-    setRole((data?.role as Role) ?? "user");
+      .eq("user_id", userId);
+    if (error) {
+      console.error("fetchRole error:", error);
+      setRole("user");
+    } else if (data && data.length > 0) {
+      const roles = data.map((r) => r.role as Role);
+      const best: Role = roles.includes("admin")
+        ? "admin"
+        : roles.includes("editor")
+        ? "editor"
+        : "user";
+      setRole(best);
+    } else {
+      setRole("user");
+    }
+    setRoleLoading(false);
   };
 
   useEffect(() => {
@@ -39,6 +52,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setSession(sess);
       setUser(sess?.user ?? null);
       if (sess?.user) {
+        setRoleLoading(true);
         // Defer Supabase call to avoid deadlock
         setTimeout(() => fetchRole(sess.user.id), 0);
       } else {
@@ -50,8 +64,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     supabase.auth.getSession().then(({ data: { session: sess } }) => {
       setSession(sess);
       setUser(sess?.user ?? null);
-      if (sess?.user) fetchRole(sess.user.id);
-      setLoading(false);
+      if (sess?.user) {
+        fetchRole(sess.user.id).finally(() => setLoading(false));
+      } else {
+        setLoading(false);
+      }
     });
 
     return () => subscription.unsubscribe();
