@@ -27,7 +27,8 @@ const NewsForm = () => {
   const { id } = useParams();
   const isEdit = !!id;
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, role, loading: authLoading, roleLoading } = useAuth();
+  const canManageNews = role === "admin" || role === "editor";
 
   const [title, setTitle] = useState("");
   const [excerpt, setExcerpt] = useState("");
@@ -68,32 +69,53 @@ const NewsForm = () => {
   }, [id, isEdit, navigate]);
 
   const uploadFile = async (file: File, kind: "image" | "video") => {
-    if (!user) return;
+    if (authLoading || roleLoading) {
+      toast.info("Tunggu sebentar", { description: "Sesi admin sedang disiapkan." });
+      return;
+    }
+    if (!user || !canManageNews) {
+      toast.error("Upload ditolak", { description: "Akun ini belum punya akses admin/editor." });
+      return;
+    }
     const maxMB = kind === "image" ? 10 : 100;
     if (file.size > maxMB * 1024 * 1024) {
       toast.error(`Ukuran maksimal ${maxMB}MB`);
       return;
     }
-    setUploading(kind);
-    const ext = file.name.split(".").pop();
-    const path = `${user.id}/${kind}/${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from("news-media").upload(path, file, {
-      cacheControl: "3600",
-      upsert: false,
-    });
-    if (error) {
-      toast.error("Upload gagal", { description: error.message });
-      setUploading(null);
+    const allowed = kind === "image" ? file.type.startsWith("image/") : file.type.startsWith("video/");
+    if (!allowed) {
+      toast.error("Format file tidak sesuai", { description: kind === "image" ? "Pilih file gambar." : "Pilih file video." });
       return;
     }
-    const { data } = supabase.storage.from("news-media").getPublicUrl(path);
-    if (kind === "image") setImageUrl(data.publicUrl);
-    else setVideoUrl(data.publicUrl);
-    toast.success(`${kind === "image" ? "Foto" : "Video"} berhasil diupload`);
-    setUploading(null);
+    setUploading(kind);
+    try {
+      const ext = file.name.split(".").pop()?.toLowerCase().replace(/[^a-z0-9]/g, "") || (kind === "image" ? "jpg" : "mp4");
+      const path = `${user.id}/${kind}/${crypto.randomUUID()}.${ext}`;
+      const { error } = await supabase.storage.from("news-media").upload(path, file, {
+        cacheControl: "3600",
+        contentType: file.type,
+        upsert: false,
+      });
+      if (error) {
+        toast.error("Upload gagal", { description: error.message });
+        return;
+      }
+      const { data } = supabase.storage.from("news-media").getPublicUrl(path);
+      if (kind === "image") setImageUrl(data.publicUrl);
+      else setVideoUrl(data.publicUrl);
+      toast.success(`${kind === "image" ? "Foto" : "Video"} berhasil diupload`);
+    } catch (error) {
+      toast.error("Upload gagal", { description: error instanceof Error ? error.message : "Coba ulangi lagi." });
+    } finally {
+      setUploading(null);
+    }
   };
 
   const save = async (status: "draft" | "published") => {
+    if (!user || authLoading || roleLoading || !canManageNews) {
+      toast.error("Belum bisa menyimpan", { description: "Pastikan akun admin/editor sudah siap." });
+      return;
+    }
     const parsed = schema.safeParse({ title, excerpt, content, category });
     if (!parsed.success) {
       toast.error("Periksa form", { description: parsed.error.issues[0].message });
