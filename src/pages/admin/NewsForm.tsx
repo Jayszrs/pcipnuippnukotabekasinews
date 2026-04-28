@@ -248,32 +248,86 @@ const NewsForm = () => {
           {/* Video */}
           <div className="bg-background p-5 rounded-sm border border-border">
             <label className="block text-xs font-brand font-bold uppercase tracking-wider mb-3">Video (Opsional)</label>
-            {videoUrl ? (
-              <div className="relative">
-                <video src={videoUrl} controls className="w-full aspect-video rounded-sm bg-foreground" />
-                <button
-                  onClick={() => setVideoUrl(null)}
-                  className="absolute top-2 right-2 h-8 w-8 bg-background/90 rounded-sm flex items-center justify-center hover:bg-breaking hover:text-breaking-foreground"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
+
+            {/* Mode toggle */}
+            <div className="grid grid-cols-2 gap-1 p-1 bg-muted rounded-sm mb-4">
+              <button
+                type="button"
+                onClick={() => setVideoMode("upload")}
+                className={`flex items-center justify-center gap-1.5 py-2 text-xs font-bold rounded-sm transition-colors ${
+                  videoMode === "upload" ? "bg-background shadow-sm" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <Upload className="h-3.5 w-3.5" /> Upload File
+              </button>
+              <button
+                type="button"
+                onClick={() => setVideoMode("url")}
+                className={`flex items-center justify-center gap-1.5 py-2 text-xs font-bold rounded-sm transition-colors ${
+                  videoMode === "url" ? "bg-background shadow-sm" : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <Link2 className="h-3.5 w-3.5" /> URL Eksternal
+              </button>
+            </div>
+
+            {videoMode === "upload" ? (
+              videoUrl && !videoUrlInput ? (
+                <div className="relative">
+                  <video src={videoUrl} controls className="w-full aspect-video rounded-sm bg-foreground" />
+                  <button
+                    onClick={() => setVideoUrl(null)}
+                    className="absolute top-2 right-2 h-8 w-8 bg-background/90 rounded-sm flex items-center justify-center hover:bg-breaking hover:text-breaking-foreground"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
+              ) : (
+                <label className="flex flex-col items-center justify-center aspect-video border-2 border-dashed border-border rounded-sm cursor-pointer hover:border-gold hover:bg-muted/30 transition-colors">
+                  {uploading === "video" ? (
+                    <Loader2 className="h-6 w-6 animate-spin text-gold" />
+                  ) : (
+                    <>
+                      <Video className="h-8 w-8 text-muted-foreground mb-2" />
+                      <span className="text-xs text-muted-foreground">Klik untuk upload video</span>
+                      <span className="text-[10px] text-muted-foreground">MP4, WebM (max 100MB)</span>
+                    </>
+                  )}
+                  <input
+                    type="file" accept="video/*,.mp4,.webm,.mov" className="hidden"
+                    onChange={(e) => {
+                      if (e.target.files?.[0]) {
+                        setVideoUrlInput("");
+                        uploadFile(e.target.files[0], "video");
+                      }
+                    }}
+                  />
+                </label>
+              )
             ) : (
-              <label className="flex flex-col items-center justify-center aspect-video border-2 border-dashed border-border rounded-sm cursor-pointer hover:border-gold hover:bg-muted/30 transition-colors">
-                {uploading === "video" ? (
-                  <Loader2 className="h-6 w-6 animate-spin text-gold" />
-                ) : (
-                  <>
-                    <Video className="h-8 w-8 text-muted-foreground mb-2" />
-                    <span className="text-xs text-muted-foreground">Klik untuk upload video</span>
-                    <span className="text-[10px] text-muted-foreground">MP4, WebM (max 100MB)</span>
-                  </>
+              <div className="space-y-2">
+                <div className="relative">
+                  <Link2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <input
+                    type="url"
+                    value={videoUrlInput}
+                    onChange={(e) => {
+                      setVideoUrlInput(e.target.value);
+                      setVideoUrl(e.target.value.trim() || null);
+                    }}
+                    placeholder="https://www.tiktok.com/@user/video/..."
+                    className="w-full pl-9 pr-3 py-2.5 rounded-sm border border-input bg-background focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+                  />
+                </div>
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                  Tempel link dari <strong>TikTok, YouTube, Instagram, Facebook, Twitter/X</strong>, atau URL file <strong>.mp4 / .webm</strong>.
+                </p>
+                {videoUrlInput && (
+                  <div className="mt-2 p-2 rounded-sm bg-muted text-[11px] break-all text-muted-foreground">
+                    ✓ Tersimpan: {videoUrlInput}
+                  </div>
                 )}
-                <input
-                  type="file" accept="video/*" className="hidden"
-                  onChange={(e) => e.target.files?.[0] && uploadFile(e.target.files[0], "video")}
-                />
-              </label>
+              </div>
             )}
           </div>
 
