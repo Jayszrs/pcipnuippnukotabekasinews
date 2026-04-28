@@ -14,8 +14,14 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }
 
   if (!user) return <Navigate to="/admin" replace />;
-  if (roleLoading) return <>{children}</>;
-  if (role && role !== "admin" && role !== "editor") {
+  if (roleLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+  if (role !== "admin" && role !== "editor") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-8 text-center">
         <div>
