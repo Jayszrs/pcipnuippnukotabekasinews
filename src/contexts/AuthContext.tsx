@@ -32,7 +32,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setRoleLoading(true);
     setRole(null);
 
-    for (const delay of [0, 600, 1500, 3000]) {
+    for (const delay of [0, 800]) {
       if (delay) await wait(delay);
 
       const { data, error } = await supabase
@@ -84,10 +84,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     supabase.auth.getSession().then(({ data: { session: sess } }) => {
       setSession(sess);
       setUser(sess?.user ?? null);
+      setLoading(false);
       if (sess?.user) {
-        fetchRole(sess.user.id).finally(() => setLoading(false));
-      } else {
-        setLoading(false);
+        fetchRole(sess.user.id);
       }
     });
 
