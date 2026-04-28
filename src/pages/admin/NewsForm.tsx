@@ -3,7 +3,7 @@ import { useNavigate, useParams, Link } from "react-router-dom";
 import { AdminLayout } from "@/components/AdminLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { ArrowLeft, Save, Send, Upload, X, Loader2, Image as ImageIcon, Video } from "lucide-react";
+import { ArrowLeft, Save, Send, X, Loader2, Image as ImageIcon, Video, Link2, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -36,6 +36,8 @@ const NewsForm = () => {
   const [tags, setTags] = useState("");
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [videoUrl, setVideoUrl] = useState<string | null>(null);
+  const [videoMode, setVideoMode] = useState<"upload" | "url">("upload");
+  const [videoUrlInput, setVideoUrlInput] = useState("");
   const [uploading, setUploading] = useState<"image" | "video" | null>(null);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(isEdit);
