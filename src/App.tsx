@@ -11,6 +11,8 @@ import Category from "./pages/Category.tsx";
 import Media from "./pages/Media.tsx";
 import AdminLogin from "./pages/AdminLogin.tsx";
 import AdminSignup from "./pages/AdminSignup.tsx";
+import ForgotPassword from "./pages/ForgotPassword.tsx";
+import ResetPassword from "./pages/ResetPassword.tsx";
 import Dashboard from "./pages/admin/Dashboard.tsx";
 import NewsForm from "./pages/admin/NewsForm.tsx";
 import NotFound from "./pages/NotFound.tsx";
@@ -31,6 +33,8 @@ const App = () => (
             <Route path="/media" element={<Media />} />
             <Route path="/admin" element={<AdminLogin />} />
             <Route path="/admin/signup" element={<AdminSignup />} />
+            <Route path="/admin/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route
               path="/admin/dashboard"
               element={<ProtectedRoute><Dashboard /></ProtectedRoute>}

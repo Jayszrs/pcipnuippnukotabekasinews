@@ -84,6 +84,11 @@ const AdminLogin = () => {
                   className="w-full pl-10 pr-4 py-3 rounded-sm border border-input bg-background focus:outline-none focus:ring-2 focus:ring-primary text-sm"
                 />
               </div>
+              <div className="mt-2 text-right">
+                <Link to="/admin/forgot-password" className="text-xs text-primary font-semibold hover:underline">
+                  Lupa password?
+                </Link>
+              </div>
             </div>
 
             <button
