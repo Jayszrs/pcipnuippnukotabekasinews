@@ -5,7 +5,7 @@ import { Loader2 } from "lucide-react";
 export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading, role, roleLoading } = useAuth();
 
-  if (loading || (user && roleLoading)) {
+  if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -14,7 +14,8 @@ export const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }
 
   if (!user) return <Navigate to="/admin" replace />;
-  if (role !== "admin" && role !== "editor") {
+  if (roleLoading) return <>{children}</>;
+  if (role && role !== "admin" && role !== "editor") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background p-8 text-center">
         <div>
