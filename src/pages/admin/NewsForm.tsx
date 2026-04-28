@@ -59,6 +59,10 @@ const NewsForm = () => {
       setTags((data.tags ?? []).join(", "));
       setImageUrl(data.image_url);
       setVideoUrl(data.video_url);
+      if (data.video_url && !data.video_url.includes("/storage/v1/object/public/news-media/")) {
+        setVideoMode("url");
+        setVideoUrlInput(data.video_url);
+      }
       setLoading(false);
     })();
   }, [id, isEdit, navigate]);
