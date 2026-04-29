@@ -5,6 +5,12 @@ import n3 from "@/assets/news-3.jpg";
 import n4 from "@/assets/news-4.jpg";
 import n5 from "@/assets/news-5.jpg";
 import n6 from "@/assets/news-6.jpg";
+import n7 from "@/assets/news-7.jpg";
+import n8 from "@/assets/news-8.jpg";
+import n9 from "@/assets/news-9.jpg";
+import n10 from "@/assets/news-10.jpg";
+import n11 from "@/assets/news-11.jpg";
+import n12 from "@/assets/news-12.jpg";
 
 export type Category =
   | "Kegiatan IPNU"
@@ -190,7 +196,179 @@ export const articles: Article[] = [
     views: 3420,
     tags: ["PBNU", "Nasional", "Kaderisasi"],
   },
-];
+  {
+    id: "9",
+    slug: "ipnu-bekasi-juara-lomba-debat-aswaja",
+    title: "IPNU Bekasi Sabet Juara 1 Lomba Debat Aswaja Tingkat Jabodetabek",
+    excerpt:
+      "Tim debat IPNU Kota Bekasi berhasil mengalahkan 24 tim dari berbagai daerah dalam ajang debat keagamaan bergengsi.",
+    content: [
+      "BEKASI — Tim debat Pimpinan Cabang IPNU Kota Bekasi sukses meraih juara pertama dalam Lomba Debat Aswaja se-Jabodetabek yang digelar di Universitas Nahdlatul Ulama Indonesia, Sabtu (5/4/2026).",
+      "Dengan mengangkat tema 'Moderasi Beragama di Tengah Polarisasi Sosial', tim Bekasi tampil meyakinkan di babak final melawan IPNU Jakarta Selatan.",
+      "Kemenangan ini menjadi bukti kuatnya tradisi keilmuan pelajar NU Kota Bekasi yang konsisten dibina melalui kajian mingguan.",
+    ],
+    image: n7,
+    category: "Kegiatan IPNU",
+    author: "Tim Redaksi",
+    date: "5 April 2026",
+    readTime: 3,
+    views: 1820,
+    tags: ["Debat", "Aswaja", "Prestasi", "Jabodetabek"],
+  },
+  {
+    id: "10",
+    slug: "ippnu-bekasi-buka-kelas-tahfidz-online",
+    title: "IPPNU Bekasi Buka Kelas Tahfidz Online Gratis untuk Pelajar Putri",
+    excerpt:
+      "Program Tahfidz Online IPPNU menyasar 500 pelajar putri dengan metode talaqqi dan setoran via Zoom.",
+    content: [
+      "BEKASI — Departemen Dakwah PC IPPNU Kota Bekasi resmi membuka kelas tahfidz Al-Qur'an online gratis bagi pelajar putri se-Kota Bekasi.",
+      "Program ini akan berlangsung selama 6 bulan dengan metode talaqqi dan setoran hafalan via Zoom setiap malam ba'da Maghrib.",
+      "Pendaftaran dibuka melalui website resmi PC IPPNU Bekasi dan ditargetkan menampung 500 peserta dari berbagai jenjang pendidikan.",
+    ],
+    image: n8,
+    category: "Kegiatan IPPNU",
+    author: "Nur Fadilah",
+    date: "3 April 2026",
+    readTime: 3,
+    views: 1240,
+    tags: ["Tahfidz", "Online", "Dakwah", "IPPNU"],
+    featured: true,
+  },
+  {
+    id: "11",
+    slug: "halaqah-kitab-kuning-pelajar-nu-bekasi",
+    title: "Halaqah Kitab Kuning Pelajar NU Bekasi Kembali Digelar di Pesantren Al-Hikmah",
+    excerpt:
+      "Kegiatan rutin tahunan ini menghadirkan kiai-kiai sepuh untuk membaca kitab Fathul Qarib dan Bulughul Maram.",
+    content: [
+      "BEKASI — Halaqah kitab kuning yang menjadi tradisi tahunan IPNU IPPNU Kota Bekasi kembali digelar di Pondok Pesantren Al-Hikmah, Bantargebang.",
+      "Sebanyak 200 pelajar NU mengikuti pembacaan kitab Fathul Qarib dan Bulughul Maram yang dipimpin langsung oleh KH Mahfudz Asy'ari.",
+      "Kegiatan ini bertujuan memperkuat sanad keilmuan pesantren di kalangan pelajar generasi Z.",
+    ],
+    image: n9,
+    category: "Kegiatan IPNU",
+    author: "Abdul Karim",
+    date: "1 April 2026",
+    readTime: 3,
+    views: 670,
+    tags: ["Halaqah", "Kitab Kuning", "Pesantren", "Sanad"],
+  },
+  {
+    id: "12",
+    slug: "ipnu-ippnu-bekasi-bantu-korban-banjir",
+    title: "Solidaritas Pelajar: IPNU IPPNU Bekasi Salurkan Bantuan untuk Korban Banjir Pondok Gede",
+    excerpt:
+      "Lebih dari 800 paket bantuan disalurkan ke 5 titik pengungsian banjir oleh relawan pelajar NU.",
+    content: [
+      "BEKASI — Tim relawan IPNU IPPNU Kota Bekasi menyalurkan bantuan kepada korban banjir di kawasan Pondok Gede yang terdampak luapan Kali Bekasi.",
+      "Bantuan berupa makanan siap saji, pakaian layak pakai, popok bayi, dan obat-obatan dengan total lebih dari 800 paket.",
+      "Posko bantuan didirikan di Masjid Jami Al-Ikhlas dan akan terus aktif hingga kondisi pemulihan berlangsung.",
+    ],
+    image: n10,
+    category: "Bekasi Update",
+    author: "Tim Tanggap Bencana",
+    date: "29 Maret 2026",
+    readTime: 4,
+    views: 2340,
+    tags: ["Banjir", "Bantuan", "Solidaritas", "Pondok Gede"],
+    featured: true,
+  },
+  {
+    id: "13",
+    slug: "konferensi-pelajar-aswaja-nasional-2026",
+    title: "Konferensi Pelajar Aswaja Nasional 2026 Akan Digelar di Kota Bekasi",
+    excerpt:
+      "PC IPNU Bekasi terpilih menjadi tuan rumah Konferensi Pelajar Aswaja Nasional yang akan dihadiri 32 provinsi.",
+    content: [
+      "BEKASI — Pengurus Pusat IPNU mengumumkan bahwa Kota Bekasi terpilih sebagai tuan rumah Konferensi Pelajar Aswaja Nasional (KPAN) 2026.",
+      "Acara akan digelar pada Juli 2026 dan dihadiri perwakilan IPNU IPPNU dari 32 provinsi di Indonesia.",
+      "Wali Kota Bekasi menyatakan komitmen mendukung penuh penyelenggaraan event nasional ini.",
+    ],
+    image: n11,
+    category: "Nasional",
+    author: "Redaksi",
+    date: "27 Maret 2026",
+    readTime: 3,
+    views: 1980,
+    tags: ["KPAN", "Aswaja", "Nasional", "Konferensi"],
+  },
+  {
+    id: "14",
+    slug: "go-green-pelajar-nu-tanam-1000-pohon",
+    title: "Go Green: Pelajar NU Bekasi Tanam 1.000 Pohon di Bantaran Kali Bekasi",
+    excerpt:
+      "Aksi peduli lingkungan ini menjadi bentuk komitmen pelajar NU dalam menjaga kelestarian alam Bekasi.",
+    content: [
+      "BEKASI — Sebanyak 500 pelajar NU dari berbagai PAC se-Kota Bekasi menanam 1.000 pohon mangrove dan trembesi di sepanjang bantaran Kali Bekasi.",
+      "Kegiatan ini bekerjasama dengan Dinas Lingkungan Hidup Kota Bekasi sebagai bagian dari program Bekasi Hijau 2030.",
+      "Ketua PC IPNU Bekasi menegaskan bahwa menjaga lingkungan adalah bagian dari ajaran Aswaja.",
+    ],
+    image: n12,
+    category: "Kegiatan IPNU",
+    author: "Departemen Lingkungan",
+    date: "25 Maret 2026",
+    readTime: 3,
+    views: 1120,
+    tags: ["Lingkungan", "Go Green", "Tanam Pohon", "Aswaja"],
+  },
+  {
+    id: "15",
+    slug: "opini-pelajar-nu-dan-moderasi-beragama",
+    title: "Opini: Pelajar NU sebagai Garda Depan Moderasi Beragama",
+    excerpt:
+      "Refleksi tentang peran strategis pelajar Nahdlatul Ulama dalam menyebarkan nilai Islam Wasathiyah di Indonesia.",
+    content: [
+      "Moderasi beragama bukan sekadar jargon, melainkan keniscayaan di tengah keberagaman Indonesia. Pelajar NU memikul tanggung jawab besar untuk menjaganya.",
+      "Tradisi Aswaja yang dianut NU mengajarkan tawassuth (tengah), tawazun (seimbang), dan tasamuh (toleran). Tiga nilai inilah yang menjadi modal utama pelajar NU.",
+      "Di era digital, pelajar NU dituntut tidak hanya hadir di mimbar pengajian, tetapi juga di linimasa media sosial sebagai counter-narasi terhadap ekstremisme.",
+    ],
+    image: n7,
+    category: "Opini",
+    author: "Ust. Hamzah Mustofa",
+    date: "23 Maret 2026",
+    readTime: 6,
+    views: 1670,
+    tags: ["Opini", "Moderasi", "Aswaja", "Wasathiyah"],
+  },
+  {
+    id: "16",
+    slug: "pelatihan-jurnalistik-pelajar-nu-bekasi",
+    title: "PC IPNU Bekasi Gelar Pelatihan Jurnalistik untuk Kader Media",
+    excerpt:
+      "Pelatihan dua hari ini melibatkan 50 kader yang akan menjadi tim media resmi IPNU IPPNU Kota Bekasi.",
+    content: [
+      "BEKASI — Departemen Media dan Informasi PC IPNU Kota Bekasi menggelar pelatihan jurnalistik dasar selama dua hari di Gedung NU Bekasi.",
+      "Pemateri dihadirkan dari NU Online dan beberapa media nasional untuk memberikan workshop penulisan berita, fotografi, dan videografi.",
+      "Para peserta nantinya akan tergabung dalam Tim Media PC IPNU IPPNU yang bertugas memproduksi konten berita harian.",
+    ],
+    image: n11,
+    category: "Kegiatan IPNU",
+    author: "Tim Media",
+    date: "20 Maret 2026",
+    readTime: 3,
+    views: 540,
+    tags: ["Jurnalistik", "Pelatihan", "Media", "Kader"],
+  },
+  {
+    id: "17",
+    slug: "bekasi-perkuat-pendidikan-karakter-pelajar",
+    title: "Pemkot Bekasi Perkuat Pendidikan Karakter Pelajar Lewat Kerjasama dengan IPNU IPPNU",
+    excerpt:
+      "Kolaborasi ini akan menyasar 200 sekolah menengah di Kota Bekasi dengan program mentoring berkelanjutan.",
+    content: [
+      "BEKASI — Pemerintah Kota Bekasi resmi menjalin kerjasama dengan PC IPNU IPPNU untuk program penguatan pendidikan karakter di sekolah-sekolah menengah.",
+      "Program ini akan menyasar 200 SMP/SMA/SMK di Kota Bekasi dengan kegiatan mentoring spiritual, anti-bullying, dan literasi keagamaan.",
+      "MoU ditandatangani langsung oleh Wali Kota Bekasi dan Ketua PC IPNU di Balai Kota.",
+    ],
+    image: n2,
+    category: "Bekasi Update",
+    author: "Humas Pemkot",
+    date: "18 Maret 2026",
+    readTime: 3,
+    views: 890,
+    tags: ["Pendidikan", "Karakter", "Pemkot", "Kerjasama"],
+  },
 
 export const getArticleBySlug = (slug: string) =>
   articles.find((a) => a.slug === slug);
