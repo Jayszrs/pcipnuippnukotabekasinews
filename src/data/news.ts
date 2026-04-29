@@ -369,6 +369,7 @@ export const articles: Article[] = [
     views: 890,
     tags: ["Pendidikan", "Karakter", "Pemkot", "Kerjasama"],
   },
+];
 
 export const getArticleBySlug = (slug: string) =>
   articles.find((a) => a.slug === slug);
