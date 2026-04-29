@@ -1,22 +1,34 @@
 import { Link } from "react-router-dom";
+import logoImg from "@/assets/logo-ipnu-ippnu.png";
 
 export const Logo = ({ variant = "default" }: { variant?: "default" | "light" }) => {
   const isLight = variant === "light";
   return (
-    <Link to="/" className="flex items-center gap-2.5 group" aria-label="IPNU IPPNU Bekasi">
-      <div className="relative">
-        <div className="h-10 w-10 rounded-md gradient-primary flex items-center justify-center shadow-elevated">
-          <span className="font-display font-black text-primary-foreground text-lg leading-none">
-            ن
-          </span>
-        </div>
-        <div className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full bg-gold border-2 border-background" />
-      </div>
-      <div className="leading-none">
-        <div className={`font-brand font-extrabold text-base tracking-tight ${isLight ? "text-white" : "text-foreground"}`}>
+    <Link
+      to="/"
+      className="flex items-center gap-2.5 group shrink-0"
+      aria-label="IPNU IPPNU Kota Bekasi"
+    >
+      <img
+        src={logoImg}
+        alt="Logo IPNU IPPNU"
+        width={96}
+        height={48}
+        className="h-10 sm:h-11 w-auto object-contain shrink-0"
+      />
+      <div className="leading-none hidden xs:block sm:block">
+        <div
+          className={`font-brand font-extrabold text-sm sm:text-base tracking-tight ${
+            isLight ? "text-white" : "text-foreground"
+          }`}
+        >
           IPNU<span className="text-gold">·</span>IPPNU
         </div>
-        <div className={`text-[10px] font-semibold uppercase tracking-[0.18em] mt-0.5 ${isLight ? "text-white/70" : "text-muted-foreground"}`}>
+        <div
+          className={`text-[9px] sm:text-[10px] font-semibold uppercase tracking-[0.18em] mt-0.5 ${
+            isLight ? "text-white/70" : "text-muted-foreground"
+          }`}
+        >
           Kota Bekasi
         </div>
       </div>

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -63,10 +63,10 @@
     --shadow-elevated: 0 10px 30px -10px hsl(132 81% 22% / 0.18);
     --shadow-gold: 0 8px 24px -8px hsl(51 100% 50% / 0.5);
 
-    /* Type */
-    --font-display: 'Playfair Display', Georgia, serif;
-    --font-sans: 'Inter', system-ui, sans-serif;
-    --font-brand: 'Plus Jakarta Sans', system-ui, sans-serif;
+    /* Type — Montserrat across the board */
+    --font-display: 'Montserrat', system-ui, sans-serif;
+    --font-sans: 'Montserrat', system-ui, sans-serif;
+    --font-brand: 'Montserrat', system-ui, sans-serif;
 
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
@@ -123,11 +123,11 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-family: var(--font-sans);
-    font-feature-settings: "ss01", "cv11";
   }
   h1, h2, h3, h4, .font-display {
     font-family: var(--font-display);
-    letter-spacing: -0.015em;
+    letter-spacing: -0.025em;
+    font-weight: 800;
   }
   .font-brand {
     font-family: var(--font-brand);

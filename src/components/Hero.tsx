@@ -31,9 +31,9 @@ export const Hero = () => {
               Headline
             </span>
           </div>
-          <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-8 text-white">
+          <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-6 lg:p-8 text-white">
             <CategoryBadge category={main.category} size="md" />
-            <h1 className="mt-3 font-display font-black text-2xl sm:text-3xl lg:text-5xl leading-[1.05] text-balance">
+            <h1 className="mt-2.5 font-display font-black text-xl sm:text-3xl lg:text-5xl leading-[1.1] text-balance line-clamp-3">
               {main.title}
             </h1>
             <p className="mt-3 text-sm sm:text-base text-white/85 line-clamp-2 max-w-2xl">
