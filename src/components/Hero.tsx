@@ -1,9 +1,11 @@
 import { Link } from "react-router-dom";
 import { Clock, Eye, ArrowRight } from "lucide-react";
-import { articles } from "@/data/news";
+import { useArticles } from "@/contexts/ArticlesContext";
 import { CategoryBadge } from "./CategoryBadge";
 
 export const Hero = () => {
+  const { articles } = useArticles();
+  if (articles.length === 0) return null;
   const main = articles[0];
   const secondary = articles.slice(1, 4);
 

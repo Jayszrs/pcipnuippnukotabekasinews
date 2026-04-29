@@ -1,9 +1,11 @@
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
-import { articles, categories } from "@/data/news";
+import { categories } from "@/data/news";
+import { useArticles } from "@/contexts/ArticlesContext";
 import { NewsCard } from "./NewsCard";
 
 export const CategorySection = () => {
+  const { articles } = useArticles();
   return (
     <section className="container-news py-12 lg:py-16">
       <div className="flex items-end justify-between mb-8 border-b-2 border-foreground pb-3">
