@@ -3,10 +3,12 @@ import { useParams } from "react-router-dom";
 import { Layout } from "@/components/Layout";
 import { Sidebar } from "@/components/Sidebar";
 import { NewsCard } from "@/components/NewsCard";
-import { articles, categories } from "@/data/news";
+import { categories } from "@/data/news";
+import { useArticles } from "@/contexts/ArticlesContext";
 
 const Category = () => {
   const { slug } = useParams();
+  const { articles } = useArticles();
   const category = categories.find(
     (c) => c.toLowerCase().replace(/\s+/g, "-") === slug
   );

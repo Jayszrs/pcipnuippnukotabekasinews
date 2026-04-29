@@ -4,12 +4,19 @@ import { Layout } from "@/components/Layout";
 import { Sidebar } from "@/components/Sidebar";
 import { NewsCard } from "@/components/NewsCard";
 import { CategoryBadge } from "@/components/CategoryBadge";
-import { getArticleBySlug, getRelatedArticles } from "@/data/news";
-import { Clock, Eye, Share2, Facebook, Twitter, MessageCircle, Link2, ChevronRight, Home } from "lucide-react";
+import { useArticles } from "@/contexts/ArticlesContext";
+import { Clock, Eye, Share2, Facebook, Twitter, MessageCircle, Link2, ChevronRight, Home, ExternalLink } from "lucide-react";
+
+const isDirectVideoFile = (url: string) => /\.(mp4|webm|ogg|mov)(\?.*)?$/i.test(url);
+const getYoutubeEmbed = (url: string): string | null => {
+  const m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([\w-]{11})/);
+  return m ? `https://www.youtube.com/embed/${m[1]}` : null;
+};
 
 const Article = () => {
   const { slug } = useParams();
-  const article = slug ? getArticleBySlug(slug) : undefined;
+  const { getBySlug, getRelated, loading } = useArticles();
+  const article = slug ? getBySlug(slug) : undefined;
 
   useEffect(() => {
     if (article) {
@@ -18,12 +25,18 @@ const Article = () => {
     }
   }, [article]);
 
+  if (loading && !article) {
+    return <Layout><div className="container-news py-20 text-center text-muted-foreground">Memuat berita...</div></Layout>;
+  }
   if (!article) return <Navigate to="/" replace />;
 
-  const related = getRelatedArticles(article);
+  const related = getRelated(article);
   const url = typeof window !== "undefined" ? window.location.href : "";
   const shareText = encodeURIComponent(article.title);
   const shareUrl = encodeURIComponent(url);
+
+  const videoUrl = article.videoUrl;
+  const ytEmbed = videoUrl ? getYoutubeEmbed(videoUrl) : null;
 
   return (
     <Layout>
@@ -64,6 +77,25 @@ const Article = () => {
             </div>
             <p className="mt-2 text-xs text-muted-foreground italic">Foto: Dokumentasi PC IPNU IPPNU Kota Bekasi</p>
 
+            {/* Video */}
+            {videoUrl && (
+              <div className="mt-6">
+                <div className="aspect-video overflow-hidden rounded-sm bg-black relative">
+                  {isDirectVideoFile(videoUrl) ? (
+                    <video src={videoUrl} controls className="w-full h-full" />
+                  ) : ytEmbed ? (
+                    <iframe src={ytEmbed} title={article.title} className="w-full h-full" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+                  ) : (
+                    <a href={videoUrl} target="_blank" rel="noreferrer" className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 text-white hover:bg-black/70 transition-colors">
+                      <ExternalLink className="h-10 w-10 mb-3" />
+                      <span className="text-sm font-bold">Tonton video di sumber asli</span>
+                      <span className="text-xs text-white/70 mt-1 px-4 break-all max-w-md text-center">{videoUrl}</span>
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Body */}
             <div className="mt-8 prose-news space-y-5 text-[17px] leading-[1.85] text-foreground/90">
               {article.content.map((p, i) => (
@@ -74,12 +106,14 @@ const Article = () => {
             </div>
 
             {/* Tags */}
-            <div className="mt-10 pt-6 border-t border-border flex flex-wrap items-center gap-2">
-              <span className="text-xs font-brand font-bold uppercase tracking-wider text-muted-foreground mr-1">Tags:</span>
-              {article.tags.map((t) => (
-                <a key={t} href="#" className="text-xs font-semibold px-3 py-1.5 rounded-full bg-muted hover:bg-primary hover:text-primary-foreground transition-colors">#{t}</a>
-              ))}
-            </div>
+            {article.tags.length > 0 && (
+              <div className="mt-10 pt-6 border-t border-border flex flex-wrap items-center gap-2">
+                <span className="text-xs font-brand font-bold uppercase tracking-wider text-muted-foreground mr-1">Tags:</span>
+                {article.tags.map((t) => (
+                  <a key={t} href="#" className="text-xs font-semibold px-3 py-1.5 rounded-full bg-muted hover:bg-primary hover:text-primary-foreground transition-colors">#{t}</a>
+                ))}
+              </div>
+            )}
 
             {/* Share */}
             <div className="mt-6 p-5 bg-secondary rounded-sm flex items-center justify-between flex-wrap gap-3">
