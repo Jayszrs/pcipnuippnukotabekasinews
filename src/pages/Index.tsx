@@ -6,11 +6,13 @@ import { VideoHighlight } from "@/components/VideoHighlight";
 import { EventBanner } from "@/components/EventBanner";
 import { Sidebar } from "@/components/Sidebar";
 import { NewsCard } from "@/components/NewsCard";
-import { articles } from "@/data/news";
+import { useArticles } from "@/contexts/ArticlesContext";
 import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Index = () => {
+  const { articles } = useArticles();
+
   useEffect(() => {
     document.title = "IPNU IPPNU Kota Bekasi — Portal Berita Pelajar NU";
     const meta = document.querySelector('meta[name="description"]');
@@ -45,11 +47,15 @@ const Index = () => {
                 Semua <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
-            <div className="grid sm:grid-cols-2 gap-x-6 gap-y-8">
-              {latest.map((a) => (
-                <NewsCard key={a.id} article={a} />
-              ))}
-            </div>
+            {latest.length === 0 ? (
+              <p className="text-muted-foreground">Belum ada berita.</p>
+            ) : (
+              <div className="grid sm:grid-cols-2 gap-x-6 gap-y-8">
+                {latest.map((a) => (
+                  <NewsCard key={a.id} article={a} />
+                ))}
+              </div>
+            )}
           </div>
           <Sidebar />
         </div>

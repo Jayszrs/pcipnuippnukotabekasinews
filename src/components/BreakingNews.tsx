@@ -1,8 +1,10 @@
 import { Zap } from "lucide-react";
-import { articles } from "@/data/news";
+import { useArticles } from "@/contexts/ArticlesContext";
 
 export const BreakingNews = () => {
+  const { articles } = useArticles();
   const items = articles.slice(0, 6).map((a) => a.title);
+  if (items.length === 0) return null;
   const doubled = [...items, ...items];
   return (
     <div className="bg-foreground text-background border-y border-border">

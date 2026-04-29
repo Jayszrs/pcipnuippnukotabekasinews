@@ -1,9 +1,11 @@
 import { Link } from "react-router-dom";
 import { Flame, Hash, TrendingUp, Bell } from "lucide-react";
-import { categories, getPopularArticles, getTrendingTags } from "@/data/news";
+import { categories } from "@/data/news";
+import { useArticles } from "@/contexts/ArticlesContext";
 
 export const Sidebar = () => {
-  const popular = getPopularArticles(5);
+  const { getPopular, getTrendingTags } = useArticles();
+  const popular = getPopular(5);
   const tags = getTrendingTags();
 
   return (
@@ -77,23 +79,25 @@ export const Sidebar = () => {
       </div>
 
       {/* Tags */}
-      <div>
-        <div className="flex items-center gap-2 pb-3 border-b-2 border-foreground">
-          <Hash className="h-5 w-5 text-primary" />
-          <h3 className="font-brand font-extrabold text-base uppercase tracking-wide">Tag Trending</h3>
+      {tags.length > 0 && (
+        <div>
+          <div className="flex items-center gap-2 pb-3 border-b-2 border-foreground">
+            <Hash className="h-5 w-5 text-primary" />
+            <h3 className="font-brand font-extrabold text-base uppercase tracking-wide">Tag Trending</h3>
+          </div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            {tags.map((t) => (
+              <a
+                key={t}
+                href="#"
+                className="text-xs font-semibold px-3 py-1.5 rounded-full bg-muted hover:bg-primary hover:text-primary-foreground transition-colors"
+              >
+                #{t}
+              </a>
+            ))}
+          </div>
         </div>
-        <div className="mt-4 flex flex-wrap gap-2">
-          {tags.map((t) => (
-            <a
-              key={t}
-              href="#"
-              className="text-xs font-semibold px-3 py-1.5 rounded-full bg-muted hover:bg-primary hover:text-primary-foreground transition-colors"
-            >
-              #{t}
-            </a>
-          ))}
-        </div>
-      </div>
+      )}
     </aside>
   );
 };

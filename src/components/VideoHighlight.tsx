@@ -1,8 +1,43 @@
-import { Play } from "lucide-react";
-import { articles } from "@/data/news";
+import { Play, ExternalLink } from "lucide-react";
+import { useArticles, type ArticleWithVideo } from "@/contexts/ArticlesContext";
+import { Link } from "react-router-dom";
+
+// Detect external embed URLs (TikTok, YouTube, Instagram, etc.)
+const isDirectVideoFile = (url: string) =>
+  /\.(mp4|webm|ogg|mov)(\?.*)?$/i.test(url);
+
+const getYoutubeEmbed = (url: string): string | null => {
+  const m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([\w-]{11})/);
+  return m ? `https://www.youtube.com/embed/${m[1]}` : null;
+};
+
+const VideoPlayer = ({ video }: { video: ArticleWithVideo }) => {
+  const url = video.videoUrl!;
+  if (isDirectVideoFile(url)) {
+    return <video src={url} controls className="w-full h-full object-cover bg-black" />;
+  }
+  const yt = getYoutubeEmbed(url);
+  if (yt) {
+    return <iframe src={yt} title={video.title} className="w-full h-full" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />;
+  }
+  // Fallback: external link card
+  return (
+    <a href={url} target="_blank" rel="noreferrer" className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 text-white">
+      <ExternalLink className="h-10 w-10 mb-3" />
+      <span className="text-sm font-bold">Buka video di tab baru</span>
+    </a>
+  );
+};
 
 export const VideoHighlight = () => {
-  const videos = articles.slice(0, 4);
+  const { getVideos, articles } = useArticles();
+  const videos = getVideos();
+  if (videos.length === 0) return null; // hide section when no videos uploaded
+
+  const main = videos[0];
+  const others = videos.slice(1, 4);
+  const fillers = others.length < 3 ? articles.slice(0, 3 - others.length) : [];
+
   return (
     <section className="bg-foreground text-background py-14 lg:py-20">
       <div className="container-news">
@@ -16,34 +51,27 @@ export const VideoHighlight = () => {
               Tonton Liputan Terbaru
             </h2>
           </div>
-          <a href="/media" className="hidden sm:inline-block text-sm font-bold text-gold hover:underline">
+          <Link to="/media" className="hidden sm:inline-block text-sm font-bold text-gold hover:underline">
             Semua Video →
-          </a>
+          </Link>
         </div>
 
         <div className="grid lg:grid-cols-[1.6fr_1fr] gap-6">
-          <div className="relative aspect-video overflow-hidden rounded-sm group cursor-pointer">
-            <img src={videos[0].image} alt={videos[0].title} loading="lazy" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
-            <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors" />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="h-20 w-20 rounded-full bg-gold/95 flex items-center justify-center shadow-gold transition-transform group-hover:scale-110">
-                <Play className="h-8 w-8 text-gold-foreground fill-current ml-1" />
-              </div>
-            </div>
-            <div className="absolute bottom-0 left-0 right-0 p-6">
-              <span className="text-xs font-bold uppercase tracking-wider text-gold">Video Utama · 12:34</span>
+          <div className="relative aspect-video overflow-hidden rounded-sm bg-black">
+            <VideoPlayer video={main} />
+            <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/90 to-transparent pointer-events-none">
+              <span className="text-xs font-bold uppercase tracking-wider text-gold">Video Utama</span>
               <h3 className="mt-2 font-display font-bold text-2xl lg:text-3xl text-white text-balance line-clamp-2">
-                {videos[0].title}
+                {main.title}
               </h3>
             </div>
           </div>
 
           <div className="grid grid-cols-2 lg:grid-cols-1 gap-4">
-            {videos.slice(1, 4).map((v) => (
-              <div key={v.id} className="relative aspect-video lg:aspect-[16/9] overflow-hidden rounded-sm group cursor-pointer">
+            {others.map((v) => (
+              <Link key={v.id} to={`/berita/${v.slug}`} className="relative aspect-video lg:aspect-[16/9] overflow-hidden rounded-sm group cursor-pointer">
                 <img src={v.image} alt={v.title} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
                 <div className="absolute inset-0 bg-black/40 group-hover:bg-black/25 transition-colors" />
-                <div className="absolute top-2 right-2 bg-black/70 text-white text-[10px] px-1.5 py-0.5 rounded-sm font-bold">04:21</div>
                 <div className="absolute inset-0 flex items-center justify-center">
                   <div className="h-12 w-12 rounded-full bg-white/90 flex items-center justify-center">
                     <Play className="h-5 w-5 text-foreground fill-current ml-0.5" />
@@ -52,7 +80,16 @@ export const VideoHighlight = () => {
                 <div className="absolute bottom-0 left-0 right-0 p-3">
                   <h4 className="text-white text-sm font-bold line-clamp-2 leading-snug">{v.title}</h4>
                 </div>
-              </div>
+              </Link>
+            ))}
+            {fillers.map((v) => (
+              <Link key={v.id} to={`/berita/${v.slug}`} className="relative aspect-video lg:aspect-[16/9] overflow-hidden rounded-sm group cursor-pointer">
+                <img src={v.image} alt={v.title} loading="lazy" className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-black/40" />
+                <div className="absolute bottom-0 left-0 right-0 p-3">
+                  <h4 className="text-white text-sm font-bold line-clamp-2 leading-snug">{v.title}</h4>
+                </div>
+              </Link>
             ))}
           </div>
         </div>

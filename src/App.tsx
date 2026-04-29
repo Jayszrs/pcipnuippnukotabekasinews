@@ -4,7 +4,9 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ArticlesProvider } from "@/contexts/ArticlesContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
+import { FloatingWidgets } from "@/components/FloatingWidgets";
 import Index from "./pages/Index.tsx";
 import Article from "./pages/Article.tsx";
 import Category from "./pages/Category.tsx";
@@ -26,30 +28,33 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <AuthProvider>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/berita/:slug" element={<Article />} />
-            <Route path="/kategori/:slug" element={<Category />} />
-            <Route path="/media" element={<Media />} />
-            <Route path="/admin" element={<AdminLogin />} />
-            <Route path="/admin/signup" element={<AdminSignup />} />
-            <Route path="/admin/forgot-password" element={<ForgotPassword />} />
-            <Route path="/reset-password" element={<ResetPassword />} />
-            <Route
-              path="/admin/dashboard"
-              element={<ProtectedRoute><Dashboard /></ProtectedRoute>}
-            />
-            <Route
-              path="/admin/news/new"
-              element={<ProtectedRoute><NewsForm /></ProtectedRoute>}
-            />
-            <Route
-              path="/admin/news/:id/edit"
-              element={<ProtectedRoute><NewsForm /></ProtectedRoute>}
-            />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <ArticlesProvider>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/berita/:slug" element={<Article />} />
+              <Route path="/kategori/:slug" element={<Category />} />
+              <Route path="/media" element={<Media />} />
+              <Route path="/admin" element={<AdminLogin />} />
+              <Route path="/admin/signup" element={<AdminSignup />} />
+              <Route path="/admin/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
+              <Route
+                path="/admin/dashboard"
+                element={<ProtectedRoute><Dashboard /></ProtectedRoute>}
+              />
+              <Route
+                path="/admin/news/new"
+                element={<ProtectedRoute><NewsForm /></ProtectedRoute>}
+              />
+              <Route
+                path="/admin/news/:id/edit"
+                element={<ProtectedRoute><NewsForm /></ProtectedRoute>}
+              />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+            <FloatingWidgets />
+          </ArticlesProvider>
         </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
