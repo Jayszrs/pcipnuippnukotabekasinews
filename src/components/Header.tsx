@@ -41,9 +41,10 @@ export const Header = () => {
             <span className="capitalize">{today}</span>
           </div>
           <div className="flex items-center gap-5 opacity-90">
-            <a href="#" className="hover:text-gold transition-colors">Tentang Kami</a>
-            <a href="#" className="hover:text-gold transition-colors">Redaksi</a>
-            <a href="#" className="hover:text-gold transition-colors">Kontak</a>
+            {/* PERBAIKAN: Ganti <a> jadi <Link> dan arahkan ke path yang benar */}
+            <Link to="/tentang-kami" className="hover:text-gold transition-colors">Tentang Kami</Link>
+            <Link to="/redaksi" className="hover:text-gold transition-colors">Redaksi</Link>
+            <Link to="/kontak" className="hover:text-gold transition-colors">Kontak</Link>
             <Link to="/admin" className="hover:text-gold transition-colors font-semibold">Admin Login</Link>
           </div>
         </div>
@@ -138,13 +139,19 @@ export const Header = () => {
                 {item.label}
               </NavLink>
             ))}
-            <Link
-              to="/admin"
-              onClick={() => setOpen(false)}
-              className="mt-2 px-3 py-3 rounded-md bg-gold text-gold-foreground font-bold text-sm text-center"
-            >
-              Admin Login
-            </Link>
+            {/* Mobile links juga perlu diperhatikan */}
+            <div className="flex flex-col gap-1 mt-2 pt-2 border-t border-border">
+              <Link to="/tentang-kami" onClick={() => setOpen(false)} className="px-3 py-2 text-sm hover:bg-muted rounded-md">Tentang Kami</Link>
+              <Link to="/redaksi" onClick={() => setOpen(false)} className="px-3 py-2 text-sm hover:bg-muted rounded-md">Redaksi</Link>
+              <Link to="/kontak" onClick={() => setOpen(false)} className="px-3 py-2 text-sm hover:bg-muted rounded-md">Kontak</Link>
+              <Link
+                to="/admin"
+                onClick={() => setOpen(false)}
+                className="mt-2 px-3 py-3 rounded-md bg-gold text-gold-foreground font-bold text-sm text-center"
+              >
+                Admin Login
+              </Link>
+            </div>
           </nav>
         </div>
       )}

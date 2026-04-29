@@ -7,6 +7,8 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ArticlesProvider } from "@/contexts/ArticlesContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { FloatingWidgets } from "@/components/FloatingWidgets";
+
+// Import Halaman Utama
 import Index from "./pages/Index.tsx";
 import Article from "./pages/Article.tsx";
 import Category from "./pages/Category.tsx";
@@ -19,6 +21,11 @@ import Dashboard from "./pages/admin/Dashboard.tsx";
 import NewsForm from "./pages/admin/NewsForm.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
+// --- IMPORT HALAMAN BARU ---
+import { TentangKami } from "./pages/TentangKami";
+import { Redaksi } from "./pages/Redaksi";
+import { Kontak } from "./pages/Kontak";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -30,29 +37,53 @@ const App = () => (
         <AuthProvider>
           <ArticlesProvider>
             <Routes>
+              {/* Rute Publik */}
               <Route path="/" element={<Index />} />
               <Route path="/berita/:slug" element={<Article />} />
               <Route path="/kategori/:slug" element={<Category />} />
               <Route path="/media" element={<Media />} />
+              
+              {/* Rute Halaman Informasi Baru */}
+              <Route path="/tentang-kami" element={<TentangKami />} />
+              <Route path="/redaksi" element={<Redaksi />} />
+              <Route path="/kontak" element={<Kontak />} />
+
+              {/* Rute Admin & Auth */}
               <Route path="/admin" element={<AdminLogin />} />
               <Route path="/admin/signup" element={<AdminSignup />} />
               <Route path="/admin/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ResetPassword />} />
+              
               <Route
                 path="/admin/dashboard"
-                element={<ProtectedRoute><Dashboard /></ProtectedRoute>}
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                }
               />
               <Route
                 path="/admin/news/new"
-                element={<ProtectedRoute><NewsForm /></ProtectedRoute>}
+                element={
+                  <ProtectedRoute>
+                    <NewsForm />
+                  </ProtectedRoute>
+                }
               />
               <Route
                 path="/admin/news/:id/edit"
-                element={<ProtectedRoute><NewsForm /></ProtectedRoute>}
+                element={
+                  <ProtectedRoute>
+                    <NewsForm />
+                  </ProtectedRoute>
+                }
               />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              
+              {/* Catch-all Route untuk 404 */}
               <Route path="*" element={<NotFound />} />
             </Routes>
+            
+            {/* Widgets seperti Chatbot & Floating Button muncul di semua halaman */}
             <FloatingWidgets />
           </ArticlesProvider>
         </AuthProvider>

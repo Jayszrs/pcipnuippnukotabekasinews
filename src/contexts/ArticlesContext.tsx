@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { articles as mockArticles, type Article, type Category } from "@/data/news";
+import { type Article, type Category } from "@/data/news";
 
 interface DbNews {
   id: string;
@@ -54,26 +54,31 @@ interface Ctx {
 const ArticlesContext = createContext<Ctx | null>(null);
 
 export const ArticlesProvider = ({ children }: { children: ReactNode }) => {
-  const [articles, setArticles] = useState<ArticleWithVideo[]>(mockArticles as ArticleWithVideo[]);
+  // Nilai awal adalah array kosong karena kita hanya pakai data dari database
+  const [articles, setArticles] = useState<ArticleWithVideo[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let mounted = true;
     const fetchArticles = async () => {
+      setLoading(true);
       const { data } = await supabase
         .from("news")
         .select("*")
         .eq("status", "published")
         .order("published_at", { ascending: false });
+      
       if (!mounted) return;
-      if (data && data.length > 0) {
+      
+      if (data) {
         setArticles(data.map((d) => dbToArticle(d as DbNews)));
       }
       setLoading(false);
     };
+
     fetchArticles();
 
-    // realtime updates
+    // Realtime updates: web otomatis update kalau lu tambah berita di Supabase
     const ch = supabase
       .channel("public:news")
       .on("postgres_changes", { event: "*", schema: "public", table: "news" }, fetchArticles)
@@ -103,36 +108,17 @@ export const ArticlesProvider = ({ children }: { children: ReactNode }) => {
   return <ArticlesContext.Provider value={value}>{children}</ArticlesContext.Provider>;
 };
 
-const fallback: Ctx = {
-  articles: mockArticles as ArticleWithVideo[],
-  loading: false,
-  getBySlug: (slug) => (mockArticles as ArticleWithVideo[]).find((a) => a.slug === slug),
-  getRelated: (a, limit = 3) =>
-    (mockArticles as ArticleWithVideo[])
-      .filter((x) => x.id !== a.id && x.category === a.category)
-      .slice(0, limit),
-  getByCategory: (cat) =>
-    (mockArticles as ArticleWithVideo[]).filter(
-      (a) => a.category.toLowerCase() === cat.toLowerCase()
-    ),
-  getPopular: (limit = 5) =>
-    [...(mockArticles as ArticleWithVideo[])]
-      .sort((a, b) => b.views - a.views)
-      .slice(0, limit),
-  getTrendingTags: () => {
-    const counts = new Map<string, number>();
-    (mockArticles as ArticleWithVideo[]).forEach((a) =>
-      a.tags.forEach((t) => counts.set(t, (counts.get(t) || 0) + 1))
-    );
-    return [...counts.entries()]
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 12)
-      .map(([t]) => t);
-  },
-  getVideos: () => [],
-};
-
 export const useArticles = (): Ctx => {
   const ctx = useContext(ArticlesContext);
-  return ctx ?? fallback;
+  // Default fallback kosong jika context tidak ditemukan
+  return ctx ?? {
+    articles: [],
+    loading: false,
+    getBySlug: () => undefined,
+    getRelated: () => [],
+    getByCategory: () => [],
+    getPopular: () => [],
+    getTrendingTags: () => [],
+    getVideos: () => [],
+  };
 };
