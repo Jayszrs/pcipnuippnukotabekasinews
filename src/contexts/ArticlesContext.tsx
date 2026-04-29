@@ -103,8 +103,36 @@ export const ArticlesProvider = ({ children }: { children: ReactNode }) => {
   return <ArticlesContext.Provider value={value}>{children}</ArticlesContext.Provider>;
 };
 
-export const useArticles = () => {
+const fallback: Ctx = {
+  articles: mockArticles as ArticleWithVideo[],
+  loading: false,
+  getBySlug: (slug) => (mockArticles as ArticleWithVideo[]).find((a) => a.slug === slug),
+  getRelated: (a, limit = 3) =>
+    (mockArticles as ArticleWithVideo[])
+      .filter((x) => x.id !== a.id && x.category === a.category)
+      .slice(0, limit),
+  getByCategory: (cat) =>
+    (mockArticles as ArticleWithVideo[]).filter(
+      (a) => a.category.toLowerCase() === cat.toLowerCase()
+    ),
+  getPopular: (limit = 5) =>
+    [...(mockArticles as ArticleWithVideo[])]
+      .sort((a, b) => b.views - a.views)
+      .slice(0, limit),
+  getTrendingTags: () => {
+    const counts = new Map<string, number>();
+    (mockArticles as ArticleWithVideo[]).forEach((a) =>
+      a.tags.forEach((t) => counts.set(t, (counts.get(t) || 0) + 1))
+    );
+    return [...counts.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 12)
+      .map(([t]) => t);
+  },
+  getVideos: () => [],
+};
+
+export const useArticles = (): Ctx => {
   const ctx = useContext(ArticlesContext);
-  if (!ctx) throw new Error("useArticles must be used within ArticlesProvider");
-  return ctx;
+  return ctx ?? fallback;
 };
