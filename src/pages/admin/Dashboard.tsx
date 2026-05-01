@@ -33,7 +33,7 @@ const Dashboard = () => {
   
   // State untuk Profil
   const [profileLoading, setProfileLoading] = useState(false);
-  const [fullname, setFullname] = useState("");
+  const [fullname, setFullname] = useState(""); // State lokal tetap fullname biar gak bingung
   const [avatarUrl, setAvatarUrl] = useState("");
   const [isEditingProfile, setIsEditingProfile] = useState(false);
 
@@ -60,17 +60,17 @@ const Dashboard = () => {
     setLoading(false);
   };
 
-  // Fungsi ambil data profil
+  // --- PERBAIKAN: Ambil data menggunakan kolom 'full_name' ---
   const fetchProfile = async () => {
     if (!user) return;
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("profiles")
-      .select("fullname, avatar_url")
+      .select("full_name, avatar_url") // Sesuaikan dengan DB
       .eq("id", user.id)
-      .maybeSingle(); // Menggunakan maybeSingle agar tidak error jika baris data belum ada
+      .maybeSingle();
     
     if (data) {
-      setFullname(data.fullname || "");
+      setFullname(data.full_name || "");
       setAvatarUrl(data.avatar_url || "");
     }
   };
@@ -86,7 +86,7 @@ const Dashboard = () => {
     fetchProfile();
   }, [authLoading, user]);
 
-  // --- PERBAIKAN: Fungsi Update Profil menggunakan UPSERT ---
+  // --- PERBAIKAN: Update Profil menggunakan UPSERT dan kolom 'full_name' ---
   const handleUpdateProfile = async () => {
     if (!user) return;
     setProfileLoading(true);
@@ -94,42 +94,41 @@ const Dashboard = () => {
     const { error } = await supabase
       .from("profiles")
       .upsert({ 
-        id: user.id, // ID wajib untuk mendeteksi baris mana yang harus diisi
-        fullname: fullname,
+        id: user.id, 
+        full_name: fullname, // Map state fullname ke kolom full_name
         updated_at: new Date().toISOString(),
       }, { onConflict: 'id' });
     
     if (error) {
-      toast.error("Gagal update profil: " + error.message);
+      toast.error("Gagal update profil", { description: error.message });
     } else {
       toast.success("Profil diperbarui!");
       setIsEditingProfile(false);
-      fetchProfile(); // Segarkan data UI
+      fetchProfile();
     }
     setProfileLoading(false);
   };
 
-  // --- PERBAIKAN: Fungsi Upload Foto menggunakan UPSERT ---
+  // --- PERBAIKAN: Upload Foto menggunakan UPSERT ---
   const handleUploadAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
 
     setProfileLoading(true);
     const fileExt = file.name.split(".").pop();
-    // Gunakan uniqueId manual agar aman di konteks non-HTTPS
+    // Gunakan ID unik manual agar tidak error di non-HTTPS
     const uniqueId = Date.now() + '-' + Math.random().toString(36).substring(2, 11);
     const filePath = `${user.id}-${uniqueId}.${fileExt}`;
 
     const { error: uploadError } = await supabase.storage
-      .from("avatars") // Pastikan bucket "avatars" sudah dibuat dan diset Public
+      .from("avatars")
       .upload(filePath, file);
 
     if (uploadError) {
-      toast.error("Gagal upload foto: " + uploadError.message);
+      toast.error("Gagal upload foto", { description: uploadError.message });
     } else {
       const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(filePath);
       
-      // Update tabel profil dengan URL foto baru menggunakan upsert
       const { error: profileError } = await supabase
         .from("profiles")
         .upsert({ 
@@ -139,7 +138,7 @@ const Dashboard = () => {
         }, { onConflict: 'id' });
 
       if (profileError) {
-        toast.error("Gagal memperbarui data profil database");
+        toast.error("Gagal sinkron database foto");
       } else {
         setAvatarUrl(publicUrl);
         toast.success("Foto profil diperbarui!");
@@ -184,7 +183,7 @@ const Dashboard = () => {
         <div className="lg:col-span-2 bg-white p-6 rounded-sm border border-border flex items-center justify-between shadow-sm">
           <div className="flex items-center gap-5">
             <div className="relative group">
-              <Avatar className="h-20 w-20 border-2 border-primary/10">
+              <Avatar className="h-20 w-20 border-2 border-primary/10 shadow-inner">
                 <AvatarImage src={avatarUrl} className="object-cover" />
                 <AvatarFallback className="bg-primary text-white text-2xl font-bold">
                   {fullname?.charAt(0) || user?.email?.charAt(0).toUpperCase()}
@@ -202,7 +201,7 @@ const Dashboard = () => {
                   <Input 
                     value={fullname} 
                     onChange={(e) => setFullname(e.target.value)} 
-                    className="h-8 w-48 text-sm"
+                    className="h-8 w-48 text-sm font-bold"
                     placeholder="Nama Lengkap"
                   />
                   <Button size="sm" onClick={handleUpdateProfile} disabled={profileLoading}>
@@ -214,7 +213,7 @@ const Dashboard = () => {
                 </div>
               ) : (
                 <div className="flex items-center gap-2">
-                  <h2 className="text-xl font-bold text-primary">{fullname || "Admin Baru"}</h2>
+                  <h2 className="text-xl font-bold text-primary">{fullname || "Admin LPP"}</h2>
                   <button onClick={() => setIsEditingProfile(true)} className="text-muted-foreground hover:text-primary">
                     <Edit className="h-3 w-3" />
                   </button>
@@ -232,7 +231,7 @@ const Dashboard = () => {
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-primary-deep text-white p-6 rounded-sm flex flex-col justify-center gap-3">
+        <div className="bg-primary-deep text-white p-6 rounded-sm flex flex-col justify-center gap-3 shadow-sm">
           <h3 className="text-xs font-bold uppercase tracking-widest opacity-70">Aksi Cepat</h3>
           <div className="grid grid-cols-2 gap-2">
             <Link to="/admin/news/new" className="bg-white/10 hover:bg-white/20 p-2 rounded text-center text-[10px] font-bold transition-colors">BARU</Link>
@@ -241,7 +240,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Stats */}
+      {/* Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         {[
           { label: "Total Berita", value: stats.total, icon: FileText, color: "bg-primary text-primary-foreground" },
@@ -259,7 +258,7 @@ const Dashboard = () => {
         ))}
       </div>
 
-      {/* News table */}
+      {/* Management Table */}
       <div className="bg-background rounded-sm border border-border overflow-hidden shadow-sm">
         <div className="px-5 py-4 border-b border-border flex items-center justify-between bg-muted/20">
           <h2 className="font-brand font-extrabold text-base uppercase tracking-wide">Manajemen Konten</h2>
@@ -268,17 +267,6 @@ const Dashboard = () => {
         {loading ? (
           <div className="p-12 flex justify-center">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
-        ) : news.length === 0 ? (
-          <div className="p-12 text-center">
-            <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-3 opacity-50" />
-            <p className="text-muted-foreground mb-4">Belum ada berita. Mulai tulis berita pertama Anda.</p>
-            <Link
-              to="/admin/news/new"
-              className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-sm font-brand font-bold text-sm"
-            >
-              <PlusCircle className="h-4 w-4" /> Tulis Berita Pertama
-            </Link>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -296,7 +284,7 @@ const Dashboard = () => {
               </thead>
               <tbody className="divide-y divide-border">
                 {news.map((n) => (
-                  <tr key={n.id} className="hover:bg-muted/30 transition-colors">
+                  <tr key={n.id} className="hover:bg-muted/30 transition-colors group">
                     <td className="px-5 py-3">
                       <div className="flex items-center gap-3">
                         {n.image_url ? (
@@ -306,11 +294,11 @@ const Dashboard = () => {
                             <ImageIcon className="h-4 w-4 text-muted-foreground" />
                           </div>
                         )}
-                        <div className="font-bold line-clamp-2 max-w-md hover:text-primary transition-colors">{n.title}</div>
+                        <div className="font-bold line-clamp-2 max-w-md group-hover:text-primary transition-colors">{n.title}</div>
                       </div>
                     </td>
                     <td className="px-3 py-3 text-xs">
-                      <span className="px-2 py-1 bg-muted rounded-full">{n.category}</span>
+                      <span className="px-2 py-1 bg-muted rounded-full font-medium">{n.category}</span>
                     </td>
                     <td className="px-3 py-3">
                       <span className={`text-[10px] px-2 py-0.5 rounded-sm font-bold uppercase ${n.status === "published" ? "bg-primary text-primary-foreground" : "bg-muted text-foreground"}`}>
@@ -327,7 +315,7 @@ const Dashboard = () => {
                     <td className="px-3 py-3 text-xs text-muted-foreground whitespace-nowrap">
                       {new Date(n.published_at ?? n.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
                     </td>
-                    <td className="px-5 py-3">
+                    <td className="px-5 py-3 text-right">
                       <div className="flex justify-end gap-1">
                         {n.status === "published" && (
                           <Link to={`/berita/${n.slug}`} target="_blank" className="p-2 hover:bg-primary hover:text-white rounded-sm transition-all" title="Lihat">
