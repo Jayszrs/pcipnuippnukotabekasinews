@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { 
   PlusCircle, Edit, Trash2, Eye, FileText, FileCheck2, 
-  Loader2, Image as ImageIcon, Video, User, Camera, Save, Settings 
+  Loader2, Image as ImageIcon, Video, User, Camera, Save, Settings, X
 } from "lucide-react";
 import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -67,7 +67,7 @@ const Dashboard = () => {
       .from("profiles")
       .select("fullname, avatar_url")
       .eq("id", user.id)
-      .single();
+      .maybeSingle(); // Menggunakan maybeSingle agar tidak error jika baris data belum ada
     
     if (data) {
       setFullname(data.fullname || "");
@@ -86,43 +86,64 @@ const Dashboard = () => {
     fetchProfile();
   }, [authLoading, user]);
 
-  // Fungsi Update Profil
+  // --- PERBAIKAN: Fungsi Update Profil menggunakan UPSERT ---
   const handleUpdateProfile = async () => {
+    if (!user) return;
     setProfileLoading(true);
+    
     const { error } = await supabase
       .from("profiles")
-      .update({ fullname })
-      .eq("id", user?.id);
+      .upsert({ 
+        id: user.id, // ID wajib untuk mendeteksi baris mana yang harus diisi
+        fullname: fullname,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: 'id' });
     
     if (error) {
-      toast.error("Gagal update profil");
+      toast.error("Gagal update profil: " + error.message);
     } else {
       toast.success("Profil diperbarui!");
       setIsEditingProfile(false);
+      fetchProfile(); // Segarkan data UI
     }
     setProfileLoading(false);
   };
 
-  // Fungsi Upload Foto
+  // --- PERBAIKAN: Fungsi Upload Foto menggunakan UPSERT ---
   const handleUploadAvatar = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
 
     setProfileLoading(true);
     const fileExt = file.name.split(".").pop();
-    const filePath = `${user.id}-${Math.random()}.${fileExt}`;
+    // Gunakan uniqueId manual agar aman di konteks non-HTTPS
+    const uniqueId = Date.now() + '-' + Math.random().toString(36).substring(2, 11);
+    const filePath = `${user.id}-${uniqueId}.${fileExt}`;
 
     const { error: uploadError } = await supabase.storage
-      .from("avatars")
+      .from("avatars") // Pastikan bucket "avatars" sudah dibuat dan diset Public
       .upload(filePath, file);
 
     if (uploadError) {
-      toast.error("Gagal upload foto");
+      toast.error("Gagal upload foto: " + uploadError.message);
     } else {
       const { data: { publicUrl } } = supabase.storage.from("avatars").getPublicUrl(filePath);
-      await supabase.from("profiles").update({ avatar_url: publicUrl }).eq("id", user.id);
-      setAvatarUrl(publicUrl);
-      toast.success("Foto profil diperbarui!");
+      
+      // Update tabel profil dengan URL foto baru menggunakan upsert
+      const { error: profileError } = await supabase
+        .from("profiles")
+        .upsert({ 
+          id: user.id, 
+          avatar_url: publicUrl,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'id' });
+
+      if (profileError) {
+        toast.error("Gagal memperbarui data profil database");
+      } else {
+        setAvatarUrl(publicUrl);
+        toast.success("Foto profil diperbarui!");
+      }
     }
     setProfileLoading(false);
   };
@@ -142,7 +163,7 @@ const Dashboard = () => {
     total: news.length,
     published: news.filter((n) => n.status === "published").length,
     draft: news.filter((n) => n.status === "draft").length,
-    views: news.reduce((s, n) => s + n.views, 0),
+    views: news.reduce((s, n) => s + (n.views || 0), 0),
   };
 
   return (
@@ -158,7 +179,7 @@ const Dashboard = () => {
       }
     >
       
-      {/* 1. SEKSI PROFIL & QUICK ACTIONS (Penambahan baru agar Profesional) */}
+      {/* 1. SEKSI PROFIL & QUICK ACTIONS */}
       <div className="grid lg:grid-cols-3 gap-6 mb-8">
         <div className="lg:col-span-2 bg-white p-6 rounded-sm border border-border flex items-center justify-between shadow-sm">
           <div className="flex items-center gap-5">
@@ -186,6 +207,9 @@ const Dashboard = () => {
                   />
                   <Button size="sm" onClick={handleUpdateProfile} disabled={profileLoading}>
                     {profileLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => setIsEditingProfile(false)} disabled={profileLoading}>
+                    <X className="h-3 w-3" />
                   </Button>
                 </div>
               ) : (
@@ -223,7 +247,7 @@ const Dashboard = () => {
           { label: "Total Berita", value: stats.total, icon: FileText, color: "bg-primary text-primary-foreground" },
           { label: "Dipublikasi", value: stats.published, icon: FileCheck2, color: "bg-gold text-gold-foreground" },
           { label: "Draft", value: stats.draft, icon: FileText, color: "bg-secondary text-primary" },
-          { label: "Total Views", value: stats.views.toLocaleString("id-ID"), icon: Eye, color: "bg-foreground text-background" },
+          { label: "Total Views", value: (stats.views || 0).toLocaleString("id-ID"), icon: Eye, color: "bg-foreground text-background" },
         ].map((s) => (
           <div key={s.label} className="bg-background p-5 rounded-sm border border-border shadow-sm hover:border-primary/20 transition-colors">
             <div className={`h-10 w-10 rounded-sm flex items-center justify-center ${s.color} mb-3`}>
@@ -299,7 +323,7 @@ const Dashboard = () => {
                         {n.video_url && <Video className="h-4 w-4 text-gold" />}
                       </div>
                     </td>
-                    <td className="px-3 py-3 text-right tabular-nums font-medium">{n.views.toLocaleString("id-ID")}</td>
+                    <td className="px-3 py-3 text-right tabular-nums font-medium">{(n.views || 0).toLocaleString("id-ID")}</td>
                     <td className="px-3 py-3 text-xs text-muted-foreground whitespace-nowrap">
                       {new Date(n.published_at ?? n.created_at).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
                     </td>
