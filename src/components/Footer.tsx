@@ -23,7 +23,6 @@ export const Footer = () => {
               >
                 <Instagram className="h-4 w-4" />
               </a>
-              {/* Youtube dibiarkan karena tidak disuruh hapus */}
               <a 
                 href="#" 
                 className="h-9 w-9 rounded-sm bg-white/10 hover:bg-gold hover:text-gold-foreground flex items-center justify-center transition-colors"
@@ -65,12 +64,12 @@ export const Footer = () => {
               <li className="flex gap-2 items-start">
                 <MapPin className="h-4 w-4 text-gold shrink-0 mt-0.5" />
                 <a 
-                  href="https://maps.app.goo.gl/Tf42hHrQvgE1tLHX9" 
+                  href="https://maps.app.goo.gl/as8ycaD6YvUHaSGr7" 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="hover:text-gold transition-colors text-left"
+                  className="hover:text-gold transition-colors text-left font-medium"
                 >
-                  Gedung NU Centre yang ada di rawalumbu kota bekasi
+                  Jl. Veteran, RT.005/RW.003, Marga Jaya, Kec. Bekasi Sel., Kota Bks, Jawa Barat 17141
                 </a>
               </li>
               <li className="flex gap-2 items-center">
