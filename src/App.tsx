@@ -19,13 +19,17 @@ import ForgotPassword from "./pages/ForgotPassword.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";
 import Dashboard from "./pages/admin/Dashboard.tsx";
 import NewsForm from "./pages/admin/NewsForm.tsx";
-import Profile from "./pages/admin/Profile.tsx"; // <--- IMPORT HALAMAN PROFIL
+import Profile from "./pages/admin/Profile.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 // --- IMPORT HALAMAN INFORMASI ---
 import { TentangKami } from "./pages/TentangKami";
 import { Redaksi } from "./pages/Redaksi";
 import { Kontak } from "./pages/Kontak";
+
+// --- PERBAIKAN: IMPORT HALAMAN KADER & STRUKTURAL ---
+import { StructuralPage } from "./pages/StructuralPage"; // Halaman Publik
+import { CadreManager } from "./pages/admin/CadreManager"; // Halaman Admin
 
 const queryClient = new QueryClient();
 
@@ -49,6 +53,9 @@ const App = () => (
               <Route path="/redaksi" element={<Redaksi />} />
               <Route path="/kontak" element={<Kontak />} />
 
+              {/* PERBAIKAN: RUTE STRUKTURAL PUBLIK */}
+              <Route path="/struktural" element={<StructuralPage />} />
+
               {/* Rute Admin & Auth */}
               <Route path="/admin" element={<AdminLogin />} />
               <Route path="/admin/signup" element={<AdminSignup />} />
@@ -62,8 +69,15 @@ const App = () => (
               />
               <Route
                 path="/admin/profile"
-                element={<ProtectedRoute><Profile /></ProtectedRoute>} // <--- HALAMAN EDIT PROFIL
+                element={<ProtectedRoute><Profile /></ProtectedRoute>}
               />
+              
+              {/* PERBAIKAN: RUTE MANAJEMEN KADER ADMIN */}
+              <Route
+                path="/admin/cadres"
+                element={<ProtectedRoute><CadreManager /></ProtectedRoute>}
+              />
+
               <Route
                 path="/admin/news/new"
                 element={<ProtectedRoute><NewsForm /></ProtectedRoute>}
