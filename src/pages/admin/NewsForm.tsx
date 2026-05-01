@@ -3,7 +3,11 @@ import { useNavigate, useParams, Link } from "react-router-dom";
 import { AdminLayout } from "@/components/AdminLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { ArrowLeft, Save, Send, X, Loader2, Image as ImageIcon, Video, Link2, Upload } from "lucide-react";
+import { 
+  ArrowLeft, Save, Send, X, Loader2, 
+  Image as ImageIcon, Video, Link2, 
+  Plus, Trash2, Globe, ChevronLeft, ChevronRight, Star
+} from "lucide-react"; 
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -27,7 +31,7 @@ const NewsForm = () => {
   const { id } = useParams();
   const isEdit = !!id;
   const navigate = useNavigate();
-  const { user, role, loading: authLoading, roleLoading } = useAuth();
+  const { user, role } = useAuth();
   const canManageNews = role === "admin" || role === "editor";
 
   const [title, setTitle] = useState("");
@@ -35,10 +39,11 @@ const NewsForm = () => {
   const [content, setContent] = useState("");
   const [category, setCategory] = useState<string>("Kegiatan IPNU");
   const [tags, setTags] = useState("");
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const [videoUrl, setVideoUrl] = useState<string | null>(null);
-  const [videoMode, setVideoMode] = useState<"upload" | "url">("upload");
+  
+  const [images, setImages] = useState<string[]>([]);
+  const [videos, setVideos] = useState<string[]>([]); 
   const [videoUrlInput, setVideoUrlInput] = useState("");
+  
   const [uploading, setUploading] = useState<"image" | "video" | null>(null);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(isEdit);
@@ -58,79 +63,86 @@ const NewsForm = () => {
       setContent(data.content);
       setCategory(data.category);
       setTags((data.tags ?? []).join(", "));
-      setImageUrl(data.image_url);
-      setVideoUrl(data.video_url);
-      if (data.video_url && !data.video_url.includes("/storage/v1/object/public/news-media/")) {
-        setVideoMode("url");
-        setVideoUrlInput(data.video_url);
+      
+      if (data.image_url) setImages(Array.isArray(data.image_url) ? data.image_url : [data.image_url]); 
+      if (data.video_url) {
+        if (data.video_url.includes("/storage/v1/object/public/")) {
+          setVideos([data.video_url]);
+        } else {
+          setVideoUrlInput(data.video_url);
+        }
       }
       setLoading(false);
     })();
   }, [id, isEdit, navigate]);
 
-  const uploadFile = async (file: File, kind: "image" | "video") => {
-    if (authLoading || roleLoading) {
-      toast.info("Tunggu sebentar", { description: "Sesi admin sedang disiapkan." });
-      return;
-    }
-    if (!user || !canManageNews) {
-      toast.error("Upload ditolak", { description: "Akun ini belum punya akses admin/editor." });
-      return;
-    }
-    const maxMB = kind === "image" ? 10 : 100;
-    if (file.size > maxMB * 1024 * 1024) {
-      toast.error(`Ukuran maksimal ${maxMB}MB`);
-      return;
-    }
-    const allowed = kind === "image" ? file.type.startsWith("image/") : file.type.startsWith("video/");
-    if (!allowed) {
-      toast.error("Format file tidak sesuai", { description: kind === "image" ? "Pilih file gambar." : "Pilih file video." });
-      return;
-    }
+  // --- LOGIKA GESER FOTO (REORDER) ---
+  const moveImage = (index: number, direction: 'left' | 'right') => {
+    const newImages = [...images];
+    const newIndex = direction === 'left' ? index - 1 : index + 1;
+    
+    if (newIndex < 0 || newIndex >= newImages.length) return;
+
+    // Swap posisi array
+    const temp = newImages[index];
+    newImages[index] = newImages[newIndex];
+    newImages[newIndex] = temp;
+    
+    setImages(newImages);
+  };
+
+  const handleParallelUpload = async (e: React.ChangeEvent<HTMLInputElement>, kind: "image" | "video") => {
+    const files = e.target.files;
+    if (!files || files.length === 0 || !user || !canManageNews) return;
+
     setUploading(kind);
+    const fileArray = Array.from(files);
+    
     try {
-      const ext = file.name.split(".").pop()?.toLowerCase().replace(/[^a-z0-9]/g, "") || (kind === "image" ? "jpg" : "mp4");
-      const path = `${user.id}/${kind}/${crypto.randomUUID()}.${ext}`;
-      const { error } = await supabase.storage.from("news-media").upload(path, file, {
-        cacheControl: "3600",
-        contentType: file.type,
-        upsert: false,
+      const uploadPromises = fileArray.map(async (file) => {
+        const maxMB = 1024; 
+        if (file.size > maxMB * 1024 * 1024) throw new Error(`File ${file.name} terlalu besar!`);
+
+        const ext = file.name.split(".").pop();
+        const uniqueId = Date.now() + '-' + Math.random().toString(36).substring(2, 11);
+        const path = `${user.id}/${kind}s/${uniqueId}.${ext}`;
+
+        const { error: uploadError } = await supabase.storage.from("news-media").upload(path, file);
+        if (uploadError) throw uploadError;
+
+        const { data } = supabase.storage.from("news-media").getPublicUrl(path);
+        return data.publicUrl;
       });
-      if (error) {
-        toast.error("Upload gagal", { description: error.message });
-        return;
-      }
-      const { data } = supabase.storage.from("news-media").getPublicUrl(path);
-      if (kind === "image") setImageUrl(data.publicUrl);
-      else setVideoUrl(data.publicUrl);
-      toast.success(`${kind === "image" ? "Foto" : "Video"} berhasil diupload`);
-    } catch (error) {
-      toast.error("Upload gagal", { description: error instanceof Error ? error.message : "Coba ulangi lagi." });
+
+      const results = await Promise.all(uploadPromises);
+      
+      if (kind === "image") setImages((prev) => [...prev, ...results]);
+      else setVideos((prev) => [...prev, ...results]);
+      
+      toast.success(`${results.length} media berhasil diunggah!`);
+    } catch (err: any) {
+      toast.error("Gagal upload", { description: err.message });
     } finally {
       setUploading(null);
     }
   };
 
   const save = async (status: "draft" | "published") => {
-    if (!user || authLoading || roleLoading || !canManageNews) {
-      toast.error("Belum bisa menyimpan", { description: "Pastikan akun admin/editor sudah siap." });
-      return;
-    }
     const parsed = schema.safeParse({ title, excerpt, content, category });
     if (!parsed.success) {
-      toast.error("Periksa form", { description: parsed.error.issues[0].message });
+      toast.error(parsed.error.issues[0].message);
       return;
     }
+
     setSaving(true);
     const slug = isEdit ? undefined : `${slugify(title)}-${Date.now().toString(36)}`;
+    const finalVideoUrl = videoUrlInput.trim() !== "" ? videoUrlInput : (videos[0] || null);
+
     const payload = {
-      title: parsed.data.title,
-      excerpt: parsed.data.excerpt,
-      content: parsed.data.content,
-      category: parsed.data.category,
+      ...parsed.data,
       tags: tags.split(",").map((t) => t.trim()).filter(Boolean),
-      image_url: imageUrl,
-      video_url: videoUrl,
+      image_url: images[0] || null, // Foto di index 0 otomatis jadi Poster Utama
+      video_url: finalVideoUrl,
       status,
       author_id: user?.id,
       author_name: user?.email?.split("@")[0] ?? "Admin",
@@ -143,225 +155,153 @@ const NewsForm = () => {
       : await supabase.from("news").insert(payload as any);
 
     setSaving(false);
-    if (res.error) {
-      toast.error("Gagal menyimpan", { description: res.error.message });
-      return;
+    if (!res.error) {
+      toast.success(status === "published" ? "Berita Terbit!" : "Draft Aman");
+      navigate("/admin/dashboard");
     }
-    toast.success(status === "published" ? "Berita dipublikasi!" : "Draft tersimpan");
-    navigate("/admin/dashboard");
   };
 
-  if (loading) {
-    return (
-      <AdminLayout title="Memuat...">
-        <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
-      </AdminLayout>
-    );
-  }
+  if (loading) return <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
 
   return (
-    <AdminLayout
+    <AdminLayout 
       title={isEdit ? "Edit Berita" : "Tulis Berita Baru"}
       action={
-        <Link to="/admin/dashboard" className="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold hover:bg-muted rounded-sm">
+        <Link to="/admin/dashboard" className="inline-flex items-center gap-2 px-3 py-2 text-xs font-black uppercase tracking-widest hover:bg-muted rounded-sm">
           <ArrowLeft className="h-4 w-4" /> Kembali
         </Link>
       }
     >
-      <div className="grid lg:grid-cols-[1fr_320px] gap-6 max-w-7xl">
-        {/* Main */}
-        <div className="space-y-5">
-          <div className="bg-background p-5 rounded-sm border border-border">
-            <label className="block text-xs font-brand font-bold uppercase tracking-wider mb-2">Judul Berita *</label>
+      <div className="grid lg:grid-cols-[1fr_350px] gap-8 max-w-7xl mx-auto">
+        
+        {/* KOLOM KIRI: EDITOR */}
+        <div className="space-y-6">
+          <div className="bg-white p-6 rounded-sm border border-border shadow-sm">
+            <label className="block text-[10px] font-black uppercase tracking-[0.2em] mb-4 text-primary">Judul Berita *</label>
             <input
               value={title} onChange={(e) => setTitle(e.target.value)}
-              placeholder="Tulis judul yang menarik..."
-              className="w-full px-4 py-3 text-xl font-display font-bold rounded-sm border border-input bg-background focus:outline-none focus:ring-2 focus:ring-primary"
-              maxLength={200}
+              placeholder="Judul berita..."
+              className="w-full px-0 py-2 text-2xl font-bold border-b border-border focus:border-primary focus:outline-none bg-transparent"
             />
           </div>
 
-          <div className="bg-background p-5 rounded-sm border border-border">
-            <label className="block text-xs font-brand font-bold uppercase tracking-wider mb-2">Ringkasan / Deskripsi *</label>
+          <div className="bg-white p-6 rounded-sm border border-border shadow-sm text-right">
+            <label className="block text-left text-[10px] font-black uppercase tracking-[0.2em] mb-4 text-primary">Ringkasan Singkat *</label>
             <textarea
               value={excerpt} onChange={(e) => setExcerpt(e.target.value)}
-              placeholder="Ringkasan singkat untuk preview berita..."
+              className="w-full p-0 border-none focus:ring-0 text-sm resize-none"
               rows={3} maxLength={500}
-              className="w-full px-4 py-3 rounded-sm border border-input bg-background focus:outline-none focus:ring-2 focus:ring-primary resize-y text-sm"
             />
-            <div className="text-right text-xs text-muted-foreground mt-1">{excerpt.length}/500</div>
+            <span className="text-[10px] font-bold text-muted-foreground uppercase">{excerpt.length}/500</span>
           </div>
 
-          <div className="bg-background p-5 rounded-sm border border-border">
-            <label className="block text-xs font-brand font-bold uppercase tracking-wider mb-2">Isi Berita *</label>
+          <div className="bg-white p-6 rounded-sm border border-border shadow-sm">
+            <label className="block text-[10px] font-black uppercase tracking-[0.2em] mb-4 text-primary">Isi Berita *</label>
             <textarea
               value={content} onChange={(e) => setContent(e.target.value)}
-              placeholder="Tulis isi berita di sini... Pisahkan paragraf dengan baris kosong."
-              rows={16}
-              className="w-full px-4 py-3 rounded-sm border border-input bg-background focus:outline-none focus:ring-2 focus:ring-primary resize-y text-base leading-relaxed font-sans"
+              className="w-full min-h-[500px] p-0 border-none focus:ring-0 text-base leading-relaxed"
             />
-            <p className="text-xs text-muted-foreground mt-2">Tip: pisahkan paragraf dengan menekan Enter dua kali.</p>
           </div>
         </div>
 
-        {/* Sidebar */}
-        <div className="space-y-5">
-          {/* Publish */}
-          <div className="bg-background p-5 rounded-sm border border-border space-y-3">
-            <h3 className="font-brand font-extrabold text-sm uppercase tracking-wider">Publikasi</h3>
-            <button
-              onClick={() => save("published")} disabled={saving || uploading !== null}
-              className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-primary text-primary-foreground rounded-sm font-brand font-bold text-sm hover:opacity-95 shadow-elevated disabled:opacity-60"
-            >
-              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-              Publikasikan
+        {/* KOLOM KANAN: SIDEBAR */}
+        <div className="space-y-6">
+          
+          <div className="bg-white p-5 rounded-sm border border-border shadow-sm space-y-3">
+            <button onClick={() => save("published")} disabled={saving || uploading !== null} className="w-full py-3 bg-primary text-white text-[10px] font-black uppercase tracking-widest rounded-sm hover:opacity-90 flex items-center justify-center gap-2 transition-all">
+              {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Send className="h-3 w-3" />} PUBLIKASIKAN
             </button>
-            <button
-              onClick={() => save("draft")} disabled={saving || uploading !== null}
-              className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-muted hover:bg-muted/80 rounded-sm font-brand font-bold text-sm disabled:opacity-60"
-            >
-              <Save className="h-4 w-4" /> Simpan Draft
+            <button onClick={() => save("draft")} disabled={saving || uploading !== null} className="w-full py-3 bg-muted text-[10px] font-black uppercase tracking-widest rounded-sm hover:bg-muted/80 transition-all">
+              SIMPAN DRAFT
             </button>
           </div>
 
-          {/* Category */}
-          <div className="bg-background p-5 rounded-sm border border-border">
-            <label className="block text-xs font-brand font-bold uppercase tracking-wider mb-2">Kategori *</label>
-            <select
-              value={category} onChange={(e) => setCategory(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-sm border border-input bg-background focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-            >
-              {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
-            </select>
-          </div>
-
-          {/* Image */}
-          <div className="bg-background p-5 rounded-sm border border-border">
-            <label className="block text-xs font-brand font-bold uppercase tracking-wider mb-3">Foto Utama</label>
-            {imageUrl ? (
-              <div className="relative">
-                <img src={imageUrl} alt="" className="w-full aspect-video object-cover rounded-sm" />
-                <button
-                  onClick={() => setImageUrl(null)}
-                  className="absolute top-2 right-2 h-8 w-8 bg-background/90 rounded-sm flex items-center justify-center hover:bg-breaking hover:text-breaking-foreground"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-            ) : (
-              <label className="flex flex-col items-center justify-center aspect-video border-2 border-dashed border-border rounded-sm cursor-pointer hover:border-primary hover:bg-muted/30 transition-colors">
-                {uploading === "image" ? (
-                  <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                ) : (
-                  <>
-                    <ImageIcon className="h-8 w-8 text-muted-foreground mb-2" />
-                    <span className="text-xs text-muted-foreground">Klik untuk upload foto</span>
-                    <span className="text-[10px] text-muted-foreground">JPG, PNG (max 10MB)</span>
-                  </>
-                )}
-                <input
-                  type="file" accept="image/*" className="hidden"
-                  onChange={(e) => e.target.files?.[0] && uploadFile(e.target.files[0], "image")}
-                />
-              </label>
-            )}
-          </div>
-
-          {/* Video */}
-          <div className="bg-background p-5 rounded-sm border border-border">
-            <label className="block text-xs font-brand font-bold uppercase tracking-wider mb-3">Video (Opsional)</label>
-
-            {/* Mode toggle */}
-            <div className="grid grid-cols-2 gap-1 p-1 bg-muted rounded-sm mb-4">
-              <button
-                type="button"
-                onClick={() => setVideoMode("upload")}
-                className={`flex items-center justify-center gap-1.5 py-2 text-xs font-bold rounded-sm transition-colors ${
-                  videoMode === "upload" ? "bg-background shadow-sm" : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <Upload className="h-3.5 w-3.5" /> Upload File
-              </button>
-              <button
-                type="button"
-                onClick={() => setVideoMode("url")}
-                className={`flex items-center justify-center gap-1.5 py-2 text-xs font-bold rounded-sm transition-colors ${
-                  videoMode === "url" ? "bg-background shadow-sm" : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <Link2 className="h-3.5 w-3.5" /> URL Eksternal
-              </button>
-            </div>
-
-            {videoMode === "upload" ? (
-              videoUrl && !videoUrlInput ? (
-                <div className="relative">
-                  <video src={videoUrl} controls className="w-full aspect-video rounded-sm bg-foreground" />
-                  <button
-                    onClick={() => setVideoUrl(null)}
-                    className="absolute top-2 right-2 h-8 w-8 bg-background/90 rounded-sm flex items-center justify-center hover:bg-breaking hover:text-breaking-foreground"
-                  >
-                    <X className="h-4 w-4" />
-                  </button>
-                </div>
-              ) : (
-                <label className="flex flex-col items-center justify-center aspect-video border-2 border-dashed border-border rounded-sm cursor-pointer hover:border-gold hover:bg-muted/30 transition-colors">
-                  {uploading === "video" ? (
-                    <Loader2 className="h-6 w-6 animate-spin text-gold" />
-                  ) : (
-                    <>
-                      <Video className="h-8 w-8 text-muted-foreground mb-2" />
-                      <span className="text-xs text-muted-foreground">Klik untuk upload video</span>
-                      <span className="text-[10px] text-muted-foreground">MP4, WebM (max 100MB)</span>
-                    </>
-                  )}
-                  <input
-                    type="file" accept="video/*,.mp4,.webm,.mov" className="hidden"
-                    onChange={(e) => {
-                      if (e.target.files?.[0]) {
-                        setVideoUrlInput("");
-                        uploadFile(e.target.files[0], "video");
-                      }
-                    }}
-                  />
-                </label>
-              )
-            ) : (
-              <div className="space-y-2">
-                <div className="relative">
-                  <Link2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                  <input
-                    type="url"
-                    value={videoUrlInput}
-                    onChange={(e) => {
-                      setVideoUrlInput(e.target.value);
-                      setVideoUrl(e.target.value.trim() || null);
-                    }}
-                    placeholder="https://www.tiktok.com/@user/video/..."
-                    className="w-full pl-9 pr-3 py-2.5 rounded-sm border border-input bg-background focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-                  />
-                </div>
-                <p className="text-[11px] text-muted-foreground leading-relaxed">
-                  Tempel link dari <strong>TikTok, YouTube, Instagram, Facebook, Twitter/X</strong>, atau URL file <strong>.mp4 / .webm</strong>.
-                </p>
-                {videoUrlInput && (
-                  <div className="mt-2 p-2 rounded-sm bg-muted text-[11px] break-all text-muted-foreground">
-                    ✓ Tersimpan: {videoUrlInput}
+          {/* GALERI FOTO DENGAN FITUR GESER */}
+          <div className="bg-white p-5 rounded-sm border border-border shadow-sm">
+            <label className="block text-[10px] font-black uppercase tracking-[0.2em] mb-3 text-primary italic">Atur Urutan Foto</label>
+            <div className="space-y-3">
+              {images.map((url, idx) => (
+                <div key={idx} className={`relative aspect-video rounded-sm overflow-hidden border-2 group transition-all ${idx === 0 ? 'border-primary' : 'border-border'}`}>
+                  <img src={url} className="w-full h-full object-cover" />
+                  
+                  {/* Overlay Kontrol Geser */}
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
+                    <button 
+                      onClick={() => moveImage(idx, 'left')} 
+                      disabled={idx === 0}
+                      className="p-1.5 bg-white text-black rounded-full disabled:opacity-30 hover:bg-gold transition-colors"
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </button>
+                    <button 
+                      onClick={() => setImages(images.filter((_, i) => i !== idx))}
+                      className="p-1.5 bg-destructive text-white rounded-full hover:scale-110 transition-transform"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                    <button 
+                      onClick={() => moveImage(idx, 'right')} 
+                      disabled={idx === images.length - 1}
+                      className="p-1.5 bg-white text-black rounded-full disabled:opacity-30 hover:bg-gold transition-colors"
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </button>
                   </div>
-                )}
-              </div>
-            )}
+
+                  {/* Indikator Utama */}
+                  {idx === 0 && (
+                    <div className="absolute top-2 left-2 bg-primary text-white text-[8px] font-black uppercase px-2 py-0.5 rounded-sm flex items-center gap-1 shadow-lg">
+                      <Star className="h-2 w-2 fill-white" /> Utama
+                    </div>
+                  )}
+                  <div className="absolute bottom-1 right-2 text-white text-[10px] font-black drop-shadow-md">#{idx + 1}</div>
+                </div>
+              ))}
+              
+              <label className="aspect-video border-2 border-dashed border-muted rounded-sm flex flex-col items-center justify-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-all">
+                {uploading === "image" ? <Loader2 className="h-4 w-4 animate-spin text-primary" /> : <Plus className="h-4 w-4 text-muted-foreground" />}
+                <span className="text-[8px] font-black mt-1 uppercase">Tambah Foto (Max 1GB)</span>
+                <input type="file" multiple accept="image/*" className="hidden" onChange={(e) => handleParallelUpload(e, "image")} />
+              </label>
+            </div>
+            <p className="mt-3 text-[8px] text-muted-foreground italic text-center">Gunakan panah di gambar untuk mengatur urutan. Foto teratas (#1) akan jadi poster berita.</p>
           </div>
 
-          {/* Tags */}
-          <div className="bg-background p-5 rounded-sm border border-border">
-            <label className="block text-xs font-brand font-bold uppercase tracking-wider mb-2">Tags</label>
-            <input
-              value={tags} onChange={(e) => setTags(e.target.value)}
-              placeholder="ipnu, ippnu, bekasi"
-              className="w-full px-3 py-2.5 rounded-sm border border-input bg-background focus:outline-none focus:ring-2 focus:ring-primary text-sm"
-            />
-            <p className="mt-1 text-xs text-muted-foreground">Pisahkan dengan koma</p>
+          {/* UPLOAD VIDEO (LIMIT 1GB) */}
+          <div className="bg-white p-5 rounded-sm border border-border shadow-sm">
+            <label className="block text-[10px] font-black uppercase tracking-[0.2em] mb-4 text-primary italic">Upload Berkas Video</label>
+            <div className="space-y-3 mb-3">
+              {videos.map((url, idx) => (
+                <div key={idx} className="relative aspect-video rounded-sm overflow-hidden bg-black group">
+                  <video src={url} className="w-full h-full" />
+                  <button onClick={() => setVideos(videos.filter((_, i) => i !== idx))} className="absolute top-2 right-2 h-7 w-7 bg-destructive text-white rounded-sm flex items-center justify-center shadow-lg"><X className="h-4 w-4" /></button>
+                </div>
+              ))}
+            </div>
+            <label className="flex flex-col items-center justify-center aspect-video border-2 border-dashed border-muted rounded-sm cursor-pointer hover:border-gold hover:bg-gold/5 transition-all group">
+              {uploading === "video" ? <Loader2 className="h-6 w-6 animate-spin text-gold" /> : <Video className="h-8 w-8 text-muted-foreground mb-2 group-hover:text-gold transition-colors" />}
+              <span className="text-[10px] font-black uppercase tracking-widest text-center px-4">Upload Video (Max 1GB)</span>
+              <input type="file" multiple accept="video/*" className="hidden" onChange={(e) => handleParallelUpload(e, "video")} />
+            </label>
+          </div>
+
+          {/* URL EKSTERNAL */}
+          <div className="bg-white p-5 rounded-sm border border-border shadow-sm">
+            <label className="block text-[10px] font-black uppercase tracking-[0.2em] mb-4 text-primary italic">URL Eksternal (Reels / YT)</label>
+            <div className="relative group">
+              <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+              <input 
+                value={videoUrlInput} 
+                onChange={(e) => setVideoUrlInput(e.target.value)}
+                placeholder="Link Instagram / Reels / YouTube" 
+                className="w-full pl-9 pr-3 py-3 text-xs font-bold border border-border rounded-sm bg-muted/10 outline-none focus:ring-1 focus:ring-primary transition-all"
+              />
+            </div>
+          </div>
+
+          <div className="bg-white p-5 rounded-sm border border-border shadow-sm">
+            <label className="block text-[10px] font-black uppercase tracking-[0.2em] mb-2 text-primary">Tags Berita</label>
+            <input value={tags} onChange={(e) => setTags(e.target.value)} placeholder="ipnu, ippnu, bekasi" className="w-full p-2.5 text-xs font-bold border border-border rounded-sm bg-muted/5 outline-none focus:border-primary" />
           </div>
         </div>
       </div>

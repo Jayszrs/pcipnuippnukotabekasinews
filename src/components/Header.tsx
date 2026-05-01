@@ -2,14 +2,14 @@ import { useEffect, useState } from "react";
 import { Link, NavLink } from "react-router-dom";
 import { Menu, Search, X, Calendar, Moon, Sun } from "lucide-react";
 import { Logo } from "./Logo";
-import { categories } from "@/data/news";
 
+// FIX: Menghapus "Kegiatan IPPNU" agar navigasi lebih rapi dan tidak dobel
 const navItems = [
   { label: "Beranda", to: "/" },
-  ...categories.map((c) => ({
-    label: c,
-    to: `/kategori/${encodeURIComponent(c.toLowerCase().replace(/\s+/g, "-"))}`,
-  })),
+  { label: "Kegiatan IPNU", to: "/kategori/kegiatan-ipnu" }, // Kamu bisa ganti labelnya jadi "Kegiatan" saja kalau mau digabung
+  { label: "Bekasi Update", to: "/kategori/bekasi-update" },
+  { label: "Nasional", to: "/kategori/nasional" },
+  { label: "Opini", to: "/kategori/opini" },
   { label: "Media", to: "/media" },
 ];
 
@@ -32,20 +32,19 @@ export const Header = () => {
   });
 
   return (
-    <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border">
+    <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border transition-all duration-300">
       {/* Top utility bar */}
-      <div className="hidden md:block bg-primary-deep text-primary-foreground text-xs">
-        <div className="container-news flex items-center justify-between h-9">
+      <div className="hidden md:block bg-primary-deep text-primary-foreground text-[10px] font-bold uppercase tracking-widest">
+        <div className="container-news flex items-center justify-between h-10">
           <div className="flex items-center gap-2 opacity-90">
             <Calendar className="h-3.5 w-3.5 text-gold" />
             <span className="capitalize">{today}</span>
           </div>
-          <div className="flex items-center gap-5 opacity-90">
-            {/* PERBAIKAN: Ganti <a> jadi <Link> dan arahkan ke path yang benar */}
+          <div className="flex items-center gap-6 opacity-90">
             <Link to="/tentang-kami" className="hover:text-gold transition-colors">Tentang Kami</Link>
             <Link to="/redaksi" className="hover:text-gold transition-colors">Redaksi</Link>
             <Link to="/kontak" className="hover:text-gold transition-colors">Kontak</Link>
-            <Link to="/admin" className="hover:text-gold transition-colors font-semibold">Admin Login</Link>
+            <Link to="/admin" className="px-3 py-1 bg-gold text-primary-deep rounded-sm hover:bg-white transition-colors">Admin Login</Link>
           </div>
         </div>
       </div>
@@ -61,8 +60,8 @@ export const Header = () => {
               to={item.to}
               end={item.to === "/"}
               className={({ isActive }) =>
-                `relative px-3 py-2 text-sm font-semibold font-brand transition-colors ${
-                  isActive ? "text-primary" : "text-foreground/80 hover:text-primary"
+                `relative px-3 py-2 text-xs font-black font-brand uppercase tracking-wider transition-all duration-300 ${
+                  isActive ? "text-primary" : "text-foreground/70 hover:text-primary"
                 }`
               }
             >
@@ -70,7 +69,7 @@ export const Header = () => {
                 <>
                   {item.label}
                   {isActive && (
-                    <span className="absolute -bottom-[22px] left-3 right-3 h-[3px] bg-gold" />
+                    <span className="absolute -bottom-[26px] left-3 right-3 h-[3px] bg-gold rounded-t-full" />
                   )}
                 </>
               )}
@@ -81,49 +80,32 @@ export const Header = () => {
         <div className="flex items-center gap-1">
           <button
             onClick={() => setSearchOpen((s) => !s)}
-            className="p-2 rounded-md hover:bg-muted transition-colors"
+            className="p-2.5 rounded-full hover:bg-muted transition-colors"
             aria-label="Cari"
           >
-            <Search className="h-5 w-5" />
+            <Search className="h-5 w-5 text-foreground" />
           </button>
           <button
             onClick={() => setDark((d) => !d)}
-            className="p-2 rounded-md hover:bg-muted transition-colors"
+            className="p-2.5 rounded-full hover:bg-muted transition-colors"
             aria-label="Toggle dark mode"
           >
-            {dark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            {dark ? <Sun className="h-5 w-5 text-gold" /> : <Moon className="h-5 w-5 text-foreground" />}
           </button>
           <button
             onClick={() => setOpen((o) => !o)}
-            className="lg:hidden p-2 rounded-md hover:bg-muted transition-colors"
+            className="lg:hidden p-2.5 rounded-full hover:bg-muted transition-colors"
             aria-label="Menu"
           >
-            {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            {open ? <X className="h-6 w-6 text-primary" /> : <Menu className="h-6 w-6 text-foreground" />}
           </button>
         </div>
       </div>
 
-      {/* Search overlay */}
-      {searchOpen && (
-        <div className="border-t border-border bg-background">
-          <div className="container-news py-4">
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
-              <input
-                autoFocus
-                type="search"
-                placeholder="Cari berita, kategori, tag..."
-                className="w-full pl-12 pr-4 py-3 rounded-md bg-muted border border-border focus:outline-none focus:ring-2 focus:ring-primary text-base"
-              />
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Mobile nav */}
       {open && (
-        <div className="lg:hidden border-t border-border bg-background">
-          <nav className="container-news py-4 flex flex-col gap-1">
+        <div className="lg:hidden border-t border-border bg-background animate-in fade-in slide-in-from-top-4 duration-300 shadow-2xl">
+          <nav className="container-news py-6 flex flex-col gap-2">
             {navItems.map((item) => (
               <NavLink
                 key={item.to}
@@ -131,27 +113,14 @@ export const Header = () => {
                 end={item.to === "/"}
                 onClick={() => setOpen(false)}
                 className={({ isActive }) =>
-                  `px-3 py-3 rounded-md text-sm font-semibold font-brand transition-colors ${
-                    isActive ? "bg-primary text-primary-foreground" : "hover:bg-muted"
+                  `px-4 py-4 rounded-xl text-sm font-bold font-brand uppercase tracking-widest transition-all ${
+                    isActive ? "bg-primary text-white shadow-lg" : "hover:bg-muted"
                   }`
                 }
               >
                 {item.label}
               </NavLink>
             ))}
-            {/* Mobile links juga perlu diperhatikan */}
-            <div className="flex flex-col gap-1 mt-2 pt-2 border-t border-border">
-              <Link to="/tentang-kami" onClick={() => setOpen(false)} className="px-3 py-2 text-sm hover:bg-muted rounded-md">Tentang Kami</Link>
-              <Link to="/redaksi" onClick={() => setOpen(false)} className="px-3 py-2 text-sm hover:bg-muted rounded-md">Redaksi</Link>
-              <Link to="/kontak" onClick={() => setOpen(false)} className="px-3 py-2 text-sm hover:bg-muted rounded-md">Kontak</Link>
-              <Link
-                to="/admin"
-                onClick={() => setOpen(false)}
-                className="mt-2 px-3 py-3 rounded-md bg-gold text-gold-foreground font-bold text-sm text-center"
-              >
-                Admin Login
-              </Link>
-            </div>
           </nav>
         </div>
       )}

@@ -5,12 +5,38 @@ import { Sidebar } from "@/components/Sidebar";
 import { NewsCard } from "@/components/NewsCard";
 import { CategoryBadge } from "@/components/CategoryBadge";
 import { useArticles } from "@/contexts/ArticlesContext";
-import { Clock, Eye, Share2, Facebook, Twitter, MessageCircle, Link2, ChevronRight, Home, ExternalLink } from "lucide-react";
+import { 
+  Clock, 
+  Eye, 
+  Share2, 
+  Facebook, 
+  Twitter, 
+  MessageCircle, 
+  Link2, 
+  ChevronRight, 
+  Home, 
+  ExternalLink,
+  Instagram,
+  Image as ImageIcon
+} from "lucide-react";
 
+// Helper untuk deteksi file video langsung
 const isDirectVideoFile = (url: string) => /\.(mp4|webm|ogg|mov)(\?.*)?$/i.test(url);
+
+// Helper untuk deteksi dan format YouTube
 const getYoutubeEmbed = (url: string): string | null => {
   const m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([\w-]{11})/);
   return m ? `https://www.youtube.com/embed/${m[1]}` : null;
+};
+
+// --- PERBAIKAN HELPER INSTAGRAM (Mendukung Post & Reels) ---
+const getInstagramEmbed = (url: string): string | null => {
+  // Regex untuk menangkap ID dari link /p/, /reel/, atau /reels/
+  const match = url.match(/instagram\.com\/(?:p|reel|reels)\/([^/?#&]+)/);
+  if (match) {
+    return `https://www.instagram.com/p/${match[1]}/embed`;
+  }
+  return null;
 };
 
 const Article = () => {
@@ -37,6 +63,7 @@ const Article = () => {
 
   const videoUrl = article.videoUrl;
   const ytEmbed = videoUrl ? getYoutubeEmbed(videoUrl) : null;
+  const igEmbed = videoUrl ? getInstagramEmbed(videoUrl) : null;
 
   return (
     <Layout>
@@ -72,26 +99,70 @@ const Article = () => {
               <span className="flex items-center gap-1.5 text-muted-foreground"><Eye className="h-4 w-4" />{article.views.toLocaleString("id-ID")} views</span>
             </div>
 
-            <div className="mt-6 aspect-[16/10] overflow-hidden rounded-sm bg-muted">
-              <img src={article.image} alt={article.title} className="w-full h-full object-cover" />
-            </div>
-            <p className="mt-2 text-xs text-muted-foreground italic">Foto: Dokumentasi PC IPNU IPPNU Kota Bekasi</p>
-
-            {/* Video */}
-            {videoUrl && (
+            {/* --- GAMBAR UTAMA / POSTER (BERSIH & ANTI-CROP) --- */}
+            {article.image && (
               <div className="mt-6">
-                <div className="aspect-video overflow-hidden rounded-sm bg-black relative">
+                <a 
+                  href={article.image} 
+                  target="_blank" 
+                  rel="noreferrer" 
+                  className="cursor-zoom-in block"
+                  title="Klik untuk memperbesar"
+                >
+                  <img 
+                    src={article.image} 
+                    alt={article.title} 
+                    className="w-full h-auto object-contain transition-transform duration-500 hover:scale-[1.01]" 
+                  />
+                </a>
+              </div>
+            )}
+            <p className="mt-2 text-xs text-muted-foreground italic text-center">
+              Foto: Dokumentasi PC IPNU IPPNU Kota Bekasi (Klik gambar untuk memperbesar)
+            </p>
+
+            {/* --- VIDEO & INSTAGRAM (FIX REELS & LINK HREF) --- */}
+            {videoUrl && (
+              <div className="mt-8 space-y-4">
+                <div className={`relative w-full overflow-hidden rounded-xl bg-transparent ${igEmbed ? 'aspect-[4/5] sm:aspect-[1/1.2]' : 'aspect-video bg-black shadow-lg'}`}>
                   {isDirectVideoFile(videoUrl) ? (
                     <video src={videoUrl} controls className="w-full h-full" />
                   ) : ytEmbed ? (
-                    <iframe src={ytEmbed} title={article.title} className="w-full h-full" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+                    <iframe 
+                      src={ytEmbed} 
+                      title={article.title} 
+                      className="w-full h-full" 
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                      allowFullScreen 
+                    />
+                  ) : igEmbed ? (
+                    <iframe 
+                      src={igEmbed} 
+                      title="Instagram Content" 
+                      className="absolute inset-0 w-full h-full border-none" 
+                      frameBorder="0" 
+                      scrolling="no" 
+                      allowTransparency={true}
+                    />
                   ) : (
                     <a href={videoUrl} target="_blank" rel="noreferrer" className="absolute inset-0 flex flex-col items-center justify-center bg-black/80 text-white hover:bg-black/70 transition-colors">
                       <ExternalLink className="h-10 w-10 mb-3" />
-                      <span className="text-sm font-bold">Tonton video di sumber asli</span>
+                      <span className="text-sm font-bold">Tonton di sumber asli</span>
                       <span className="text-xs text-white/70 mt-1 px-4 break-all max-w-md text-center">{videoUrl}</span>
                     </a>
                   )}
+                </div>
+                
+                {/* Link Href ke Postingan Asli */}
+                <div className="flex justify-center">
+                  <a 
+                    href={videoUrl} 
+                    target="_blank" 
+                    rel="noreferrer" 
+                    className="inline-flex items-center gap-2 text-xs font-bold text-muted-foreground hover:text-primary transition-colors bg-muted/50 px-4 py-2 rounded-full border border-border"
+                  >
+                    <Instagram className="h-3.5 w-3.5" /> Lihat Postingan Asli di Instagram
+                  </a>
                 </div>
               </div>
             )}
@@ -115,21 +186,21 @@ const Article = () => {
               </div>
             )}
 
-            {/* Share */}
+            {/* Share Section */}
             <div className="mt-6 p-5 bg-secondary rounded-sm flex items-center justify-between flex-wrap gap-3">
-              <div className="flex items-center gap-2 font-bold text-sm">
+              <div className="flex items-center gap-2 font-bold text-sm text-foreground">
                 <Share2 className="h-4 w-4 text-primary" />
                 Bagikan artikel ini:
               </div>
               <div className="flex gap-2">
-                <a href={`https://wa.me/?text=${shareText}%20${shareUrl}`} target="_blank" rel="noreferrer" className="h-10 w-10 rounded-sm bg-[#25D366] text-white flex items-center justify-center hover:opacity-90 transition-opacity" aria-label="Share WhatsApp"><MessageCircle className="h-4 w-4" /></a>
-                <a href={`https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`} target="_blank" rel="noreferrer" className="h-10 w-10 rounded-sm bg-[#1877F2] text-white flex items-center justify-center hover:opacity-90 transition-opacity" aria-label="Share Facebook"><Facebook className="h-4 w-4" /></a>
-                <a href={`https://twitter.com/intent/tweet?text=${shareText}&url=${shareUrl}`} target="_blank" rel="noreferrer" className="h-10 w-10 rounded-sm bg-foreground text-background flex items-center justify-center hover:opacity-90 transition-opacity" aria-label="Share Twitter"><Twitter className="h-4 w-4" /></a>
-                <button onClick={() => navigator.clipboard?.writeText(url)} className="h-10 w-10 rounded-sm bg-muted hover:bg-foreground hover:text-background flex items-center justify-center transition-colors" aria-label="Copy link"><Link2 className="h-4 w-4" /></button>
+                <a href={`https://wa.me/?text=${shareText}%20${shareUrl}`} target="_blank" rel="noreferrer" className="h-10 w-10 rounded-sm bg-[#25D366] text-white flex items-center justify-center hover:opacity-90 transition-opacity"><MessageCircle className="h-4 w-4" /></a>
+                <a href={`https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`} target="_blank" rel="noreferrer" className="h-10 w-10 rounded-sm bg-[#1877F2] text-white flex items-center justify-center hover:opacity-90 transition-opacity"><Facebook className="h-4 w-4" /></a>
+                <a href={`https://twitter.com/intent/tweet?text=${shareText}&url=${shareUrl}`} target="_blank" rel="noreferrer" className="h-10 w-10 rounded-sm bg-foreground text-background flex items-center justify-center hover:opacity-90 transition-opacity"><Twitter className="h-4 w-4" /></a>
+                <button onClick={() => navigator.clipboard?.writeText(url)} className="h-10 w-10 rounded-sm bg-muted hover:bg-foreground hover:text-background flex items-center justify-center transition-colors"><Link2 className="h-4 w-4" /></button>
               </div>
             </div>
 
-            {/* Related */}
+            {/* Related Articles */}
             {related.length > 0 && (
               <section className="mt-14">
                 <h2 className="font-display font-black text-2xl lg:text-3xl border-b-2 border-foreground pb-3 mb-6">
