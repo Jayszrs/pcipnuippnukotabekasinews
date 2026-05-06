@@ -9,7 +9,8 @@ import {
   LogOut, 
   Globe, 
   ShieldCheck,
-  Users // Import icon Users untuk menu Struktural
+  Users,
+  Calendar // <-- 1. IMPORT ICON CALENDAR BARU DI SINI
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -23,11 +24,12 @@ export const AdminLayout = ({ children, title, action }: { children: ReactNode; 
     navigate("/admin");
   };
 
-  // DAFTAR MENU SIDEBAR - Sudah ditambahkan "Manajemen Kader/Struktural"
+  // DAFTAR MENU SIDEBAR - Sudah disempurnakan dengan Menu Event & Countdown
   const links = [
     { to: "/admin/dashboard", icon: LayoutDashboard, label: "Dashboard" },
     { to: "/admin/news/new", icon: PlusCircle, label: "Tulis Berita" },
-    { to: "/admin/cadres", icon: Users, label: "Struktural" }, // <-- MENU BARU
+    { to: "/admin/cadres", icon: Users, label: "Struktural" }, 
+    { to: "/admin/events", icon: Calendar, label: "Banner & Countdown" }, // <-- 2. COPASTE MENU BARU ACARA BESAR LU DI SINI
   ];
 
   return (
