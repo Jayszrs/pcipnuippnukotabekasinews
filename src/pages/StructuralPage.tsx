@@ -1,7 +1,108 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { Quote, ArrowLeft, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Quote, MapPin, Calendar, Shield } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+
+// Komponen sub-card untuk menghandle state flip masing-masing kader
+const CadreCard = ({ kader }: { kader: any }) => {
+  const [isFlipped, setIsFlipped] = useState(false);
+
+  return (
+    <div 
+      onClick={() => setIsFlipped(!isFlipped)}
+      className="w-full aspect-[4/5] cursor-pointer [perspective:1000px] group select-none"
+    >
+      {/* Container Card yang Berputar */}
+      <div className={`relative w-full h-full transition-transform duration-700 [transform-style:preserve-3d] ${isFlipped ? '[transform:rotateY(180deg)]' : ''}`}>
+        
+        {/* ================= BAGIAN DEPAN (FULL IMAGE DESAIN LU) ================= */}
+        <div className="absolute inset-0 w-full h-full rounded-[2rem] overflow-hidden shadow-xl [backface-visibility:hidden] z-20">
+          {kader.image_url ? (
+            <img 
+              src={kader.image_url} 
+              alt={kader.name}
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-102"
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-primary to-primary-deep flex flex-col items-center justify-center p-6 text-white text-center">
+              <span className="text-4xl font-black mb-2">NU</span>
+              <p className="font-bold uppercase text-xs tracking-widest">{kader.name}</p>
+              <p className="text-[10px] text-gold uppercase mt-1">{kader.position}</p>
+            </div>
+          )}
+        </div>
+
+        {/* ================= BAGIAN BELAKANG (BIODATA & QUOTE) ================= */}
+        <div className="absolute inset-0 w-full h-full rounded-[2rem] p-8 bg-gradient-to-br from-white via-emerald-50/40 to-emerald-100/60 border border-emerald-200/60 shadow-xl [backface-visibility:hidden] [transform:rotateY(180deg)] z-10 flex flex-col justify-between">
+          
+          <div className="space-y-4">
+            <div className="flex justify-between items-start">
+              <span className="px-3 py-1 bg-primary/10 text-primary border border-primary/20 text-[9px] font-black tracking-widest uppercase rounded-full">
+                {kader.organization || "IPNU"}
+              </span>
+              <span className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">
+                Khidmah {kader.period_start}—{kader.period_end}
+              </span>
+            </div>
+
+            {/* Nama & Jabatan */}
+            <div className="space-y-1">
+              <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight leading-tight">
+                {kader.name}
+              </h3>
+              <p className="text-xs font-bold text-primary uppercase tracking-wider">
+                {kader.position}
+              </p>
+              <div className="h-1 w-12 bg-gold rounded-full mt-2"></div>
+            </div>
+
+            {/* Detail Biodata */}
+            <div className="space-y-3 pt-4 text-slate-600">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-white rounded-xl shadow-sm text-primary border border-slate-100">
+                  <MapPin className="h-4 w-4" />
+                </div>
+                <div>
+                  <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Asal / Pimpinan</p>
+                  <p className="text-xs font-bold text-slate-700">{kader.origin || "Kota Bekasi"}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-white rounded-xl shadow-sm text-primary border border-slate-100">
+                  <Calendar className="h-4 w-4" />
+                </div>
+                <div>
+                  <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Tempat, Tanggal Lahir</p>
+                  <p className="text-xs font-bold text-slate-700">{kader.birth_info || "-"}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-white rounded-xl shadow-sm text-primary border border-slate-100">
+                  <Shield className="h-4 w-4" />
+                </div>
+                <div>
+                  <p className="text-[9px] text-slate-400 font-bold uppercase tracking-wider">Departemen / Divisi</p>
+                  <p className="text-xs font-bold text-slate-700">{kader.division || "-"}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Quote */}
+          <div className="border-t border-emerald-200/50 pt-4 text-center">
+            <Quote className="h-4 w-4 text-primary/20 mx-auto mb-1.5" />
+            <p className="text-xs font-medium text-slate-600 italic leading-relaxed line-clamp-3">
+              "{kader.quote || "Belajar, Berjuang, Bertaqwa."}"
+            </p>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export const StructuralPage = () => {
   const [cadres, setCadres] = useState<any[]>([]);
@@ -9,7 +110,6 @@ export const StructuralPage = () => {
 
   useEffect(() => {
     const loadData = async () => {
-      // Mengambil data kader dan mengurutkannya berdasarkan prioritas
       const { data } = await supabase
         .from("cadres")
         .select("*")
@@ -20,98 +120,31 @@ export const StructuralPage = () => {
   }, []);
 
   return (
-    <div className="container-news py-10 min-h-screen bg-white animate-in fade-in duration-700">
+    <div className="container-news py-12 min-h-screen bg-white animate-in fade-in duration-700">
       <div className="max-w-6xl mx-auto px-4">
         
-        {/* Tombol Kembali dengan Efek Hover */}
         <button 
           onClick={() => navigate(-1)} 
-          className="flex items-center gap-2 text-primary hover:text-gold transition-all mb-10 font-bold group"
+          className="flex items-center gap-2 text-primary hover:text-gold transition-all mb-12 font-bold group"
         >
           <ArrowLeft className="h-5 w-5 group-hover:-translate-x-1 transition-transform" />
           Kembali
         </button>
 
-        {/* Header Halaman - Lebih Elegan */}
-        <div className="text-center mb-20 space-y-3">
-          <h1 className="text-4xl md:text-5xl font-display font-black text-primary uppercase tracking-tight">
+        <div className="text-center mb-24 space-y-4">
+          <h1 className="text-4xl md:text-5xl font-display font-black text-primary uppercase tracking-tighter">
             Struktural Pimpinan Cabang
           </h1>
-          <p className="text-muted-foreground font-bold uppercase tracking-[0.3em] text-[10px]">
-            Masa Khidmah 2025 — 2027
+          {/* DI SINI SUDAH TERUPDATE MENJADI 2025 - 2028 */}
+          <p className="text-muted-foreground font-bold uppercase tracking-[0.4em] text-[10px]">
+            Masa Khidmah 2025 — 2028
           </p>
-          <div className="h-1.5 w-24 bg-gold mx-auto rounded-full shadow-md"></div>
+          <div className="h-1.5 w-20 bg-gold mx-auto rounded-full shadow-sm"></div>
         </div>
 
-        {/* Grid Struktural - 3 Kolom di Desktop */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-12">
           {cadres.map((kader) => (
-            <div key={kader.id} className="group relative flex flex-col items-center">
-              
-              {/* PREMIUM CARD TEMPLATE */}
-              <div className="relative w-full aspect-[4/5] rounded-[2.5rem] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.15)] transition-all duration-500 group-hover:-translate-y-4 group-hover:shadow-[0_30px_60px_rgba(0,0,0,0.25)] bg-primary-deep isolate border border-white/10">
-                
-                {/* 1. Background Gradient & Glow (Layer 0) */}
-                <div className="absolute inset-0 bg-gradient-to-br from-primary via-primary-deep to-black z-0"></div>
-                
-                {/* 2. Watermark NU dengan Soft Glow (Layer 1) */}
-                <div className="absolute inset-0 flex items-center justify-center opacity-20 pointer-events-none z-10">
-                  <span className="text-[14rem] font-black text-gold/20 select-none blur-[1px]">NU</span>
-                </div>
-
-                {/* 3. Foto Kader (Layer 2) */}
-                {kader.image_url ? (
-                  <img 
-                    src={kader.image_url} 
-                    alt={kader.name}
-                    className="relative z-20 w-full h-full object-cover object-top drop-shadow-[0_10px_15px_rgba(0,0,0,0.5)] transition-transform duration-700 group-hover:scale-110"
-                  />
-                ) : (
-                  <div className="absolute inset-0 flex items-center justify-center z-20">
-                     <span className="text-white/20 text-xs italic">Foto tidak tersedia</span>
-                  </div>
-                )}
-
-                {/* 4. Glassmorphism Info Panel (Layer 3 & 4) */}
-                <div className="absolute inset-x-0 bottom-0 p-8 z-40 bg-gradient-to-t from-black via-black/60 to-transparent backdrop-blur-[2px]">
-                  <div className="space-y-1 transform transition-transform duration-500 group-hover:translate-y-[-5px]">
-                    <h3 className="text-2xl font-black uppercase leading-tight text-white drop-shadow-lg">
-                      {kader.name}
-                    </h3>
-                    <div className="h-1 w-12 bg-gold my-3 rounded-full"></div>
-                    
-                    <div className="flex items-center justify-between">
-                      <p className="text-[10px] font-bold tracking-[0.2em] uppercase text-gold">
-                        {kader.position}
-                      </p>
-                      {/* Badge Organisasi Kecil */}
-                      <span className="flex items-center gap-1 text-[8px] bg-white/10 px-2 py-1 rounded-full text-white/60 border border-white/5 uppercase font-bold tracking-tighter">
-                        <ShieldCheck className="h-2 w-2 text-gold" /> PC KOTA BEKASI
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* 5. Quote Section (Di bawah Card) */}
-              <div className="mt-8 text-center max-w-[85%] animate-in fade-in slide-in-from-top-2 duration-700">
-                <div className="flex justify-center mb-3">
-                  <Quote className="h-5 w-5 text-gold/30" />
-                </div>
-                <p className="text-sm font-medium text-slate-700 italic leading-relaxed">
-                  "{kader.quote || "Belajar, Berjuang, Bertaqwa."}"
-                </p>
-                
-                {/* Divider Bidang */}
-                <div className="mt-4 flex items-center justify-center gap-3">
-                  <div className="h-[1px] w-6 bg-slate-200"></div>
-                  <p className="text-[10px] font-black text-primary/40 uppercase tracking-[0.2em]">
-                    {kader.division}
-                  </p>
-                  <div className="h-[1px] w-6 bg-slate-200"></div>
-                </div>
-              </div>
-            </div>
+            <CadreCard key={kader.id} kader={kader} />
           ))}
         </div>
       </div>
