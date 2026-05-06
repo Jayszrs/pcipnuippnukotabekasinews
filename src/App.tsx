@@ -30,6 +30,7 @@ import { Kontak } from "./pages/Kontak";
 // --- PERBAIKAN: IMPORT HALAMAN KADER & STRUKTURAL ---
 import { StructuralPage } from "./pages/StructuralPage"; // Halaman Publik
 import { CadreManager } from "./pages/admin/CadreManager"; // Halaman Admin
+import { EventManager } from "./pages/admin/EventManager"; // <-- TAMBAHAN: Halaman Admin Banner & Countdown
 
 const queryClient = new QueryClient();
 
@@ -76,6 +77,12 @@ const App = () => (
               <Route
                 path="/admin/cadres"
                 element={<ProtectedRoute><CadreManager /></ProtectedRoute>}
+              />
+
+              {/* TAMBAHAN: RUTE MANAJEMEN EVENT BESAR & COUNTDOWN */}
+              <Route
+                path="/admin/events"
+                element={<ProtectedRoute><EventManager /></ProtectedRoute>}
               />
 
               <Route

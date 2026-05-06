@@ -6,6 +6,7 @@ import { VideoHighlight } from "@/components/VideoHighlight";
 import { EventBanner } from "@/components/EventBanner";
 import { Sidebar } from "@/components/Sidebar";
 import { NewsCard } from "@/components/NewsCard";
+import { HeroBanner } from "@/components/HeroBanner"; // <-- 1. IMPORT HERO BANNER COUNTDOWN BARU LU DI SINI
 import { useArticles } from "@/contexts/ArticlesContext";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -34,10 +35,14 @@ const Index = () => {
       {/* 1. Hero Section (Headline Utama) */}
       <Hero />
 
-      {/* 2. Event/Running Text Banner */}
+      {/* 2. Event/Running Text Banner (Ticker Berita) */}
       <EventBanner />
 
-      {/* 3. Main Content Section (Terkini + Sidebar) */}
+      {/* ================= 3. FEATURED BIG EVENT BANNER & COUNTDOWN ================= */}
+      {/* Di sinilah banner Pelantikan 10 Mei otomatis tampil lengkap dengan hitungan mundur dinamis */}
+      <HeroBanner />
+
+      {/* 4. Main Content Section (Terkini + Sidebar) */}
       <section className="container-news py-10 lg:py-16 bg-background">
         <div className="grid lg:grid-cols-[1fr_320px] gap-10 lg:gap-16">
           <div className="space-y-10">
@@ -78,12 +83,12 @@ const Index = () => {
         </div>
       </section>
 
-      {/* 4. Video Highlight (Liputan Terbaru) */}
+      {/* 5. Video Highlight (Liputan Terbaru) */}
       <div className="bg-foreground py-16">
         <VideoHighlight />
       </div>
 
-      {/* 5. Category Sections (Berita per Kategori) */}
+      {/* 6. Category Sections (Berita per Kategori) */}
       <CategorySection />
     </Layout>
   );
