@@ -3,6 +3,7 @@ import { useNavigate, useParams, Link } from "react-router-dom";
 import { AdminLayout } from "@/components/AdminLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useQueryClient } from "@tanstack/react-query"; // <-- 1. IMPORT PENGHANCUR DELAY CACHE
 import { 
   ArrowLeft, Save, Send, X, Loader2, 
   Image as ImageIcon, Video, Link2, 
@@ -34,6 +35,7 @@ const NewsForm = () => {
   const navigate = useNavigate();
   const { user, role } = useAuth();
   const canManageNews = role === "admin" || role === "editor";
+  const queryClient = useQueryClient(); // <-- 2. INISIALISASI QUERY CLIENT
 
   // STATE KONTEN & BACKDATE
   const [title, setTitle] = useState("");
@@ -53,9 +55,7 @@ const NewsForm = () => {
   const [loading, setLoading] = useState(isEdit);
   const [existingDates, setExistingDates] = useState<string[]>([]);
 
-  // ==========================================
-  // FITUR AUTOSAVE 1: AMBIL DRAF JIKA ADA (HANYA UNTUK TULIS BARU)
-  // ==========================================
+  // AUTOSAVE: AMBIL DRAF JIKA ADA (HANYA UNTUK TULIS BARU)
   useEffect(() => {
     if (!isEdit) {
       const savedDraft = localStorage.getItem("news_draft_new");
@@ -80,9 +80,7 @@ const NewsForm = () => {
     }
   }, [isEdit]);
 
-  // ==========================================
-  // FITUR AUTOSAVE 2: REKAM SETIAP KETIKAN KE LOCALSTORAGE
-  // ==========================================
+  // AUTOSAVE: REKAM SETIAP KETIKAN KE LOCALSTORAGE
   useEffect(() => {
     if (!isEdit) {
       const draftData = {
@@ -197,16 +195,27 @@ const NewsForm = () => {
     };
 
     const res = isEdit ? await supabase.from("news").update(payload).eq("id", id!) : await supabase.from("news").insert(payload as any);
-    setSaving(false);
+    
     if (!res.error) {
-      // ==========================================
-      // FITUR AUTOSAVE 3: BERSIHKAN LOCALSTORAGE JIKA SUKSES SUBMIT
-      // ==========================================
+      // Hapus draf local storage
       if (!isEdit) {
         localStorage.removeItem("news_draft_new");
       }
-      toast.success("Mantap Lan!"); 
+      
+      // ==========================================
+      // 3. PROSES INSTAN BANTAI DELAY KONTEN (INVALIDATE CACHE)
+      // ==========================================
+      try {
+        await queryClient.invalidateQueries(); // Paksa seluruh halaman web download data paling fresh dari Supabase
+      } catch (err) {
+        console.error("Gagal refresh cache:", err);
+      }
+
+      setSaving(false);
+      toast.success(status === "published" ? "Berita Terbit!" : "Draft Disimpan"); 
       navigate("/admin/dashboard"); 
+    } else {
+      setSaving(false);
     }
   };
 
