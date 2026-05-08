@@ -17,7 +17,7 @@ export const KontakKami = () => {
 
   // Nomor WA Lu yang Baru & Link Direct untuk Tombol WhatsApp
   const myWhatsAppNumber = "62895330152658"; 
-  const waUrl = `https://wa.me/${myWhatsAppNumber}?text=Halo%20Admin%20PC%20IPNU%20IPPNU%20Kota%20Bekasi%2C%20saya%20ingin%20bertanya%20mengenai...`;
+  const waUrl = `https://wa.me/${myWhatsAppNumber}?text=Assalamualaikum%20Rekan%20Admin%20PC%20IPNU%20IPPNU%20Kota%20Bekasi%2C%20saya%20ingin%20bertanya%20mengenai...`;
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
@@ -85,32 +85,57 @@ export const KontakKami = () => {
           
           <div className="grid md:grid-cols-[1fr_420px] gap-10 lg:gap-16">
             
-            {/* KOLOM KIRI: FORM / TEXT GREETING */}
-            <div className="space-y-6">
-              <h2 className="text-3xl font-brand font-black text-slate-800 uppercase tracking-tighter leading-none flex items-center gap-2">
-                <Mail className="h-6 w-6 text-primary" /> Kami Siap Membantu Lu
-              </h2>
-              <div className="h-1 w-16 bg-gold rounded-full" />
-              <p className="text-slate-600 text-sm md:text-base leading-relaxed font-medium">
-                Punya pertanyaan mengenai program kerja kaderisasi, silaturahmi ke struktural, atau butuh bantuan nulis artikel opini tentang pelajar NU Kota Bekasi? Tumpahkan aja apa yang ada di pikiran lu lewat saluran komunikasi kami di samping atau klik tombol WhatsApp pribadi asisten kami.
-              </p>
+            {/* KOLOM KIRI: INTEGRASI INTERACTIVE MAPS & TEXT GREETING */}
+            <div className="space-y-8">
+              <div className="space-y-6">
+                <h2 className="text-3xl font-brand font-black text-slate-800 uppercase tracking-tighter leading-none flex items-center gap-2">
+                  <Mail className="h-6 w-6 text-primary" /> Kami Siap Membantu Lu
+                </h2>
+                <div className="h-1 w-16 bg-gold rounded-full" />
+                <p className="text-slate-600 text-sm md:text-base leading-relaxed font-medium">
+                  Punya pertanyaan mengenai program kerja kaderisasi, silaturahmi ke struktural, atau butuh bantuan nulis artikel opini tentang pelajar NU Kota Bekasi? Tumpahkan aja apa yang ada di pikiran lu lewat saluran komunikasi kami di samping atau klik tombol WhatsApp pribadi asisten kami.
+                </p>
+              </div>
+
+              {/* ======================================================== */}
+              {/* GOOGLE MAPS EMBEDDED INTERAKTIF (RESPONSIF & BEBAS EROR) */}
+              {/* ======================================================== */}
+              <div className="w-full aspect-[16/9] rounded-[2rem] overflow-hidden border-2 border-slate-100 shadow-xl relative group animate-fade-up">
+                <iframe 
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3966.136709825633!2d106.99343767439735!3d-6.245710693742795!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e698e03e7e2bd75%3A0x63351ecf7cbebe9!2sGedung%20PCNU%20Kota%20Bekasi!5e0!3m2!1sid!2sid!4v1714812345678!5m2!1sid!2sid" 
+                  className="w-full h-full border-none"
+                  allowFullScreen={true}
+                  loading="lazy" 
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="Peta Lokasi PC IPNU IPPNU Kota Bekasi"
+                ></iframe>
+                {/* Frame Hover Highlight Overlay */}
+                <div className="absolute inset-0 pointer-events-none rounded-[2rem] border-2 border-transparent group-hover:border-primary/25 transition-all duration-500" />
+              </div>
             </div>
 
             {/* KOLOM KANAN: KARTU KONTAK & ALAMAT MEWAH */}
             <div className="space-y-6">
               
-              {/* Kartu Telepon / WA */}
-              <div className="bg-white rounded-3xl border border-slate-100 p-8 shadow-sm flex items-center gap-4 transition-all hover:shadow-2xl hover:-translate-y-1 transform animate-fade-up" style={{ animationDelay: '100ms' }}>
-                <div className="p-3.5 bg-gold/10 rounded-2xl text-gold shrink-0">
-                  <Phone className="h-5 w-5 fill-gold text-gold animate-pulse" />
+              {/* Kartu Telepon / WA (SUDAH DIPERBAIKI LANGSUNG DIRECT CHAT WA LU) */}
+              <a 
+                href={waUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-white rounded-3xl border border-slate-100 p-8 shadow-sm flex items-center gap-4 transition-all hover:shadow-2xl hover:-translate-y-1 transform animate-fade-up block group" 
+                style={{ animationDelay: '100ms' }}
+              >
+                <div className="p-3.5 bg-gold/10 rounded-2xl text-gold shrink-0 group-hover:bg-[#25D366]/10 group-hover:text-[#25D366] transition-colors">
+                  <Phone className="h-5 w-5 fill-current text-current animate-pulse" />
                 </div>
-                <div className="space-y-1">
-                  <h4 className="font-brand font-black text-xs uppercase tracking-widest text-slate-500">Telepon / WhatsApp</h4>
-                  <a href="tel:62895330152658" className="text-xl font-brand font-black text-primary hover:underline transition-all">
+                <div className="space-y-1 text-left">
+                  <h4 className="font-brand font-black text-xs uppercase tracking-widest text-slate-500">Hubungi WhatsApp Resmi</h4>
+                  <div className="text-xl font-brand font-black text-primary group-hover:text-[#25D366] transition-colors">
                     0895330152658
-                  </a>
+                  </div>
+                  <span className="text-[10px] text-slate-400 font-bold block">Klik untuk langsung chat otomatis 💬</span>
                 </div>
-              </div>
+              </a>
 
               {/* Kartu Email */}
               <div className="bg-white rounded-3xl border border-slate-100 p-8 shadow-sm flex items-center gap-4 transition-all hover:shadow-2xl hover:-translate-y-1 transform animate-fade-up" style={{ animationDelay: '200ms' }}>
@@ -125,9 +150,7 @@ export const KontakKami = () => {
                 </div>
               </div>
 
-              {/* ======================================================== */}
-              {/* KARTU ALAMAT MAPS MEWAH (SINKRON KE image_8.png STYLE) */}
-              {/* ======================================================== */}
+              {/* Kartu Alamat / Maps Detail */}
               <div className="bg-white rounded-3xl border border-slate-100 p-8 shadow-sm flex items-start gap-4 transition-all hover:shadow-2xl hover:-translate-y-1 transform animate-fade-up" style={{ animationDelay: '300ms' }}>
                 <div className="p-3.5 bg-emerald-50 rounded-2xl text-primary shrink-0">
                   <MapPin className="h-5 w-5 text-emerald-600" />
@@ -135,15 +158,15 @@ export const KontakKami = () => {
                 <div className="space-y-3">
                   <h4 className="font-brand font-black text-xl text-primary uppercase">Sekretariat</h4>
                   <p className="text-sm text-slate-700 leading-relaxed font-semibold">
-                    Jl. Veteran, RT.005/RW.003, Marga Jaya, Kec. Bekasi Sel., Kota Bks, Jawa Barat 17141
+                    Gedung PCNU Kota Bekasi, Jl. Veteran, RT.005/RW.003, Marga Jaya, Kec. Bekasi Sel., Kota Bks, Jawa Barat 17141
                   </p>
                   
-                  {/* LINK BARU MAPS MEWAH (Anti-Eror Firebase) */}
+                  {/* LINK MAPS MEWAH (Anti-Eror Firebase & Teruji Akurat) */}
                   <a 
-                    href="https://www.google.com/maps/search/?api=1&query=Jl.+Veteran,+RT.005/RW.003,+Marga+Jaya,+Kec.+Bekasi+Sel.,+Kota+Bks,+Jawa+Barat+17141" 
+                    href="https://maps.app.goo.gl/k1VepA8MbeLAs8L4A" 
                     target="_blank" 
                     rel="noopener noreferrer" 
-                    className="text-xs font-black text-primary uppercase tracking-wider hover:underline flex items-center gap-1.5 pt-1 group"
+                    className="text-xs font-brand font-black text-primary uppercase tracking-wider hover:underline flex items-center gap-1.5 pt-1 group"
                   >
                     Buka di Google Maps <ArrowRight className="h-3.5 w-3.5 group-hover:translate-x-1 transition-transform" />
                   </a>
