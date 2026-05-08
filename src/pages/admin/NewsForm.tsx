@@ -7,8 +7,7 @@ import {
   ArrowLeft, Save, Send, X, Loader2, 
   Image as ImageIcon, Video, Link2, 
   Plus, Trash2, Globe, ChevronLeft, ChevronRight, Star,
-  AlertCircle, // <-- 1. IMPORT DISECURE BIAR ENGGAK CRASH
-  CalendarDays // <-- 2. IMPORT DISECURE BIAR ENGGAK CRASH
+  AlertCircle, CalendarDays
 } from "lucide-react"; 
 import { toast } from "sonner";
 import { z } from "zod";
@@ -53,6 +52,53 @@ const NewsForm = () => {
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(isEdit);
   const [existingDates, setExistingDates] = useState<string[]>([]);
+
+  // ==========================================
+  // FITUR AUTOSAVE 1: AMBIL DRAF JIKA ADA (HANYA UNTUK TULIS BARU)
+  // ==========================================
+  useEffect(() => {
+    if (!isEdit) {
+      const savedDraft = localStorage.getItem("news_draft_new");
+      if (savedDraft) {
+        try {
+          const draft = JSON.parse(savedDraft);
+          if (draft.title) setTitle(draft.title);
+          if (draft.excerpt) setExcerpt(draft.excerpt);
+          if (draft.content) setContent(draft.content);
+          if (draft.category) setCategory(draft.category);
+          if (draft.tags) setTags(draft.tags);
+          if (draft.publishedAt) setPublishedAt(draft.publishedAt);
+          if (draft.images) setImages(draft.images);
+          if (draft.videos) setVideos(draft.videos);
+          if (draft.videoUrlInput) setVideoUrlInput(draft.videoUrlInput);
+          
+          toast.success("Draf tulisan lu otomatis dipulihkan, Lan! Tinggal lanjutin 👍");
+        } catch (e) {
+          console.error("Gagal load draft:", e);
+        }
+      }
+    }
+  }, [isEdit]);
+
+  // ==========================================
+  // FITUR AUTOSAVE 2: REKAM SETIAP KETIKAN KE LOCALSTORAGE
+  // ==========================================
+  useEffect(() => {
+    if (!isEdit) {
+      const draftData = {
+        title,
+        excerpt,
+        content,
+        category,
+        tags,
+        publishedAt,
+        images,
+        videos,
+        videoUrlInput
+      };
+      localStorage.setItem("news_draft_new", JSON.stringify(draftData));
+    }
+  }, [title, excerpt, content, category, tags, publishedAt, images, videos, videoUrlInput, isEdit]);
 
   useEffect(() => {
     document.title = `${isEdit ? "Edit" : "Tulis"} Berita — IPNU IPPNU Bekasi`;
@@ -133,19 +179,9 @@ const NewsForm = () => {
   const save = async (status: "draft" | "published") => {
     const parsed = schema.safeParse({ title, excerpt, content, category });
     if (!parsed.success) return toast.error(parsed.error.issues[0].message);
-    const finalVideoUrl = videoUrlInput.trim() !== "" ? videoUrlInput.trim() : (videos[0] || null);
-    if (finalVideoUrl && !/^https?:\/\//i.test(finalVideoUrl)) {
-      return toast.error("URL video harus diawali dengan http:// atau https://");
-    }
     setSaving(true);
     const slug = isEdit ? undefined : `${slugify(title)}-${Date.now().toString(36)}`;
-
-    // Resolve author name from profiles (avoid leaking email prefix)
-    let authorName = "Admin";
-    if (user?.id) {
-      const { data: profile } = await supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle();
-      authorName = profile?.full_name?.trim() || "Admin";
-    }
+    const finalVideoUrl = videoUrlInput.trim() !== "" ? videoUrlInput : (videos[0] || null);
 
     const payload = {
       ...parsed.data,
@@ -154,7 +190,7 @@ const NewsForm = () => {
       video_url: finalVideoUrl,
       status,
       author_id: user?.id,
-      author_name: authorName,
+      author_name: user?.email?.split("@")[0] ?? "Admin",
       published_at: status === "published" ? new Date(publishedAt).toISOString() : null,
       created_at: status === "published" ? new Date(publishedAt).toISOString() : new Date().toISOString(),
       ...(slug ? { slug } : {}),
@@ -162,7 +198,16 @@ const NewsForm = () => {
 
     const res = isEdit ? await supabase.from("news").update(payload).eq("id", id!) : await supabase.from("news").insert(payload as any);
     setSaving(false);
-    if (!res.error) { toast.success("Mantap Lan!"); navigate("/admin/dashboard"); }
+    if (!res.error) {
+      // ==========================================
+      // FITUR AUTOSAVE 3: BERSIHKAN LOCALSTORAGE JIKA SUKSES SUBMIT
+      // ==========================================
+      if (!isEdit) {
+        localStorage.removeItem("news_draft_new");
+      }
+      toast.success("Mantap Lan!"); 
+      navigate("/admin/dashboard"); 
+    }
   };
 
   if (loading) return <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
@@ -241,7 +286,6 @@ const NewsForm = () => {
             <div className="space-y-3">
               {images.map((url, idx) => (
                 <div key={idx} className={`relative aspect-video rounded-sm overflow-hidden border-2 group transition-all ${idx === 0 ? 'border-primary' : 'border-border'}`}>
-                  {/* FIX CLASSNAME DI SINI: Kembali jadi Tailwind CSS standard */}
                   <img src={url} className="w-full h-full object-cover" alt="Preview Berita" />
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-2 transition-opacity">
                     <button onClick={() => moveImage(idx, 'left')} disabled={idx === 0} className="p-1.5 bg-white rounded-full text-black hover:bg-amber-400"><ChevronLeft className="h-4 w-4" /></button>
@@ -270,7 +314,6 @@ const NewsForm = () => {
               <div className="space-y-3 mb-3">
                 {videos.map((url, idx) => (
                   <div key={idx} className="relative aspect-video rounded-sm overflow-hidden bg-black group">
-                    {/* FIX CLASSNAME DI SINI: Kembali jadi Tailwind CSS standard */}
                     <video src={url} className="w-full h-full" controls />
                     <button onClick={() => setVideos(videos.filter((_, i) => i !== idx))} className="absolute top-2 right-2 h-7 w-7 bg-destructive text-white rounded-sm flex items-center justify-center shadow-lg"><X className="h-4 w-4" /></button>
                   </div>
