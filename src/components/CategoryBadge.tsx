@@ -12,9 +12,11 @@ const colors: Record<Category, string> = {
 export const CategoryBadge = ({
   category,
   size = "sm",
+  className = "",
 }: {
   category: Category;
   size?: "sm" | "md";
+  className?: string;
 }) => {
   const slug = encodeURIComponent(category.toLowerCase().replace(/\s+/g, "-"));
   return (
@@ -22,7 +24,7 @@ export const CategoryBadge = ({
       to={`/kategori/${slug}`}
       className={`inline-flex items-center font-brand font-bold uppercase tracking-wider transition-opacity hover:opacity-90 ${
         size === "sm" ? "text-[10px] px-2 py-1" : "text-xs px-3 py-1.5"
-      } ${colors[category]}`}
+      } ${colors[category]} ${className}`}
     >
       {category}
     </Link>
