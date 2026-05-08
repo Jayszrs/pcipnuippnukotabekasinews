@@ -133,9 +133,19 @@ const NewsForm = () => {
   const save = async (status: "draft" | "published") => {
     const parsed = schema.safeParse({ title, excerpt, content, category });
     if (!parsed.success) return toast.error(parsed.error.issues[0].message);
+    const finalVideoUrl = videoUrlInput.trim() !== "" ? videoUrlInput.trim() : (videos[0] || null);
+    if (finalVideoUrl && !/^https?:\/\//i.test(finalVideoUrl)) {
+      return toast.error("URL video harus diawali dengan http:// atau https://");
+    }
     setSaving(true);
     const slug = isEdit ? undefined : `${slugify(title)}-${Date.now().toString(36)}`;
-    const finalVideoUrl = videoUrlInput.trim() !== "" ? videoUrlInput : (videos[0] || null);
+
+    // Resolve author name from profiles (avoid leaking email prefix)
+    let authorName = "Admin";
+    if (user?.id) {
+      const { data: profile } = await supabase.from("profiles").select("full_name").eq("id", user.id).maybeSingle();
+      authorName = profile?.full_name?.trim() || "Admin";
+    }
 
     const payload = {
       ...parsed.data,
@@ -144,7 +154,7 @@ const NewsForm = () => {
       video_url: finalVideoUrl,
       status,
       author_id: user?.id,
-      author_name: user?.email?.split("@")[0] ?? "Admin",
+      author_name: authorName,
       published_at: status === "published" ? new Date(publishedAt).toISOString() : null,
       created_at: status === "published" ? new Date(publishedAt).toISOString() : new Date().toISOString(),
       ...(slug ? { slug } : {}),
