@@ -1,367 +1,344 @@
 import { useState, useEffect } from "react";
-import { AdminLayout } from "@/components/AdminLayout";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
 import { 
-  Plus, Trash2, Edit2, Loader2, Save, X, 
-  Upload, Sparkles, Users, UserCheck 
+  Plus, Trash2, Loader2, Quote, Edit2, XCircle, Save,
+  CheckCircle2, ArrowLeft, LayoutDashboard, Globe, MapPin, Calendar, Sparkles
 } from "lucide-react";
 import { toast } from "sonner";
-
-interface Cadre {
-  id: string;
-  name: string;
-  position: string;
-  org_type: "IPNU" | "IPPNU";
-  position_level: number; // 1: Ketua, 2: BPH, 3: Departemen
-  sort_order: number;
-  image_url: string | null;
-}
+import { useNavigate } from "react-router-dom";
 
 export const CadreManager = () => {
-  const { user } = useAuth();
-  const [cadres, setCadres] = useState<Cadre[]>([]);
+  const navigate = useNavigate();
+  const [cadres, setCadres] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [isUpdateSuccess, setIsUpdateSuccess] = useState(false); 
+  const [lastCreatedCadre, setLastCreatedCadre] = useState<any>(null);
 
-  // Form States
-  const [editId, setEditId] = useState<string | null>(null);
-  const [name, setName] = useState("");
-  const [position, setPosition] = useState("");
-  const [orgType, setOrgType] = useState<"IPNU" | "IPPNU">("IPNU");
-  const [positionLevel, setPositionLevel] = useState<number>(2); // Default BPH
-  const [sortOrder, setSortOrder] = useState<number>(1);
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
-
-  // Filter View State
-  const [currentFilter, setCurrentFilter] = useState<"ALL" | "IPNU" | "IPPNU">("ALL");
-
-  useEffect(() => {
-    fetchCadres();
-  }, []);
+  // Form State - Default khidmah disetel ke 2025 - 2028 + Fitur Hierarki & Urutan
+  const [formData, setFormData] = useState({
+    name: "", position: "", division: "", organization: "IPNU", 
+    period_start: "2025", period_end: "2028", quote: "",
+    origin: "", birth_info: "", 
+    position_level: 2, // <-- INTEGRASI BARU (1: Ketua, 2: BPH, 3: Departemen)
+    order_priority: 1  // <-- INTEGRASI BARU (Urutan Grid Tampil)
+  });
+  
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [currentImageUrl, setCurrentImageUrl] = useState<string | null>(null);
 
   const fetchCadres = async () => {
-    try {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from("cadres")
-        .select("*")
-        .order("position_level", { ascending: true })
-        .order("sort_order", { ascending: true });
-
-      if (error) throw error;
-      setCadres(data || []);
-    } catch (err) {
-      toast.error("Gagal memuat data pengurus");
-    } finally {
-      setLoading(false);
-    }
+    setLoading(true);
+    // Diurutkan berdasarkan level struktural dulu baru urutan prioritas
+    const { data } = await supabase
+      .from("cadres")
+      .select("*")
+      .order("position_level", { ascending: true })
+      .order("order_priority", { ascending: true });
+    
+    if (data) setCadres(data);
+    setLoading(false);
   };
 
-  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !user) return;
+  useEffect(() => { fetchCadres(); }, []);
 
-    setUploading(true);
-    try {
-      const fileExt = file.name.split('.').pop();
-      const path = `${user.id}/cadres/${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-
-      // Upload ke bucket news-media yang sudah ada permissions-nya
-      const { error: uploadError } = await supabase.storage
-        .from("news-media")
-        .upload(path, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data } = supabase.storage.from("news-media").getPublicUrl(path);
-      setImageUrl(data.publicUrl);
-      toast.success("Foto berhasil diunggah!");
-    } catch (err) {
-      console.error(err);
-      toast.error("Gagal mengunggah foto");
-    } finally {
-      setUploading(false);
-    }
+  const handleEditInitiation = (cadre: any) => {
+    setEditingId(cadre.id);
+    setFormData({
+      name: cadre.name,
+      position: cadre.position,
+      division: cadre.division,
+      organization: cadre.organization,
+      period_start: cadre.period_start,
+      period_end: cadre.period_end,
+      quote: cadre.quote || "",
+      origin: cadre.origin || "",
+      birth_info: cadre.birth_info || "",
+      position_level: cadre.position_level ?? 2, // Load data lama / fallback BPH
+      order_priority: cadre.order_priority ?? 1  // Load data lama / fallback 1
+    });
+    setCurrentImageUrl(cadre.image_url);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    toast.info(`Mode edit: ${cadre.name}`);
   };
 
   const resetForm = () => {
-    setEditId(null);
-    setName("");
-    setPosition("");
-    setOrgType("IPNU");
-    setPositionLevel(2);
-    setSortOrder(1);
-    setImageUrl(null);
+    setEditingId(null);
+    setFormData({
+      name: "", position: "", division: "", organization: "IPNU", 
+      period_start: "2025", period_end: "2028", quote: "", origin: "", birth_info: "",
+      position_level: 2, order_priority: 1
+    });
+    setImageFile(null);
+    setCurrentImageUrl(null);
+    const fileInput = document.getElementById('foto-kader') as HTMLInputElement;
+    if (fileInput) fileInput.value = '';
+  };
+
+  const handleUpload = async () => {
+    if (!imageFile) return currentImageUrl;
+    setUploading(true);
+    const fileExt = imageFile.name.split(".").pop();
+    const filePath = `card_${Date.now()}.${fileExt}`;
+    
+    const { error: uploadError } = await supabase.storage.from("cadres").upload(filePath, imageFile);
+    if (uploadError) { 
+      toast.error(`Gagal upload foto ke storage: ${uploadError.message}`); 
+      setUploading(false); 
+      return null; 
+    }
+
+    const { data } = supabase.storage.from("cadres").getPublicUrl(filePath);
+    setUploading(false);
+    return data.publicUrl;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !position.trim()) {
-      return toast.error("Semua field wajib diisi!");
-    }
+    const url = await handleUpload();
+    
+    // Validasi pencegahan jika proses upload foto gagal di tengah jalan
+    if (imageFile && !url) return;
 
-    setSaving(true);
-    const payload = {
-      name: name.trim(),
-      position: position.trim(),
-      org_type: orgType,
-      position_level: Number(positionLevel),
-      sort_order: Number(sortOrder),
-      image_url: imageUrl,
-    };
-
-    try {
-      if (editId) {
-        // Mode Update
-        const { error } = await supabase
-          .from("cadres")
-          .update(payload)
-          .eq("id", editId);
-
-        if (error) throw error;
-        toast.success("Data pengurus berhasil diperbarui!");
+    const payload = { ...formData, image_url: url };
+    
+    if (editingId) {
+      // PROSES UPDATE DATA KE SUPABASE
+      const { error } = await supabase.from("cadres").update(payload).eq("id", editingId);
+      
+      if (!error) {
+        toast.success("Card Berhasil Diperbarui!");
+        setLastCreatedCadre(payload);
+        setIsUpdateSuccess(true); 
+        setShowSuccessModal(true);    
+        resetForm();
+        fetchCadres();
       } else {
-        // Mode Insert
-        const { error } = await supabase
-          .from("cadres")
-          .insert([payload]);
-
-        if (error) throw error;
-        toast.success("Pengurus baru berhasil ditambahkan!");
+        toast.error(`Gagal memperbarui database: ${error.message}`);
+        console.error("Detail Eror Database:", error);
       }
-      resetForm();
-      fetchCadres();
-    } catch (err) {
-      toast.error("Gagal menyimpan data");
-    } finally {
-      setSaving(false);
+    } else {
+      // PROSES SIMPAN BARU
+      const { data, error } = await supabase.from("cadres").insert([payload]).select();
+      if (!error && data) {
+        toast.success("Card Berhasil Diupload!");
+        setLastCreatedCadre(data[0]); 
+        setIsUpdateSuccess(false); 
+        setShowSuccessModal(true);    
+        resetForm();
+        fetchCadres();
+      } else if (error) {
+        toast.error(`Gagal menyimpan data baru: ${error.message}`);
+      }
     }
   };
-
-  const handleEdit = (cadre: Cadre) => {
-    setEditId(cadre.id);
-    setName(cadre.name);
-    setPosition(cadre.position);
-    setOrgType(cadre.org_type);
-    setPositionLevel(cadre.position_level);
-    setSortOrder(cadre.sort_order);
-    setImageUrl(cadre.image_url);
-  };
-
-  const handleDelete = async (id: string) => {
-    if (!confirm("Yakin ingin menghapus pengurus ini dari jajaran struktural?")) return;
-
-    try {
-      const { error } = await supabase
-        .from("cadres")
-        .delete()
-        .eq("id", id);
-
-      if (error) throw error;
-      toast.success("Data pengurus dihapus");
-      fetchCadres();
-    } catch (err) {
-      toast.error("Gagal menghapus data");
-    }
-  };
-
-  const displayedCadres = currentFilter === "ALL" 
-    ? cadres 
-    : cadres.filter(c => c.org_type === currentFilter);
 
   return (
-    <AdminLayout title="Manajemen Struktural PC">
-      <div className="grid lg:grid-cols-[400px_1fr] gap-8 max-w-7xl mx-auto">
-        
-        {/* FORM SUBMISSION UNTUK KEDUA ORGANISASI (SATU PANEL) */}
-        <div className="bg-white p-6 rounded-sm border shadow-sm h-fit">
-          <h2 className="text-[10px] font-black uppercase tracking-widest text-primary flex items-center gap-1.5 mb-5">
-            <Sparkles className="h-4 w-4 text-gold animate-pulse" /> 
-            {editId ? "Edit Pengurus" : "Tambah Pengurus Baru"}
-          </h2>
+    <div className="space-y-8 bg-white rounded-xl border border-border shadow-sm overflow-hidden relative min-h-screen">
+      {/* Header Panel */}
+      <div className={`p-6 border-b border-border transition-colors ${editingId ? 'bg-amber-50' : 'bg-slate-50/50'}`}>
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-4">
+            <button onClick={() => navigate('/admin/dashboard')} className="p-2.5 hover:bg-white rounded-xl text-primary transition-all shadow-sm border border-border group">
+              <ArrowLeft className="h-6 w-6 group-hover:-translate-x-1 transition-transform" />
+            </button>
+            <div>
+              <h2 className="text-2xl font-display font-black text-primary uppercase tracking-tight">
+                {editingId ? "Edit Card Layout" : "Tambah Card Layout"}
+              </h2>
+            </div>
+          </div>
+          {editingId && (
+            <button onClick={resetForm} className="px-4 py-2 rounded-xl bg-red-100 text-red-600 text-xs font-bold hover:bg-red-200 transition-colors shadow-sm flex items-center gap-2">
+              <XCircle className="h-4 w-4" /> BATAL EDIT
+            </button>
+          )}
+        </div>
+      </div>
+
+      <div className="p-6">
+        {/* Form Container */}
+        <form onSubmit={handleSubmit} className="p-6 bg-white border border-slate-200 rounded-[2rem] shadow-xl shadow-slate-100 space-y-6">
           
-          <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Nama */}
-            <div>
-              <label className="block text-[9px] font-black uppercase tracking-wider text-slate-500 mb-1.5">Nama Lengkap *</label>
-              <input 
-                type="text" 
-                value={name} 
-                onChange={e => setName(e.target.value)}
-                placeholder="Contoh: Yusup Kurniawan"
-                className="w-full p-2.5 text-xs font-bold border rounded-sm outline-none focus:border-primary"
-              />
+          {/* BARIS 1: DATA UTAMA */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="space-y-2">
+              <label className="text-xs font-black text-slate-500 uppercase tracking-widest">Nama Lengkap</label>
+              <input className="w-full p-3.5 border rounded-2xl text-sm bg-white" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required />
             </div>
-
-            {/* Jabatan */}
-            <div>
-              <label className="block text-[9px] font-black uppercase tracking-wider text-slate-500 mb-1.5">Jabatan Resmi *</label>
-              <input 
-                type="text" 
-                value={position} 
-                onChange={e => setPosition(e.target.value)}
-                placeholder="Contoh: Ketua PC IPNU"
-                className="w-full p-2.5 text-xs font-bold border rounded-sm outline-none focus:border-primary"
-              />
+            <div className="space-y-2">
+              <label className="text-xs font-black text-slate-500 uppercase tracking-widest">Jabatan</label>
+              <input className="w-full p-3.5 border rounded-2xl text-sm bg-white" value={formData.position} onChange={e => setFormData({...formData, position: e.target.value})} required />
             </div>
-
-            {/* Organisasi Pilihan */}
-            <div>
-              <label className="block text-[9px] font-black uppercase tracking-wider text-slate-500 mb-1.5">Organisasi</label>
-              <div className="flex gap-4">
-                <label className="flex items-center gap-2 text-xs font-bold cursor-pointer">
-                  <input type="radio" checked={orgType === "IPNU"} onChange={() => setOrgType("IPNU")} className="text-primary focus:ring-0" />
-                  IPNU (Putera)
-                </label>
-                <label className="flex items-center gap-2 text-xs font-bold cursor-pointer">
-                  <input type="radio" checked={orgType === "IPPNU"} onChange={() => setOrgType("IPPNU")} className="text-primary focus:ring-0" />
-                  IPPNU (Putri)
-                </label>
-              </div>
+            <div className="space-y-2">
+              <label className="text-xs font-black text-slate-500 uppercase tracking-widest">Divisi/Bidang</label>
+              <input className="w-full p-3.5 border rounded-2xl text-sm bg-white" value={formData.division} onChange={e => setFormData({...formData, division: e.target.value})} required />
             </div>
+            <div className="space-y-2">
+              <label className="text-xs font-black text-slate-500 uppercase tracking-widest">Organisasi</label>
+              <select className="w-full p-3.5 border rounded-2xl text-sm bg-white cursor-pointer" value={formData.organization} onChange={e => setFormData({...formData, organization: e.target.value})}>
+                <option value="IPNU">IPNU</option>
+                <option value="IPPNU">IPPNU</option>
+              </select>
+            </div>
+          </div>
 
-            {/* Level Hierarki (Alur Bertingkat) */}
-            <div>
-              <label className="block text-[9px] font-black uppercase tracking-wider text-slate-500 mb-1.5">Kasta / Level Struktural</label>
+          {/* BARIS 2: ASAL & LAHIR */}
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label className="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-primary" /> Asal Pimpinan / Kec / Kel
+              </label>
+              <input className="w-full p-3.5 border rounded-2xl text-sm bg-white" value={formData.origin} onChange={e => setFormData({...formData, origin: e.target.value})} placeholder="Cth: PAC Cimuning" />
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-primary" /> Tempat, Tanggal Lahir
+              </label>
+              <input className="w-full p-3.5 border rounded-2xl text-sm bg-white" value={formData.birth_info} onChange={e => setFormData({...formData, birth_info: e.target.value})} placeholder="Cth: Bekasi, 12 Agustus 2004" />
+            </div>
+          </div>
+
+          {/* BARIS 3: INTEGRASI BARU - LEVEL HIERARKI & PRIORITAS URUTAN */}
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label className="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-primary" /> Kasta / Level Struktural (Bagan Bertingkat)
+              </label>
               <select 
-                value={positionLevel} 
-                onChange={e => setPositionLevel(Number(e.target.value))}
-                className="w-full p-2.5 text-xs font-bold border rounded-sm outline-none bg-slate-50"
+                className="w-full p-3.5 border rounded-2xl text-sm bg-white cursor-pointer font-bold text-slate-700" 
+                value={formData.position_level} 
+                onChange={e => setFormData({...formData, position_level: Number(e.target.value)})}
               >
                 <option value={1}>Level 1: Pimpinan Utama (Ketua / Ketum)</option>
                 <option value={2}>Level 2: Jajaran BPH (Wakil Ketua, Sek, Ben)</option>
                 <option value={3}>Level 3: Jajaran Departemen & Anggota</option>
               </select>
             </div>
-
-            {/* Urutan Pengurutan */}
-            <div>
-              <label className="block text-[9px] font-black uppercase tracking-wider text-slate-500 mb-1.5">Urutan Tampil (Urutan Grid)</label>
+            <div className="space-y-2">
+              <label className="text-xs font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                <Calendar className="h-4 w-4 text-primary" /> Urutan Tampil (Order Priority)
+              </label>
               <input 
                 type="number" 
-                value={sortOrder} 
-                onChange={e => setSortOrder(Number(e.target.value))}
-                className="w-full p-2.5 text-xs font-bold border rounded-sm outline-none"
+                className="w-full p-3.5 border rounded-2xl text-sm bg-white font-bold" 
+                value={formData.order_priority} 
+                onChange={e => setFormData({...formData, order_priority: Number(e.target.value)})}
                 min={1}
+                required
               />
             </div>
-
-            {/* Upload Foto */}
-            <div>
-              <label className="block text-[9px] font-black uppercase tracking-wider text-slate-500 mb-1.5">Foto Struktural (Rasio 3:4 Direkomendasikan)</label>
-              {imageUrl && (
-                <div className="aspect-[3/4] w-24 rounded-lg overflow-hidden border mb-3 relative group">
-                  <img src={imageUrl} className="w-full h-full object-cover" />
-                  <button type="button" onClick={() => setImageUrl(null)} className="absolute top-1 right-1 p-1 bg-red-600 text-white rounded-full"><X className="h-3 w-3" /></button>
-                </div>
-              )}
-              <label className="flex items-center justify-center gap-2 p-3 border-2 border-dashed border-slate-200 hover:border-primary rounded-sm cursor-pointer hover:bg-slate-50">
-                {uploading ? <Loader2 className="h-4 w-4 animate-spin text-primary" /> : <Upload className="h-4 w-4 text-slate-400" />}
-                <span className="text-[10px] font-black uppercase tracking-wider">Pilih Foto</span>
-                <input type="file" accept="image/*" className="hidden" onChange={handlePhotoUpload} disabled={uploading} />
-              </label>
-            </div>
-
-            <div className="flex gap-2 pt-2">
-              <button 
-                type="submit" 
-                disabled={saving || uploading}
-                className="flex-1 py-3 bg-primary text-white text-[10px] font-black uppercase tracking-widest rounded-sm hover:opacity-90 flex items-center justify-center gap-1.5"
-              >
-                {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3.5 w-3.5" />} Simpan
-              </button>
-              {editId && (
-                <button type="button" onClick={resetForm} className="px-4 py-3 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-sm text-[10px] font-black uppercase">
-                  Batal
-                </button>
-              )}
-            </div>
-          </form>
-        </div>
-
-        {/* TABEL VIEW MONITORING KADER */}
-        <div className="space-y-4">
-          
-          {/* Filter Atas */}
-          <div className="flex items-center justify-between border-b pb-3">
-            <div className="flex gap-2">
-              <button onClick={() => setCurrentFilter("ALL")} className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase ${currentFilter === "ALL" ? "bg-primary text-white" : "bg-slate-100 text-slate-600"}`}>Semua</button>
-              <button onClick={() => setCurrentFilter("IPNU")} className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase ${currentFilter === "IPNU" ? "bg-primary text-white" : "bg-slate-100 text-slate-600"}`}>IPNU</button>
-              <button onClick={() => setCurrentFilter("IPPNU")} className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase ${currentFilter === "IPPNU" ? "bg-primary text-white" : "bg-slate-100 text-slate-600"}`}>IPPNU</button>
-            </div>
-            <span className="text-[10px] font-bold text-slate-400">{displayedCadres.length} Total Pengurus</span>
           </div>
 
-          {/* List Table */}
-          <div className="bg-white rounded-sm border shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-slate-50 border-b border-slate-100 text-[9px] font-black uppercase tracking-wider text-slate-400">
-                    <th className="p-4">Foto</th>
-                    <th className="p-4">Nama / Jabatan</th>
-                    <th className="p-4 text-center">Organisasi</th>
-                    <th className="p-4 text-center">Level Hierarki</th>
-                    <th className="p-4 text-center">Urutan</th>
-                    <th className="p-4 text-right">Aksi</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 text-xs">
-                  {displayedCadres.map((cadre) => (
-                    <tr key={cadre.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="p-4">
-                        <div className="h-12 w-9 rounded overflow-hidden bg-slate-100 border">
-                          {cadre.image_url ? (
-                            <img src={cadre.image_url} className="w-full h-full object-cover" />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center text-slate-300"><Users className="h-4 w-4" /></div>
-                          )}
-                        </div>
-                      </td>
-                      <td className="p-4">
-                        <div className="font-bold text-slate-800 text-sm">{cadre.name}</div>
-                        <div className="text-[10px] font-bold text-primary mt-0.5">{cadre.position}</div>
-                      </td>
-                      <td className="p-4 text-center">
-                        <span className={`px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-widest ${
-                          cadre.org_type === 'IPNU' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'
-                        }`}>
-                          {cadre.org_type}
-                        </span>
-                      </td>
-                      <td className="p-4 text-center font-bold text-slate-500">
-                        {cadre.position_level === 1 ? (
-                          <span className="text-emerald-700 font-extrabold flex items-center justify-center gap-1"><UserCheck className="h-3.5 w-3.5" /> Ketua (Lvl 1)</span>
-                        ) : cadre.position_level === 2 ? (
-                          "BPH (Lvl 2)"
-                        ) : (
-                          "Departemen (Lvl 3)"
-                        )}
-                      </td>
-                      <td className="p-4 text-center font-black text-slate-600">{cadre.sort_order}</td>
-                      <td className="p-4">
-                        <div className="flex gap-2 justify-end">
-                          <button onClick={() => handleEdit(cadre)} className="p-2 hover:bg-slate-100 rounded text-amber-600"><Edit2 className="h-3.5 w-3.5" /></button>
-                          <button onClick={() => handleDelete(cadre.id)} className="p-2 hover:bg-red-50 rounded text-red-600"><Trash2 className="h-3.5 w-3.5" /></button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                  {displayedCadres.length === 0 && (
-                    <tr>
-                      <td colSpan={6} className="p-8 text-center text-slate-400 font-semibold">Belum ada data kepengurusan terdaftar.</td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+          {/* BARIS 4: QUOTE & UPLOAD */}
+          <div className="grid md:grid-cols-3 gap-6 pt-2">
+            <div className="md:col-span-2 space-y-2">
+              <label className="text-xs font-black text-slate-500 uppercase flex items-center gap-2 tracking-widest"><Quote className="h-4 w-4" /> Quote</label>
+              <textarea className="w-full p-4 border rounded-2xl text-sm bg-white h-[55px] resize-none" value={formData.quote} onChange={e => setFormData({...formData, quote: e.target.value})} placeholder="Cth: Belajar, Berjuang, Bertaqwa." />
+            </div>
+            <div className="space-y-2">
+              <label className="text-xs font-black text-slate-500 uppercase tracking-widest">Upload Desain Full Card</label>
+              <input id="foto-kader" type="file" accept="image/*" onChange={e => setImageFile(e.target.files?.[0] || null)} className="w-full p-2.5 border rounded-2xl text-xs bg-white cursor-pointer" />
             </div>
           </div>
 
-        </div>
+          <div className="pt-4 border-t border-slate-100 flex justify-end">
+            <button type="submit" disabled={uploading} className={`${editingId ? 'bg-amber-600' : 'bg-primary'} text-white px-10 py-4 rounded-2xl text-sm font-black shadow-xl flex items-center gap-3 active:scale-95`}>
+              {uploading ? <Loader2 className="animate-spin h-5 w-5" /> : editingId ? <Save className="h-5 w-5" /> : <Plus className="h-5 w-5" />}
+              {editingId ? "PERBARUI CARD" : "SIMPAN CARD STRUKTURAL"}
+            </button>
+          </div>
+        </form>
 
+        {/* List Data Table */}
+        <div className="rounded-[2rem] border border-border overflow-hidden bg-white shadow-xl mt-10">
+          <table className="w-full text-left text-sm border-collapse">
+            <thead>
+              <tr className="bg-slate-50 text-slate-400 uppercase text-[10px] font-black tracking-[0.2em]">
+                <th className="p-6 border-b">Card Desain</th>
+                <th className="p-6 border-b text-center">Organisasi</th>
+                <th className="p-6 border-b text-center">Tingkatan & Urutan</th>
+                <th className="p-6 border-b text-center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {cadres.map(c => (
+                <tr key={c.id} className="hover:bg-slate-50/50 transition-colors">
+                  <td className="p-6">
+                    <div className="flex items-center gap-4">
+                      <img src={c.image_url || "/placeholder.svg"} className="h-16 w-12 rounded-xl object-cover border bg-slate-100" />
+                      <div>
+                        <div className="font-black text-slate-900 uppercase text-base">{c.name}</div>
+                        <div className="text-[10px] text-primary font-black uppercase tracking-widest">{c.position}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td className="p-6 text-center">
+                    <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase ${c.organization === 'IPNU' ? 'bg-emerald-100 text-emerald-700' : 'bg-indigo-100 text-indigo-700'}`}>
+                      {c.organization}
+                    </span>
+                  </td>
+                  {/* KOLOM INTEGRASI BARU: Menampilkan Level dan Urutan di Tabel */}
+                  <td className="p-6 text-center font-bold text-slate-500">
+                    <span className="block text-xs font-black uppercase tracking-wider text-slate-700">
+                      {c.position_level === 1 ? (
+                        <span className="text-emerald-700 font-black">Ketum (Level 1)</span>
+                      ) : c.position_level === 2 ? (
+                        "BPH (Level 2)"
+                      ) : (
+                        "Anggota (Level 3)"
+                      )}
+                    </span>
+                    <span className="text-[10px] text-slate-400 block mt-1">Urutan Grid: {c.order_priority}</span>
+                  </td>
+                  <td className="p-6 text-center">
+                    <div className="flex justify-center gap-3">
+                      <button onClick={() => handleEditInitiation(c)} className="p-3 text-amber-600 hover:bg-amber-50 rounded-2xl border border-amber-100"><Edit2 className="h-4 w-4" /></button>
+                      <button onClick={async () => { if(window.confirm(`Hapus card ${c.name}?`)) { await supabase.from("cadres").delete().eq("id", c.id); fetchCadres(); }}} className="p-3 text-red-500 hover:bg-red-50 rounded-2xl border border-red-100"><Trash2 className="h-4 w-4" /></button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
-    </AdminLayout>
+
+      {/* SUCCESS MODAL POPUP */}
+      {showSuccessModal && lastCreatedCadre && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/90 backdrop-blur-md animate-in fade-in duration-500">
+          <div className="bg-white rounded-[3rem] p-10 max-w-md w-full text-center space-y-6">
+            <div>
+              <div className="h-16 w-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
+                <CheckCircle2 className="h-10 w-10" />
+              </div>
+              <h3 className="text-2xl font-black text-primary uppercase">
+                {isUpdateSuccess ? "Berhasil Diperbarui!" : "Desain Terpasang!"}
+              </h3>
+              <p className="text-sm text-muted-foreground mt-1">
+                {isUpdateSuccess ? "Perubahan kartu desain kader sukses disimpan ke sistem." : "Kartu desain kader sukses masuk ke sistem web utama."}
+              </p>
+            </div>
+
+            <div className="aspect-[4/5] rounded-[2rem] overflow-hidden shadow-2xl border-4 border-white bg-slate-100">
+              <img src={lastCreatedCadre.image_url || "/placeholder.svg"} className="w-full h-full object-cover" alt="Preview" />
+            </div>
+
+            <div className="flex flex-col gap-3 pt-2">
+              <div className="flex gap-4">
+                <button onClick={() => setShowSuccessModal(false)} className="flex-1 py-4 rounded-[1.5rem] border-2 border-slate-100 font-black text-xs uppercase tracking-widest">Tutup</button>
+                <button onClick={() => navigate('/struktural')} className="flex-1 py-4 rounded-[1.5rem] bg-emerald-500 text-white font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2">Lihat Web</button>
+              </div>
+              <button onClick={() => navigate('/admin/dashboard')} className="w-full py-4 rounded-[1.5rem] bg-primary text-white font-black text-xs uppercase tracking-widest flex items-center justify-center gap-3">
+                <LayoutDashboard className="h-4 w-4" /> DASHBOARD ADMIN
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };

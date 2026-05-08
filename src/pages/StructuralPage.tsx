@@ -1,249 +1,296 @@
-import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { 
-  Users, 
-  Award, 
-  ArrowLeft, 
-  Loader2, 
-  ShieldCheck, 
-  Heart,
-  Sparkles
-} from "lucide-react";
+import { ArrowLeft, Quote, MapPin, Calendar, Shield, Users, Sparkles, Heart } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Header } from "@/components/Header"; 
+import { Footer } from "@/components/Footer"; 
 
-interface Cadre {
-  id: string;
-  name: string;
-  position: string;
-  org_type: "IPNU" | "IPPNU";
-  position_level: number; // 1: Ketua, 2: BPH, 3: Departemen
-  sort_order: number;
-  image_url: string | null;
-}
-
-export const StructuralPage = () => {
-  const [activeTab, setActiveTab] = useState<"IPNU" | "IPPNU">("IPNU");
-  const [cadres, setCadres] = useState<Cadre[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    document.title = "Struktur Kepengurusan — PC IPNU IPPNU Kota Bekasi";
-    fetchCadres();
-  }, []);
-
-  const fetchCadres = async () => {
-    try {
-      setLoading(true);
-      const { data, error } = await supabase
-        .from("cadres")
-        .select("*")
-        .order("position_level", { ascending: true })
-        .order("sort_order", { ascending: true });
-
-      if (error) throw error;
-      setCadres(data || []);
-    } catch (err) {
-      console.error("Gagal mengambil data struktural:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Filter pengurus berdasarkan organisasi & level hierarki
-  const filteredCadres = cadres.filter(c => c.org_type === activeTab);
-  const leader = filteredCadres.find(c => c.position_level === 1);
-  const bph = filteredCadres.filter(c => c.position_level === 2);
-  const departments = filteredCadres.filter(c => c.position_level === 3);
-
-  // Komponen render kartu kader dengan tema plakat resmi (Sesuai gambar lu)
-  const CadreCard = ({ cadre, size = "normal" }: { cadre: Cadre; size?: "large" | "normal" | "small" }) => {
-    const isLarge = size === "large";
-    const isSmall = size === "small";
-
-    return (
-      <div className={`relative group transition-all duration-500 hover:-translate-y-2 z-10 ${
-        isLarge ? "w-72 sm:w-80" : isSmall ? "w-52" : "w-60 sm:w-64"
-      }`}>
-        {/* Frame Hijau Tua Khas NU dengan Glow Emas */}
-        <div className="bg-[#03441b] rounded-[2rem] p-3 border-2 border-emerald-600/30 group-hover:border-gold/60 shadow-lg group-hover:shadow-gold/15 transition-all duration-500 flex flex-col items-center overflow-hidden">
-          
-          {/* Logo Sudut Atas */}
-          <div className="w-full flex justify-between px-3 pt-1 pb-2">
-            <span className="text-[7px] text-emerald-400 font-black tracking-widest uppercase">PC {activeTab}</span>
-            <span className="text-[7px] text-gold font-black tracking-widest uppercase">KOTA BEKASI</span>
-          </div>
-
-          {/* Bingkai Foto Bulat / Kotak Halus */}
-          <div className={`relative rounded-2xl overflow-hidden bg-emerald-950/40 border border-white/10 flex items-end justify-center aspect-[3/4] w-full`}>
-            {cadre.image_url ? (
-              <img 
-                src={cadre.image_url} 
-                alt={cadre.name} 
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-              />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center bg-emerald-900/40 text-emerald-300">
-                <Users className="h-16 w-16 opacity-30" />
-              </div>
-            )}
-            
-            {/* Overlay Gradient Elegan */}
-            <div className="absolute inset-0 bg-gradient-to-t from-emerald-950 via-transparent to-transparent opacity-80"></div>
-          </div>
-
-          {/* Name Ribbon (Slanted / Miring Elegan) */}
-          <div className="w-full mt-4 flex flex-col items-center">
-            {/* Nama Kader */}
-            <div className="w-[95%] bg-gold text-gold-foreground py-2 px-3 rounded-xl font-brand font-black text-xs md:text-sm uppercase tracking-wider text-center transform -skew-x-6 shadow-md transition-colors group-hover:bg-amber-400">
-              <div className="transform skew-x-6 truncate">{cadre.name}</div>
-            </div>
-            {/* Jabatan Kepengurusan */}
-            <div className="w-[85%] bg-white text-emerald-900 py-1 px-2 rounded-lg font-brand font-bold text-[9px] md:text-[10px] uppercase tracking-widest text-center mt-1.5 shadow-sm">
-              {cadre.position}
-            </div>
-          </div>
-
-        </div>
-      </div>
-    );
-  };
+// ================= KOMPONEN KARTU KADER (3D FLIP EFFECT) =================
+// TETAP PERTAHANKAN FITUR PUTAR CARD 3D ANDALAN LU LAN!
+const CadreCard = ({ kader }: { kader: any }) => {
+  const [isFlipped, setIsFlipped] = useState(false);
 
   return (
-    <div className="min-h-screen bg-background text-foreground pb-24 relative overflow-hidden">
-      
-      {/* Background Decorative Circles */}
-      <div className="absolute -top-40 -left-40 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none"></div>
-      <div className="absolute top-1/2 -right-40 w-96 h-96 bg-gold/5 rounded-full blur-3xl pointer-events-none"></div>
+    <div 
+      onClick={() => setIsFlipped(!isFlipped)}
+      className="w-full aspect-[4/5] cursor-pointer [perspective:1000px] group select-none max-w-[320px] mx-auto"
+    >
+      {/* Container Card yang Berputar */}
+      <div className={`relative w-full h-full transition-transform duration-700 [transform-style:preserve-3d] ${isFlipped ? '[transform:rotateY(180deg)]' : ''}`}>
+        
+        {/* ================= BAGIAN DEPAN (FULL IMAGE DESAIN CANVA LU) ================= */}
+        <div className="absolute inset-0 w-full h-full rounded-[2rem] overflow-hidden shadow-xl [backface-visibility:hidden] z-20 border border-border bg-muted">
+          {kader.image_url ? (
+            <img 
+              src={kader.image_url} 
+              alt={kader.name}
+              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-102"
+            />
+          ) : (
+            <div className="w-full h-full bg-gradient-to-br from-primary to-[#03441b] flex flex-col items-center justify-center p-6 text-primary-foreground text-center">
+              <span className="text-4xl font-brand font-black mb-2 opacity-25">NU</span>
+              <p className="font-brand font-black uppercase text-sm tracking-tight">{kader.name}</p>
+              <p className="text-[10px] text-gold font-bold uppercase mt-1 tracking-widest">{kader.position}</p>
+            </div>
+          )}
+        </div>
 
-      {/* HEADER SECTION */}
-      <header className="bg-primary-deep text-primary-foreground py-16 relative overflow-hidden">
-        <div className="container mx-auto px-5 lg:px-8 relative z-10">
-          <Link to="/" className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-widest text-gold/80 hover:text-gold mb-6 transition-colors">
-            <ArrowLeft className="h-4 w-4" /> KEMBALI KE BERANDA
-          </Link>
-          <div className="space-y-3">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-gold/20 text-gold text-[10px] font-black uppercase tracking-widest rounded-full">
-              <Award className="h-3.5 w-3.5" /> Masa Khidmat 2025 — 2027
-            </span>
-            <h1 className="font-display font-black text-3xl lg:text-5xl uppercase tracking-tight italic">
-              Struktur Kepengurusan PC {activeTab === "IPNU" ? "IPNU" : "IPPNU"}
-            </h1>
-            <p className="text-xs lg:text-sm text-primary-foreground/70 uppercase font-bold tracking-wider">
-              Pimpinan Cabang Ikatan Pelajar Nahdlatul Ulama & Ikatan Pelajar Putri Nahdlatul Ulama Kota Bekasi
+        {/* ================= BAGIAN BELAKANG (BIODATA & GRADIASI SEMPURNA) ================= */}
+        <div className="absolute inset-0 w-full h-full rounded-[2rem] p-8 bg-gradient-to-br from-emerald-100/70 via-white to-white border border-emerald-200/50 shadow-2xl shadow-emerald-950/5 [backface-visibility:hidden] [transform:rotateY(180deg)] z-10 flex flex-col justify-between overflow-hidden text-left">
+          
+          <div className="space-y-4">
+            <div className="flex justify-between items-start">
+              <span className="px-3 py-1 bg-primary/10 text-primary border border-primary/20 text-[9px] font-brand font-black tracking-widest uppercase rounded-full shrink-0 z-10">
+                {kader.organization || "IPNU"}
+              </span>
+              <span className="text-[9px] text-muted-foreground font-bold uppercase tracking-wider shrink-0 z-10">
+                Khidmah {kader.period_start || "2025"}—{kader.period_end || "2028"}
+              </span>
+            </div>
+
+            {/* Nama & Jabatan */}
+            <div className="space-y-1 z-10">
+              <h3 className="text-xl font-brand font-black text-foreground uppercase tracking-tight leading-none mb-1">
+                {kader.name}
+              </h3>
+              <p className="text-xs font-bold text-primary uppercase tracking-wider">
+                {kader.position}
+              </p>
+              <div className="h-1 w-12 bg-gold rounded-full mt-2"></div>
+            </div>
+
+            {/* Detail Biodata Belakang */}
+            <div className="space-y-3.5 pt-5 text-foreground/80 z-10">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-white rounded-xl shadow-sm text-primary border border-emerald-200/50 shrink-0">
+                  <MapPin className="h-4 w-4 shrink-0" />
+                </div>
+                <div>
+                  <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-wider">Asal / Pimpinan</p>
+                  <p className="text-xs font-bold text-foreground leading-snug">{kader.origin || "Kota Bekasi"}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-white rounded-xl shadow-sm text-primary border border-emerald-200/50 shrink-0">
+                  <Calendar className="h-4 w-4 shrink-0" />
+                </div>
+                <div>
+                  <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-wider">Tempat, Tanggal Lahir</p>
+                  <p className="text-xs font-bold text-foreground leading-snug">{kader.birth_info || "-"}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-white rounded-xl shadow-sm text-primary border border-emerald-200/50 shrink-0">
+                  <Shield className="h-4 w-4 shrink-0" />
+                </div>
+                <div>
+                  <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-wider">Departemen / Divisi</p>
+                  <p className="text-xs font-bold text-foreground leading-snug">{kader.division || "-"}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Bagian Quote */}
+          <div className="border-t border-emerald-200/50 pt-4 text-center z-10">
+            <Quote className="h-4 w-4 text-primary/20 mx-auto mb-1.5" />
+            <p className="text-xs font-medium text-muted-foreground italic leading-relaxed line-clamp-3 px-2">
+              "{kader.quote || "Belajar, Berjuang, Bertaqwa."}"
             </p>
           </div>
-        </div>
-      </header>
 
-      {/* TAB SWITCHER */}
-      <div className="flex justify-center mt-12 px-5">
-        <div className="bg-slate-100 p-1.5 rounded-full flex items-center relative shadow-inner border">
-          <button
-            onClick={() => setActiveTab("IPNU")}
-            className={`px-8 py-3 rounded-full text-xs font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2 ${
-              activeTab === "IPNU"
-                ? "bg-[#03441b] text-white shadow-lg"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <Users className="h-4 w-4" /> PC IPNU (Putera)
-          </button>
-          <button
-            onClick={() => setActiveTab("IPPNU")}
-            className={`px-8 py-3 rounded-full text-xs font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2 ${
-              activeTab === "IPPNU"
-                ? "bg-gold text-gold-foreground shadow-lg"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
-          >
-            <Heart className="h-4 w-4" /> PC IPPNU (Putri)
-          </button>
+          {/* Efek Glow Tipis di background belakang */}
+          <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-100 rounded-full blur-3xl opacity-60 z-0 translate-x-10 -translate-y-10" />
+          <div className="absolute bottom-0 left-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl opacity-60 z-0 -translate-x-10 translate-y-10" />
+
         </div>
       </div>
+    </div>
+  );
+};
 
-      {loading ? (
-        <div className="flex justify-center py-24">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+// ================= COMPONENT UTAMA HALAMAN STRUKTURAL =================
+export const StructuralPage = () => {
+  const [cadres, setCadres] = useState<any[]>([]);
+  const [activeTab, setActiveTab] = useState<"IPNU" | "IPPNU">("IPNU");
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const loadData = async () => {
+      setLoading(true);
+      const { data } = await supabase
+        .from("cadres")
+        .select("*")
+        // Diurutkan berdasarkan kasta jabatan, lalu urutan prioritasnya
+        .order("position_level", { ascending: true })
+        .order("order_priority", { ascending: true });
+      if (data) setCadres(data);
+      setLoading(false);
+    };
+    loadData();
+  }, []);
+
+  // Filter pengurus berdasarkan Organisasi Aktif (IPNU / IPPNU)
+  const filteredCadres = cadres.filter(k => k.organization === activeTab);
+
+  // Pisahkan pengurus ke masing-masing level bertingkat
+  const leaders = filteredCadres.filter(k => k.position_level === 1);
+  const bphList = filteredCadres.filter(k => k.position_level === 2);
+  // Departemen diisi level 3 atau kader lama yang datanya belum punya position_level
+  const departments = filteredCadres.filter(k => k.position_level === 3 || !k.position_level);
+
+  return (
+    <div className="min-h-screen flex flex-col bg-background text-foreground animate-in fade-in duration-1000">
+      {/* 1. RENDER HEADER ASLI LU */}
+      <Header />
+
+      {/* 2. AREA KONTEN TENGAH STRUKTURAL */}
+      <main className="container-news flex-grow py-12 bg-background relative z-10">
+        
+        {/* Tombol Kembali Minimalis */}
+        <button 
+          onClick={() => navigate(-1)} 
+          className="flex items-center gap-2 text-primary hover:text-gold transition-all mb-12 font-brand font-black text-xs uppercase tracking-wider group"
+        >
+          <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
+          Kembali
+        </button>
+
+        {/* Heading Jajaran Struktural - Sesuai tema lu */}
+        <div className="text-center mb-12 space-y-4 max-w-2xl mx-auto px-4">
+          <h1 className="text-4xl md:text-5xl font-brand font-black text-primary uppercase tracking-tighter leading-none">
+            Struktural Pimpinan Cabang
+          </h1>
+          <p className="text-muted-foreground font-brand font-black uppercase tracking-[0.4em] text-[10px]">
+            Masa Khidmah 2025 — 2028
+          </p>
+          <div className="h-1.5 w-20 bg-gold mx-auto rounded-full shadow-sm" />
         </div>
-      ) : (
-        <div className="container mx-auto px-5 lg:px-8 mt-16 max-w-6xl relative z-10">
-          
-          {/* ======================================================== */}
-          {/* LEVEL 1: KETUA (TOP OF THE TREE) */}
-          {/* ======================================================== */}
-          {leader && (
-            <div className="flex flex-col items-center relative">
-              <div className="text-center mb-2">
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary flex items-center gap-1.5 justify-center mb-1">
-                  <Sparkles className="h-3.5 w-3.5 text-gold animate-pulse" /> Pimpinan Tertinggi
-                </span>
-              </div>
-              <CadreCard cadre={leader} size="large" />
-              
-              {/* Garis Vertikal Utama Menurun Kebawah */}
-              {(bph.length > 0 || departments.length > 0) && (
-                <div className="w-0.5 h-16 bg-gradient-to-b from-gold/80 to-slate-200 mt-4"></div>
-              )}
-            </div>
-          )}
 
-          {/* ======================================================== */}
-          {/* LEVEL 2: BADAN PENGURUS HARIAN (BPH) */}
-          {/* ======================================================== */}
-          {bph.length > 0 && (
-            <div className="relative mt-2">
-              
-              {/* Garis Horizontal Penghubung BPH (Hanya tampil di Desktop) */}
-              <div className="hidden md:block absolute top-0 left-12 right-12 h-0.5 bg-slate-200"></div>
+        {/* TAB SWITCHER IPNU VS IPPNU (Mewah & Smooth) */}
+        <div className="flex justify-center mb-16 px-4">
+          <div className="bg-slate-100 p-1.5 rounded-full flex items-center relative shadow-inner border border-slate-200">
+            <button
+              onClick={() => setActiveTab("IPNU")}
+              className={`px-8 py-3 rounded-full text-xs font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2 ${
+                activeTab === "IPNU"
+                  ? "bg-[#03441b] text-white shadow-lg"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Users className="h-4 w-4" /> PC IPNU (Putera)
+            </button>
+            <button
+              onClick={() => setActiveTab("IPPNU")}
+              className={`px-8 py-3 rounded-full text-xs font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2 ${
+                activeTab === "IPPNU"
+                  ? "bg-gold text-gold-foreground shadow-lg"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              <Heart className="h-4 w-4" /> PC IPPNU (Putri)
+            </button>
+          </div>
+        </div>
 
-              <div className="flex flex-wrap justify-center gap-8 lg:gap-12 pt-8">
-                {bph.map((cadre) => (
-                  <div key={cadre.id} className="flex flex-col items-center relative">
-                    {/* Garis Vertikal Mini di atas setiap kartu BPH */}
-                    <div className="hidden md:block absolute -top-8 w-0.5 h-8 bg-slate-200"></div>
-                    <CadreCard cadre={cadre} />
-                  </div>
-                ))}
-              </div>
-
-              {/* Garis Pembatas Menuju Departemen */}
-              {departments.length > 0 && (
-                <div className="flex justify-center mt-12">
-                  <div className="w-0.5 h-16 bg-dashed bg-slate-200"></div>
+        {loading ? (
+          <div className="flex justify-center py-24">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        ) : (
+          <div className="space-y-20">
+            
+            {/* ======================================================== */}
+            {/* LEVEL 1: KETUA UMUM (POSISI TERATAS) */}
+            {/* ======================================================== */}
+            {leaders.length > 0 && (
+              <div className="flex flex-col items-center relative">
+                <div className="text-center mb-6">
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-primary flex items-center gap-1.5 justify-center">
+                    <Sparkles className="h-3.5 w-3.5 text-gold animate-pulse" /> Pimpinan Utama
+                  </span>
                 </div>
-              )}
-            </div>
-          )}
+                
+                {/* Grid Ketua */}
+                <div className="flex flex-wrap justify-center gap-8 w-full">
+                  {leaders.map((kader) => (
+                    <div key={kader.id} className="w-72 sm:w-80">
+                      <CadreCard kader={kader} />
+                    </div>
+                  ))}
+                </div>
 
-          {/* ======================================================== */}
-          {/* LEVEL 3: DEPARTEMEN & LEMBAGA */}
-          {/* ======================================================== */}
-          {departments.length > 0 && (
-            <div className="mt-12">
-              <div className="text-center mb-8">
-                <h3 className="font-display font-black text-lg lg:text-xl text-primary uppercase tracking-wider">
-                  Departemen & Lembaga Pendukung
-                </h3>
-                <div className="h-1 w-12 bg-gold mx-auto mt-2 rounded-full"></div>
+                {/* Garis Vertikal Utama Penghubung Kebawah (Hanya jika ada jajaran di bawahnya) */}
+                {(bphList.length > 0 || departments.length > 0) && (
+                  <div className="hidden md:block w-0.5 h-16 bg-gradient-to-b from-gold/80 to-slate-200 mt-8"></div>
+                )}
               </div>
+            )}
 
-              <div className="flex flex-wrap justify-center gap-6 sm:gap-8">
-                {departments.map((cadre) => (
-                  <CadreCard key={cadre.id} cadre={cadre} size="small" />
-                ))}
+            {/* ======================================================== */}
+            {/* LEVEL 2: BADAN PENGURUS HARIAN (BPH) */}
+            {/* ======================================================== */}
+            {bphList.length > 0 && (
+              <div className="relative">
+                {/* Garis Horizontal Penghubung jajaran BPH */}
+                <div className="hidden md:block absolute top-0 left-24 right-24 h-0.5 bg-slate-200"></div>
+
+                <div className="flex flex-wrap justify-center gap-10 pt-10">
+                  {bphList.map((kader) => (
+                    <div key={kader.id} className="relative flex flex-col items-center w-64 sm:w-72">
+                      {/* Garis Vertikal Mini di atas setiap kartu BPH */}
+                      <div className="hidden md:block absolute -top-10 w-0.5 h-10 bg-slate-200"></div>
+                      <CadreCard kader={kader} />
+                    </div>
+                  ))}
+                </div>
+
+                {/* Garis Pembatas Menurun Menuju Departemen */}
+                {departments.length > 0 && (
+                  <div className="flex justify-center mt-16">
+                    <div className="w-0.5 h-16 bg-dashed bg-slate-200"></div>
+                  </div>
+                )}
               </div>
-            </div>
-          )}
+            )}
 
-          {filteredCadres.length === 0 && (
-            <div className="text-center py-20 bg-white rounded-3xl border border-dashed text-muted-foreground font-semibold">
-              Belum ada data kepengurusan terdaftar untuk PC {activeTab}.
-            </div>
-          )}
+            {/* ======================================================== */}
+            {/* LEVEL 3: DEPARTEMEN & ANGGOTA (GRID BAWAH) */}
+            {/* ======================================================== */}
+            {departments.length > 0 && (
+              <div className="pt-4">
+                <div className="text-center mb-12">
+                  <h3 className="font-brand font-black text-xl text-primary uppercase tracking-wider flex items-center justify-center gap-2">
+                    <Shield className="h-5 w-5 text-gold" /> Departemen & Lembaga
+                  </h3>
+                  <div className="h-1 w-12 bg-gold mx-auto mt-2 rounded-full" />
+                </div>
 
-        </div>
-      )}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-16">
+                  {departments.map((kader) => (
+                    <CadreCard key={kader.id} kader={kader} />
+                  ))}
+                </div>
+              </div>
+            )}
 
+            {/* Empty State */}
+            {filteredCadres.length === 0 && (
+              <div className="text-center py-20 bg-white rounded-3xl border border-dashed text-muted-foreground font-semibold">
+                Belum ada data kepengurusan terdaftar untuk PC {activeTab}.
+              </div>
+            )}
+
+          </div>
+        )}
+
+      </main>
+
+      {/* 3. RENDER FOOTER ASLI LU */}
+      <Footer />
     </div>
   );
 };
