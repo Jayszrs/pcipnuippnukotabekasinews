@@ -14,6 +14,84 @@ export type Database = {
   }
   public: {
     Tables: {
+      cadres: {
+        Row: {
+          birth_info: string | null
+          created_at: string | null
+          division: string
+          id: string
+          image_url: string | null
+          name: string
+          order_priority: number | null
+          organization: string | null
+          origin: string | null
+          period_end: string
+          period_start: string
+          position: string
+          quote: string | null
+        }
+        Insert: {
+          birth_info?: string | null
+          created_at?: string | null
+          division: string
+          id?: string
+          image_url?: string | null
+          name: string
+          order_priority?: number | null
+          organization?: string | null
+          origin?: string | null
+          period_end: string
+          period_start: string
+          position: string
+          quote?: string | null
+        }
+        Update: {
+          birth_info?: string | null
+          created_at?: string | null
+          division?: string
+          id?: string
+          image_url?: string | null
+          name?: string
+          order_priority?: number | null
+          organization?: string | null
+          origin?: string | null
+          period_end?: string
+          period_start?: string
+          position?: string
+          quote?: string | null
+        }
+        Relationships: []
+      }
+      featured_events: {
+        Row: {
+          banner_url: string
+          created_at: string
+          event_date: string
+          id: string
+          instagram_url: string | null
+          is_active: boolean | null
+          title: string
+        }
+        Insert: {
+          banner_url: string
+          created_at?: string
+          event_date: string
+          id?: string
+          instagram_url?: string | null
+          is_active?: boolean | null
+          title: string
+        }
+        Update: {
+          banner_url?: string
+          created_at?: string
+          event_date?: string
+          id?: string
+          instagram_url?: string | null
+          is_active?: boolean | null
+          title?: string
+        }
+        Relationships: []
+      }
       news: {
         Row: {
           author_id: string | null

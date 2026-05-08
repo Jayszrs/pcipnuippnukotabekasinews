@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -14,7 +14,7 @@ import Article from "./pages/Article.tsx";
 import Category from "./pages/Category.tsx";
 import Media from "./pages/Media.tsx";
 import AdminLogin from "./pages/AdminLogin.tsx";
-import AdminSignup from "./pages/AdminSignup.tsx";
+
 import ForgotPassword from "./pages/ForgotPassword.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";
 import Dashboard from "./pages/admin/Dashboard.tsx";
@@ -59,7 +59,7 @@ const App = () => (
 
               {/* Rute Admin & Auth */}
               <Route path="/admin" element={<AdminLogin />} />
-              <Route path="/admin/signup" element={<AdminSignup />} />
+              <Route path="/admin/signup" element={<Navigate to="/admin" replace />} />
               <Route path="/admin/forgot-password" element={<ForgotPassword />} />
               <Route path="/reset-password" element={<ResetPassword />} />
               

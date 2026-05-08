@@ -27,6 +27,16 @@ Deno.serve(async (req: Request) => {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    const validRoles = new Set(["user", "assistant", "system"]);
+    const invalid = messages.some((m: any) =>
+      !m || typeof m.content !== "string" || m.content.length > 1000 || !validRoles.has(m.role)
+    );
+    if (invalid) {
+      return new Response(JSON.stringify({ error: "Format pesan tidak valid atau terlalu panjang (maks 1000 karakter)." }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     if (!LOVABLE_API_KEY) {

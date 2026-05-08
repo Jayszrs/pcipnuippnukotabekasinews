@@ -23,7 +23,7 @@ export const Profile = () => {
       setUser(user);
       const { data } = await supabase.from("profiles").select("*").eq("id", user.id).single();
       if (data) {
-        setFullname(data.fullname || "");
+        setFullname(data.full_name || "");
         setAvatarUrl(data.avatar_url || "");
       }
     }
@@ -61,7 +61,7 @@ export const Profile = () => {
           />
           <label className="absolute inset-0 flex items-center justify-center bg-black/40 rounded-full opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity">
             <Upload className="text-white" />
-            <input type="file" className="hidden" onChange={handleUpload} disabled={loading} />
+            <input type="file" accept="image/*" className="hidden" onChange={handleUpload} disabled={loading} />
           </label>
         </div>
         <div className="space-y-1">
@@ -79,7 +79,7 @@ export const Profile = () => {
           className="w-full" 
           onClick={async () => {
             setLoading(true);
-            await supabase.from("profiles").update({ fullname }).eq("id", user.id);
+            await supabase.from("profiles").update({ full_name: fullname }).eq("id", user.id);
             setLoading(false);
             toast.success("Nama berhasil disimpan!");
           }}
