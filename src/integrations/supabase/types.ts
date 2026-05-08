@@ -28,6 +28,7 @@ export type Database = {
           period_end: string
           period_start: string
           position: string
+          position_level: number | null
           quote: string | null
         }
         Insert: {
@@ -43,6 +44,7 @@ export type Database = {
           period_end: string
           period_start: string
           position: string
+          position_level?: number | null
           quote?: string | null
         }
         Update: {
@@ -58,6 +60,7 @@ export type Database = {
           period_end?: string
           period_start?: string
           position?: string
+          position_level?: number | null
           quote?: string | null
         }
         Relationships: []
@@ -149,6 +152,24 @@ export type Database = {
         }
         Relationships: []
       }
+      newsletter_subscriptions: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -170,6 +191,42 @@ export type Database = {
           full_name?: string | null
           id?: string
           updated_at?: string
+        }
+        Relationships: []
+      }
+      service_ratings: {
+        Row: {
+          admin_feedback: string | null
+          comment: string
+          created_at: string
+          id: string
+          name: string
+          rated_service: string
+          rating_value: number
+          region_type: string
+          specific_region: string
+        }
+        Insert: {
+          admin_feedback?: string | null
+          comment: string
+          created_at?: string
+          id?: string
+          name: string
+          rated_service: string
+          rating_value: number
+          region_type: string
+          specific_region: string
+        }
+        Update: {
+          admin_feedback?: string | null
+          comment?: string
+          created_at?: string
+          id?: string
+          name?: string
+          rated_service?: string
+          rating_value?: number
+          region_type?: string
+          specific_region?: string
         }
         Relationships: []
       }
