@@ -7,7 +7,7 @@ import { VideoHighlight } from "@/components/VideoHighlight";
 import { Sidebar } from "@/components/Sidebar";
 import { NewsCard } from "@/components/NewsCard";
 import { useArticles } from "@/contexts/ArticlesContext";
-import { ArrowRight, Sparkles, Clock, Instagram, Bell, Loader2 } from "lucide-react";
+import { ArrowRight, Sparkles, Clock, Instagram, Bell, Loader2, Star } from "lucide-react"; // <-- IMPORT STAR DI SINI
 import { Link } from "react-router-dom";
 
 // ================= COMPONENT DYNAMIC EVENT BANNER & COUNTDOWN =================
@@ -162,12 +162,14 @@ const Index = () => {
       {/* 1. Headline Utama Berita Slider */}
       <Hero />
 
-      {/* 2. DYNAMIC COUNTDOWN BANNER PELANTIKAN (Kompnent EventBanner lama penimbun spanduk ijo sudah dihapus total!) */}
+      {/* 2. DYNAMIC COUNTDOWN BANNER */}
       <HeroBannerLocal />
 
       {/* 3. Berita Terbaru & Sidebar */}
       <section className="container-news py-10 lg:py-16 bg-background">
         <div className="grid lg:grid-cols-[1fr_320px] gap-10 lg:gap-16">
+          
+          {/* KOLOM KIRI: BERITA TERBARU */}
           <div className="space-y-10">
             <div className="flex items-end justify-between border-b-2 border-primary pb-4">
               <div>
@@ -191,7 +193,40 @@ const Index = () => {
               </div>
             )}
           </div>
-          <Sidebar />
+
+          {/* KOLOM KANAN: SIDEBAR & INTERACTIVE RATINGS LINK */}
+          <div className="space-y-8">
+            <Sidebar />
+
+            {/* BANNER AJAKAN RATING LAYANAN PUBLIK (SINKRON KE TENTANG KAMI STYLE) */}
+            <div className="relative overflow-hidden rounded-[2rem] bg-white border border-slate-100 p-6 shadow-sm hover:shadow-2xl hover:-translate-y-1 transform transition-all duration-500 group/rating">
+              {/* Glow Effect di Background */}
+              <div className="absolute -top-10 -right-10 h-24 w-24 rounded-full bg-gold/10 blur-xl group-hover/rating:scale-125 transition-transform duration-500"></div>
+              
+              <div className="flex items-center gap-2.5 mb-3">
+                <div className="p-2.5 bg-amber-50 rounded-2xl text-gold border border-amber-100 shrink-0 shadow-sm">
+                  <Star className="h-5 w-5 text-gold fill-gold animate-pulse" />
+                </div>
+                <div>
+                  <h3 className="font-brand font-black text-xs uppercase tracking-wider text-slate-800">Suara Publik</h3>
+                  <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Rating Pelayanan</p>
+                </div>
+              </div>
+
+              <p className="text-xs text-muted-foreground leading-relaxed mb-5 font-semibold">
+                Yuk bantu kami terus berbenah! Berikan penilaian bintang dan saran pelayanan kepengurusan PC IPNU IPPNU Kota Bekasi demi kemajuan bersama.
+              </p>
+
+              <Link 
+                to="/rating" 
+                className="w-full py-4 bg-[#03441b] hover:bg-[#023113] text-white text-[10px] font-brand font-black uppercase tracking-widest rounded-2xl flex items-center justify-center gap-2 transition-all shadow-md shadow-emerald-950/10 active:scale-95 group/btn"
+              >
+                Beri Nilai Sekarang 
+                <ArrowRight className="h-3.5 w-3.5 group-hover/btn:translate-x-1.5 transition-transform duration-300" />
+              </Link>
+            </div>
+          </div>
+
         </div>
       </section>
 
