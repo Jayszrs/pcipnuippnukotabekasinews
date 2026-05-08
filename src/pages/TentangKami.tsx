@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { 
-  History, 
   Users, 
   Award, 
   BookOpen, 
@@ -85,7 +84,7 @@ const IPPNU_HISTORY = [
     date: "Kongres Jombang IX (1988)",
     location: "Jombang, Jawa Timur",
     summary: "Penyesuaian nama menjadi 'Ikatan Putri-Putri Nahdlatul Ulama' akibat regulasi Orba.",
-    details: "Guna menghindari pembubaran paksa oleh undang-undang represif rezim Orde Baru, IPPNU mengubah kepanjangannya menjadi 'Ikatan Putri-Putri Nahdlatul Ulama'. Fase ini menjadi saksi ketangguhan kaderwati dalam menjaga api perjuangan Aswaja di tengah tekanan militeristik politik.",
+    details: "Guna menghindari pembubaran paksa oleh undang-undang kepemudaan rezim Orde Baru, IPPNU mengubah kepanjangannya menjadi 'Ikatan Putri-Putri Nahdlatul Ulama'. Fase ini menjadi saksi ketangguhan kaderwati dalam menjaga api perjuangan Aswaja di tengah tekanan militeristik politik.",
     badge: "Ketahanan",
     icon: Calendar
   },
@@ -181,14 +180,11 @@ export const TentangKami = () => {
           {historyData.map((item, idx) => {
             const IconComponent = item.icon;
             const isExpanded = expandedIndex === idx;
-            const activeColorClass = activeTab === "ipnu" 
-              ? "border-primary-deep text-primary hover:border-primary shadow-primary/10" 
-              : "border-gold text-gold hover:border-gold shadow-gold/10";
 
             return (
               <div key={idx} className="relative group pl-8 md:pl-12 transition-all duration-500">
                 
-                {/* 1. Node Bulat Timeline (Tahun) */}
+                {/* Node Bulat Timeline (Tahun) */}
                 <div className={`absolute -left-[17px] top-1.5 h-8 w-8 rounded-full border-2 bg-background flex items-center justify-center transition-all duration-500 group-hover:scale-125 ${
                   isExpanded 
                     ? (activeTab === "ipnu" ? "bg-primary text-white border-primary" : "bg-gold text-gold-foreground border-gold") 
@@ -197,7 +193,7 @@ export const TentangKami = () => {
                   <IconComponent className="h-4 w-4" />
                 </div>
 
-                {/* 2. Label Tahun di Sebelah Kiri (Desktop Only) */}
+                {/* Label Tahun di Sebelah Kiri (Desktop Only) */}
                 <div className="hidden md:block absolute -left-32 top-2 text-right w-24">
                   <span className={`text-xl font-black font-display tracking-tight transition-all duration-300 ${
                     isExpanded 
@@ -208,7 +204,7 @@ export const TentangKami = () => {
                   </span>
                 </div>
 
-                {/* 3. Kartu Konten Sejarah */}
+                {/* Kartu Konten Sejarah */}
                 <div 
                   onClick={() => toggleExpand(idx)}
                   className={`bg-white rounded-2xl border border-border p-5 md:p-6 shadow-sm hover:shadow-lg transition-all duration-500 cursor-pointer relative overflow-hidden group/card ${
@@ -254,12 +250,12 @@ export const TentangKami = () => {
                     </div>
                   </div>
 
-                  {/* Ringkasan Singkat (Selalu Tampil) */}
+                  {/* Ringkasan Singkat */}
                   <p className="mt-4 text-xs lg:text-sm text-muted-foreground leading-relaxed">
                     {item.summary}
                   </p>
 
-                  {/* Kisah Detail (Mulus Expand) */}
+                  {/* Kisah Detail */}
                   <div className={`transition-all duration-500 overflow-hidden ${
                     isExpanded ? "max-h-[500px] opacity-100 mt-5 pt-5 border-t border-dashed border-border" : "max-h-0 opacity-0"
                   }`}>
