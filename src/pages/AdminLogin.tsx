@@ -100,11 +100,8 @@ const AdminLogin = () => {
             </button>
           </form>
 
-          <p className="mt-8 text-sm text-center text-muted-foreground">
-            Belum punya akun admin?{" "}
-            <Link to="/admin/signup" className="text-primary font-bold hover:underline">
-              Daftar di sini
-            </Link>
+          <p className="mt-8 text-xs text-center text-muted-foreground">
+            Akses dashboard hanya untuk admin & editor terdaftar.
           </p>
         </div>
       </div>
