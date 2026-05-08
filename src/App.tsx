@@ -25,7 +25,7 @@ import NotFound from "./pages/NotFound.tsx";
 // --- IMPORT HALAMAN INFORMASI ---
 import { TentangKami } from "./pages/TentangKami";
 import { Redaksi } from "./pages/Redaksi";
-import { Kontak } from "./pages/Kontak";
+import Kontak from "./pages/Kontak";
 
 // --- PERBAIKAN: IMPORT HALAMAN KADER & STRUKTURAL ---
 import { StructuralPage } from "./pages/StructuralPage"; // Halaman Publik
