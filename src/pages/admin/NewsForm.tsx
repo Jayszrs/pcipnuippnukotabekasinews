@@ -6,7 +6,9 @@ import { useAuth } from "@/contexts/AuthContext";
 import { 
   ArrowLeft, Save, Send, X, Loader2, 
   Image as ImageIcon, Video, Link2, 
-  Plus, Trash2, Globe, ChevronLeft, ChevronRight, Star
+  Plus, Trash2, Globe, ChevronLeft, ChevronRight, Star,
+  AlertCircle, // <-- 1. IMPORT DISECURE BIAR ENGGAK CRASH
+  CalendarDays // <-- 2. IMPORT DISECURE BIAR ENGGAK CRASH
 } from "lucide-react"; 
 import { toast } from "sonner";
 import { z } from "zod";
@@ -34,22 +36,28 @@ const NewsForm = () => {
   const { user, role } = useAuth();
   const canManageNews = role === "admin" || role === "editor";
 
+  // STATE KONTEN & BACKDATE
   const [title, setTitle] = useState("");
   const [excerpt, setExcerpt] = useState("");
   const [content, setContent] = useState("");
   const [category, setCategory] = useState<string>("Kegiatan IPNU");
   const [tags, setTags] = useState("");
+  const [publishedAt, setPublishedAt] = useState(new Date().toISOString().slice(0, 16));
   
+  // STATE MEDIA & LINK LUAR (IG/YT)
   const [images, setImages] = useState<string[]>([]);
   const [videos, setVideos] = useState<string[]>([]); 
-  const [videoUrlInput, setVideoUrlInput] = useState("");
+  const [videoUrlInput, setVideoUrlInput] = useState(""); 
   
   const [uploading, setUploading] = useState<"image" | "video" | null>(null);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(isEdit);
+  const [existingDates, setExistingDates] = useState<string[]>([]);
 
   useEffect(() => {
     document.title = `${isEdit ? "Edit" : "Tulis"} Berita — IPNU IPPNU Bekasi`;
+    fetchExistingNewsDates();
+
     if (!isEdit) return;
     (async () => {
       const { data, error } = await supabase.from("news").select("*").eq("id", id).maybeSingle();
@@ -63,102 +71,88 @@ const NewsForm = () => {
       setContent(data.content);
       setCategory(data.category);
       setTags((data.tags ?? []).join(", "));
+      setPublishedAt(new Date(data.published_at || data.created_at).toISOString().slice(0, 16));
       
       if (data.image_url) setImages(Array.isArray(data.image_url) ? data.image_url : [data.image_url]); 
       if (data.video_url) {
         if (data.video_url.includes("/storage/v1/object/public/")) {
           setVideos([data.video_url]);
         } else {
-          setVideoUrlInput(data.video_url);
+          setVideoUrlInput(data.video_url); 
         }
       }
       setLoading(false);
     })();
   }, [id, isEdit, navigate]);
 
-  // --- LOGIKA GESER FOTO (REORDER) ---
+  const fetchExistingNewsDates = async () => {
+    try {
+      const { data } = await supabase.from("news").select("published_at").gte("published_at", new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString());
+      if (data) setExistingDates(data.map(n => n.published_at ? new Date(n.published_at).toISOString().split('T')[0] : ""));
+    } catch (err) { console.error(err); }
+  };
+
+  const getEmptyDates = () => {
+    const empty = [];
+    const today = new Date();
+    for (let i = 0; i < 7; i++) {
+      const checkDate = new Date();
+      checkDate.setDate(today.getDate() - i);
+      const ds = checkDate.toISOString().split('T')[0];
+      if (!existingDates.includes(ds)) {
+        empty.push({ raw: ds, display: checkDate.toLocaleDateString('id-ID', { day: 'numeric', month: 'short' }) });
+      }
+    }
+    return empty;
+  };
+
   const moveImage = (index: number, direction: 'left' | 'right') => {
     const newImages = [...images];
     const newIndex = direction === 'left' ? index - 1 : index + 1;
-    
     if (newIndex < 0 || newIndex >= newImages.length) return;
-
-    // Swap posisi array
-    const temp = newImages[index];
-    newImages[index] = newImages[newIndex];
-    newImages[newIndex] = temp;
-    
+    [newImages[index], newImages[newIndex]] = [newImages[newIndex], newImages[index]];
     setImages(newImages);
   };
 
   const handleParallelUpload = async (e: React.ChangeEvent<HTMLInputElement>, kind: "image" | "video") => {
     const files = e.target.files;
-    if (!files || files.length === 0 || !user || !canManageNews) return;
-
+    if (!files || !user || !canManageNews) return;
     setUploading(kind);
-    const fileArray = Array.from(files);
-    
     try {
-      const uploadPromises = fileArray.map(async (file) => {
-        const maxMB = 1024; 
-        if (file.size > maxMB * 1024 * 1024) throw new Error(`File ${file.name} terlalu besar!`);
-
-        const ext = file.name.split(".").pop();
-        const uniqueId = Date.now() + '-' + Math.random().toString(36).substring(2, 11);
-        const path = `${user.id}/${kind}s/${uniqueId}.${ext}`;
-
-        const { error: uploadError } = await supabase.storage.from("news-media").upload(path, file);
-        if (uploadError) throw uploadError;
-
-        const { data } = supabase.storage.from("news-media").getPublicUrl(path);
-        return data.publicUrl;
-      });
-
-      const results = await Promise.all(uploadPromises);
-      
-      if (kind === "image") setImages((prev) => [...prev, ...results]);
-      else setVideos((prev) => [...prev, ...results]);
-      
-      toast.success(`${results.length} media berhasil diunggah!`);
-    } catch (err: any) {
-      toast.error("Gagal upload", { description: err.message });
-    } finally {
-      setUploading(null);
-    }
+      const results = await Promise.all(Array.from(files).map(async (file) => {
+        const path = `${user.id}/${kind}s/${Date.now()}-${file.name}`;
+        await supabase.storage.from("news-media").upload(path, file);
+        return supabase.storage.from("news-media").getPublicUrl(path).data.publicUrl;
+      }));
+      if (kind === "image") setImages(prev => [...prev, ...results]);
+      else setVideos(prev => [...prev, ...results]);
+      toast.success("Media terunggah!");
+    } catch (err) { toast.error("Gagal upload"); } finally { setUploading(null); }
   };
 
   const save = async (status: "draft" | "published") => {
     const parsed = schema.safeParse({ title, excerpt, content, category });
-    if (!parsed.success) {
-      toast.error(parsed.error.issues[0].message);
-      return;
-    }
-
+    if (!parsed.success) return toast.error(parsed.error.issues[0].message);
     setSaving(true);
     const slug = isEdit ? undefined : `${slugify(title)}-${Date.now().toString(36)}`;
     const finalVideoUrl = videoUrlInput.trim() !== "" ? videoUrlInput : (videos[0] || null);
 
     const payload = {
       ...parsed.data,
-      tags: tags.split(",").map((t) => t.trim()).filter(Boolean),
-      image_url: images[0] || null, // Foto di index 0 otomatis jadi Poster Utama
+      tags: tags.split(",").map(t => t.trim()).filter(Boolean),
+      image_url: images[0] || null,
       video_url: finalVideoUrl,
       status,
       author_id: user?.id,
       author_name: user?.email?.split("@")[0] ?? "Admin",
-      published_at: status === "published" ? new Date().toISOString() : null,
+      published_at: status === "published" ? new Date(publishedAt).toISOString() : null,
+      created_at: status === "published" ? new Date(publishedAt).toISOString() : new Date().toISOString(),
       ...(slug ? { slug } : {}),
     };
 
-    const res = isEdit
-      ? await supabase.from("news").update(payload).eq("id", id!)
-      : await supabase.from("news").insert(payload as any);
-
+    const res = isEdit ? await supabase.from("news").update(payload).eq("id", id!) : await supabase.from("news").insert(payload as any);
     setSaving(false);
-    if (!res.error) {
-      toast.success(status === "published" ? "Berita Terbit!" : "Draft Aman");
-      navigate("/admin/dashboard");
-    }
+    if (!res.error) { toast.success("Mantap Lan!"); navigate("/admin/dashboard"); }
   };
 
   if (loading) return <div className="flex justify-center py-20"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>;
@@ -167,142 +161,144 @@ const NewsForm = () => {
     <AdminLayout 
       title={isEdit ? "Edit Berita" : "Tulis Berita Baru"}
       action={
-        <Link to="/admin/dashboard" className="inline-flex items-center gap-2 px-3 py-2 text-xs font-black uppercase tracking-widest hover:bg-muted rounded-sm">
+        <Link to="/admin/dashboard" className="inline-flex items-center gap-2 px-3 py-2 text-xs font-black uppercase tracking-widest hover:bg-muted rounded-sm text-slate-500">
           <ArrowLeft className="h-4 w-4" /> Kembali
         </Link>
       }
     >
       <div className="grid lg:grid-cols-[1fr_350px] gap-8 max-w-7xl mx-auto">
         
-        {/* KOLOM KIRI: EDITOR */}
+        {/* KOLOM KIRI */}
         <div className="space-y-6">
-          <div className="bg-white p-6 rounded-sm border border-border shadow-sm">
-            <label className="block text-[10px] font-black uppercase tracking-[0.2em] mb-4 text-primary">Judul Berita *</label>
-            <input
-              value={title} onChange={(e) => setTitle(e.target.value)}
-              placeholder="Judul berita..."
-              className="w-full px-0 py-2 text-2xl font-bold border-b border-border focus:border-primary focus:outline-none bg-transparent"
-            />
-          </div>
+          {!isEdit && (
+            <div className="bg-amber-50 border border-amber-200 p-5 rounded-sm">
+              <div className="flex items-center gap-3 mb-3">
+                <AlertCircle className="h-4 w-4 text-amber-500" />
+                <h3 className="text-[10px] font-black text-amber-900 uppercase">Klik slot tanggal untuk Backdate:</h3>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {getEmptyDates().map((date, i) => (
+                  <button 
+                    type="button"
+                    key={i} 
+                    onClick={() => setPublishedAt(`${date.raw}T09:00`)} 
+                    className="bg-white border border-amber-200 text-amber-700 px-3 py-1.5 rounded-sm text-[9px] font-black hover:bg-amber-500 hover:text-white transition-all shadow-sm"
+                  >
+                    {date.display}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
-          <div className="bg-white p-6 rounded-sm border border-border shadow-sm text-right">
-            <label className="block text-left text-[10px] font-black uppercase tracking-[0.2em] mb-4 text-primary">Ringkasan Singkat *</label>
-            <textarea
-              value={excerpt} onChange={(e) => setExcerpt(e.target.value)}
-              className="w-full p-0 border-none focus:ring-0 text-sm resize-none"
-              rows={3} maxLength={500}
-            />
-            <span className="text-[10px] font-bold text-muted-foreground uppercase">{excerpt.length}/500</span>
-          </div>
-
-          <div className="bg-white p-6 rounded-sm border border-border shadow-sm">
-            <label className="block text-[10px] font-black uppercase tracking-[0.2em] mb-4 text-primary">Isi Berita *</label>
-            <textarea
-              value={content} onChange={(e) => setContent(e.target.value)}
-              className="w-full min-h-[500px] p-0 border-none focus:ring-0 text-base leading-relaxed"
-            />
+          <div className="bg-white p-6 rounded-sm border shadow-sm space-y-6">
+            <div>
+              <label className="block text-[10px] font-black uppercase tracking-widest mb-2 text-primary">Judul Berita *</label>
+              <input value={title} onChange={e => setTitle(e.target.value)} className="w-full text-2xl font-bold border-b p-2 focus:outline-none focus:border-primary bg-transparent" placeholder="Judul berita..." />
+            </div>
+            <div>
+              <label className="block text-[10px] font-black uppercase tracking-widest mb-2 text-primary">Isi Berita *</label>
+              <textarea value={content} onChange={e => setContent(e.target.value)} className="w-full min-h-[500px] p-2 focus:outline-none resize-none border border-border rounded-sm text-base leading-relaxed" placeholder="Tulis berita lengkap..." />
+            </div>
           </div>
         </div>
 
-        {/* KOLOM KANAN: SIDEBAR */}
+        {/* KOLOM KANAN */}
         <div className="space-y-6">
-          
-          <div className="bg-white p-5 rounded-sm border border-border shadow-sm space-y-3">
-            <button onClick={() => save("published")} disabled={saving || uploading !== null} className="w-full py-3 bg-primary text-white text-[10px] font-black uppercase tracking-widest rounded-sm hover:opacity-90 flex items-center justify-center gap-2 transition-all">
-              {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Send className="h-3 w-3" />} PUBLIKASIKAN
+          <div className="bg-white p-5 rounded-sm border shadow-sm space-y-3">
+            <button onClick={() => save("published")} disabled={saving} className="w-full py-3 bg-primary text-white text-[10px] font-black uppercase rounded-sm flex items-center justify-center gap-2">
+              {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Send className="h-3 w-3" />} TERBITKAN
             </button>
-            <button onClick={() => save("draft")} disabled={saving || uploading !== null} className="w-full py-3 bg-muted text-[10px] font-black uppercase tracking-widest rounded-sm hover:bg-muted/80 transition-all">
-              SIMPAN DRAFT
-            </button>
+            <button onClick={() => save("draft")} disabled={saving} className="w-full py-3 bg-muted text-[10px] font-black uppercase rounded-sm">SIMPAN DRAFT</button>
           </div>
 
-          {/* GALERI FOTO DENGAN FITUR GESER */}
-          <div className="bg-white p-5 rounded-sm border border-border shadow-sm">
-            <label className="block text-[10px] font-black uppercase tracking-[0.2em] mb-3 text-primary italic">Atur Urutan Foto</label>
+          <div className="bg-white p-5 rounded-sm border shadow-sm">
+            <label className="block text-[10px] font-black uppercase mb-3 text-primary flex items-center gap-2">
+              <CalendarDays className="h-3.5 w-3.5" /> Tanggal Terbit (Backdate)
+            </label>
+            <input type="datetime-local" value={publishedAt} onChange={e => setPublishedAt(e.target.value)} className="w-full p-2.5 text-xs font-bold border rounded-sm bg-slate-50" />
+          </div>
+
+          <div className="bg-white p-5 rounded-sm border shadow-sm">
+            <label className="block text-[10px] font-black uppercase mb-2 text-primary">Ringkasan (Max 500)</label>
+            <textarea value={excerpt} onChange={e => setExcerpt(e.target.value)} className="w-full p-2 text-xs border rounded-sm h-24 focus:outline-none focus:border-primary resize-none" maxLength={500} placeholder="Ringkasan singkat berita..." />
+            <div className="text-right text-[9px] font-bold text-muted-foreground mt-1">{excerpt.length}/500</div>
+          </div>
+
+          {/* GALERI FOTO (REORDERABLE) */}
+          <div className="bg-white p-5 rounded-sm border shadow-sm">
+            <label className="block text-[10px] font-black uppercase mb-3 text-primary italic">Atur Urutan Foto</label>
             <div className="space-y-3">
               {images.map((url, idx) => (
                 <div key={idx} className={`relative aspect-video rounded-sm overflow-hidden border-2 group transition-all ${idx === 0 ? 'border-primary' : 'border-border'}`}>
-                  <img src={url} className="w-full h-full object-cover" />
-                  
-                  {/* Overlay Kontrol Geser */}
-                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4">
-                    <button 
-                      onClick={() => moveImage(idx, 'left')} 
-                      disabled={idx === 0}
-                      className="p-1.5 bg-white text-black rounded-full disabled:opacity-30 hover:bg-gold transition-colors"
-                    >
-                      <ChevronLeft className="h-4 w-4" />
-                    </button>
-                    <button 
-                      onClick={() => setImages(images.filter((_, i) => i !== idx))}
-                      className="p-1.5 bg-destructive text-white rounded-full hover:scale-110 transition-transform"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                    <button 
-                      onClick={() => moveImage(idx, 'right')} 
-                      disabled={idx === images.length - 1}
-                      className="p-1.5 bg-white text-black rounded-full disabled:opacity-30 hover:bg-gold transition-colors"
-                    >
-                      <ChevronRight className="h-4 w-4" />
-                    </button>
+                  {/* FIX CLASSNAME DI SINI: Kembali jadi Tailwind CSS standard */}
+                  <img src={url} className="w-full h-full object-cover" alt="Preview Berita" />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center gap-2 transition-opacity">
+                    <button onClick={() => moveImage(idx, 'left')} disabled={idx === 0} className="p-1.5 bg-white rounded-full text-black hover:bg-amber-400"><ChevronLeft className="h-4 w-4" /></button>
+                    <button onClick={() => setImages(images.filter((_, i) => i !== idx))} className="p-1.5 bg-red-600 text-white rounded-full"><Trash2 className="h-4 w-4" /></button>
+                    <button onClick={() => moveImage(idx, 'right')} disabled={idx === images.length - 1} className="p-1.5 bg-white rounded-full text-black hover:bg-amber-400"><ChevronRight className="h-4 w-4" /></button>
                   </div>
-
-                  {/* Indikator Utama */}
                   {idx === 0 && (
-                    <div className="absolute top-2 left-2 bg-primary text-white text-[8px] font-black uppercase px-2 py-0.5 rounded-sm flex items-center gap-1 shadow-lg">
+                    <div className="absolute top-2 left-2 bg-primary text-white text-[8px] font-black uppercase px-2 py-0.5 rounded-sm flex items-center gap-1">
                       <Star className="h-2 w-2 fill-white" /> Utama
                     </div>
                   )}
-                  <div className="absolute bottom-1 right-2 text-white text-[10px] font-black drop-shadow-md">#{idx + 1}</div>
                 </div>
               ))}
-              
               <label className="aspect-video border-2 border-dashed border-muted rounded-sm flex flex-col items-center justify-center cursor-pointer hover:border-primary hover:bg-primary/5 transition-all">
                 {uploading === "image" ? <Loader2 className="h-4 w-4 animate-spin text-primary" /> : <Plus className="h-4 w-4 text-muted-foreground" />}
-                <span className="text-[8px] font-black mt-1 uppercase">Tambah Foto (Max 1GB)</span>
-                <input type="file" multiple accept="image/*" className="hidden" onChange={(e) => handleParallelUpload(e, "image")} />
+                <span className="text-[8px] font-black mt-1 uppercase">Tambah Foto</span>
+                <input type="file" multiple accept="image/*" className="hidden" onChange={e => handleParallelUpload(e, "image")} />
               </label>
             </div>
-            <p className="mt-3 text-[8px] text-muted-foreground italic text-center">Gunakan panah di gambar untuk mengatur urutan. Foto teratas (#1) akan jadi poster berita.</p>
           </div>
 
-          {/* UPLOAD VIDEO (LIMIT 1GB) */}
-          <div className="bg-white p-5 rounded-sm border border-border shadow-sm">
-            <label className="block text-[10px] font-black uppercase tracking-[0.2em] mb-4 text-primary italic">Upload Berkas Video</label>
-            <div className="space-y-3 mb-3">
-              {videos.map((url, idx) => (
-                <div key={idx} className="relative aspect-video rounded-sm overflow-hidden bg-black group">
-                  <video src={url} className="w-full h-full" />
-                  <button onClick={() => setVideos(videos.filter((_, i) => i !== idx))} className="absolute top-2 right-2 h-7 w-7 bg-destructive text-white rounded-sm flex items-center justify-center shadow-lg"><X className="h-4 w-4" /></button>
-                </div>
-              ))}
+          {/* UPLOAD BERKAS VIDEO */}
+          <div className="bg-white p-5 rounded-sm border shadow-sm space-y-4">
+            <div>
+              <label className="block text-[10px] font-black uppercase mb-2 text-primary italic">Upload Berkas Video (Max 1GB)</label>
+              <div className="space-y-3 mb-3">
+                {videos.map((url, idx) => (
+                  <div key={idx} className="relative aspect-video rounded-sm overflow-hidden bg-black group">
+                    {/* FIX CLASSNAME DI SINI: Kembali jadi Tailwind CSS standard */}
+                    <video src={url} className="w-full h-full" controls />
+                    <button onClick={() => setVideos(videos.filter((_, i) => i !== idx))} className="absolute top-2 right-2 h-7 w-7 bg-destructive text-white rounded-sm flex items-center justify-center shadow-lg"><X className="h-4 w-4" /></button>
+                  </div>
+                ))}
+              </div>
+              <label className="aspect-video border-2 border-dashed flex flex-col items-center justify-center cursor-pointer hover:bg-slate-50">
+                {uploading === "video" ? <Loader2 className="h-4 w-4 animate-spin text-primary" /> : <Video className="h-4 w-4 text-muted-foreground" />}
+                <span className="text-[8px] font-black uppercase mt-1">Upload Video</span>
+                <input type="file" multiple accept="video/*" className="hidden" onChange={e => handleParallelUpload(e, "video")} />
+              </label>
             </div>
-            <label className="flex flex-col items-center justify-center aspect-video border-2 border-dashed border-muted rounded-sm cursor-pointer hover:border-gold hover:bg-gold/5 transition-all group">
-              {uploading === "video" ? <Loader2 className="h-6 w-6 animate-spin text-gold" /> : <Video className="h-8 w-8 text-muted-foreground mb-2 group-hover:text-gold transition-colors" />}
-              <span className="text-[10px] font-black uppercase tracking-widest text-center px-4">Upload Video (Max 1GB)</span>
-              <input type="file" multiple accept="video/*" className="hidden" onChange={(e) => handleParallelUpload(e, "video")} />
-            </label>
-          </div>
 
-          {/* URL EKSTERNAL */}
-          <div className="bg-white p-5 rounded-sm border border-border shadow-sm">
-            <label className="block text-[10px] font-black uppercase tracking-[0.2em] mb-4 text-primary italic">URL Eksternal (Reels / YT)</label>
-            <div className="relative group">
-              <Globe className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+            {/* URL EKSTERNAL (REELS / YT) */}
+            <div className="pt-2 border-t">
+              <label className="block text-[10px] font-black uppercase mb-2 text-primary flex items-center gap-2">
+                <Globe className="h-3.5 w-3.5" /> URL EKSTERNAL (REELS / YT)
+              </label>
               <input 
                 value={videoUrlInput} 
-                onChange={(e) => setVideoUrlInput(e.target.value)}
+                onChange={e => setVideoUrlInput(e.target.value)} 
                 placeholder="Link Instagram / Reels / YouTube" 
-                className="w-full pl-9 pr-3 py-3 text-xs font-bold border border-border rounded-sm bg-muted/10 outline-none focus:ring-1 focus:ring-primary transition-all"
+                className="w-full p-2.5 text-xs font-bold border rounded-sm bg-slate-50 outline-none focus:border-primary transition-all" 
               />
             </div>
+          </div>
+
+          <div className="bg-white p-5 rounded-sm border shadow-sm">
+            <label className="block text-[10px] font-black uppercase mb-2 text-primary">Kategori</label>
+            <select value={category} onChange={e => setCategory(e.target.value)} className="w-full p-2.5 text-xs font-bold border rounded-sm bg-muted/5 outline-none focus:border-primary">
+              {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
           </div>
 
           <div className="bg-white p-5 rounded-sm border border-border shadow-sm">
             <label className="block text-[10px] font-black uppercase tracking-[0.2em] mb-2 text-primary">Tags Berita</label>
             <input value={tags} onChange={(e) => setTags(e.target.value)} placeholder="ipnu, ippnu, bekasi" className="w-full p-2.5 text-xs font-bold border border-border rounded-sm bg-muted/5 outline-none focus:border-primary" />
           </div>
+
         </div>
       </div>
     </AdminLayout>
