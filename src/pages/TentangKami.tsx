@@ -12,6 +12,8 @@ import {
   Heart,
   ArrowRight
 } from "lucide-react";
+import { Header } from "@/components/Header"; // <-- IMPORT HEADER ASLI LU
+import { Footer } from "@/components/Footer"; // <-- IMPORT FOOTER ASLI LU
 
 // DATA SEJARAH YANG SUDAH DIPERKAYA & DISTRUKTURKAN
 const IPNU_HISTORY = [
@@ -116,281 +118,292 @@ export const TentangKami = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground pb-20 overflow-hidden">
+    <div className="min-h-screen flex flex-col bg-background text-foreground">
       
-      {/* SUNTIKAN STYLE ANIMASI MAINSTREAM & MOTION EFFECT */}
-      <style dangerouslySetInnerHTML={{ __html: `
-        @keyframes drawLine {
-          from { height: 0%; }
-          to { height: 100%; }
-        }
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(40px) scale(0.98);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-          }
-        }
-        @keyframes blobFloat {
-          0%, 100% { transform: translateY(0px) scale(1); }
-          50% { transform: translateY(-20px) scale(1.05); }
-        }
-        @keyframes pulseBorderGreen {
-          0%, 100% { border-color: rgba(3, 68, 27, 0.2); box-shadow: 0 0 0 0px rgba(3, 68, 27, 0.1); }
-          50% { border-color: rgba(3, 68, 27, 0.8); box-shadow: 0 0 15px 4px rgba(3, 68, 27, 0.15); }
-        }
-        @keyframes pulseBorderGold {
-          0%, 100% { border-color: rgba(212, 175, 55, 0.2); box-shadow: 0 0 0 0px rgba(212, 175, 55, 0.1); }
-          50% { border-color: rgba(212, 175, 55, 0.8); box-shadow: 0 0 15px 4px rgba(212, 175, 55, 0.15); }
-        }
-        .animate-draw-line {
-          animation: drawLine 2s cubic-bezier(0.16, 1, 0.3 1) forwards;
-        }
-        .animate-fade-up {
-          opacity: 0;
-          animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-        }
-        .animate-blob {
-          animation: blobFloat 8s ease-in-out infinite;
-        }
-        .glow-active-green {
-          animation: pulseBorderGreen 2s infinite;
-        }
-        .glow-active-gold {
-          animation: pulseBorderGold 2s infinite;
-        }
-      `}} />
+      {/* 1. RENDER HEADER UTAMA */}
+      <Header />
 
-      {/* BACKGROUND DEKORATIF GLOWING BLOB */}
-      <div className="absolute top-1/3 left-1/10 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-blob pointer-events-none z-0"></div>
-      <div className="absolute top-2/3 right-1/10 w-96 h-96 bg-gold/5 rounded-full blur-3xl animate-blob pointer-events-none z-0" style={{ animationDelay: '3s' }}></div>
-
-      {/* 1. HERO SECTION */}
-      <section className="relative py-24 bg-primary-deep text-primary-foreground overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(212,175,55,0.2),transparent_50%)]"></div>
-        <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/5 rounded-full blur-2xl"></div>
-        <div className="container mx-auto px-5 lg:px-8 text-center relative z-10 space-y-5">
-          <span className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-gold/20 text-gold text-xs font-black uppercase tracking-widest rounded-full shadow-lg border border-gold/10">
-            <Sparkles className="h-3.5 w-3.5 animate-spin" /> Kenali Jati Diri Kami
-          </span>
-          <h1 className="font-display font-black text-4xl lg:text-7xl uppercase tracking-tight italic transition-all duration-700 hover:scale-[1.01]">
-            Belajar, Berjuang, <span className="text-gold">Bertaqwa</span>
-          </h1>
-          <p className="text-sm lg:text-lg text-primary-foreground/80 max-w-2xl mx-auto leading-relaxed font-medium">
-            Pimpinan Cabang Ikatan Pelajar Nahdlatul Ulama & Ikatan Pelajar Putri Nahdlatul Ulama Kota Bekasi merupakan wadah perjuangan intelektual muda Aswaja di tanah patriot.
-          </p>
-        </div>
-      </section>
-
-      {/* 2. INTERACTIVE HISTORY SECTION */}
-      <section className="container mx-auto px-5 lg:px-8 mt-20 max-w-5xl relative z-10">
+      {/* 2. RENDER MAIN CONTENT AREA */}
+      <main className="flex-grow pb-20 relative overflow-hidden z-10">
         
-        {/* Header Sejarah */}
-        <div className="text-center space-y-2 mb-12">
-          <h2 className="font-display font-black text-3xl lg:text-5xl text-primary uppercase tracking-tight">
-            Gerbang Lorong Waktu
-          </h2>
-          <p className="text-xs lg:text-sm text-muted-foreground uppercase font-black tracking-[0.2em]">
-            Alur Perjalanan Sejarah Berdirinya IPNU & IPPNU dari Masa ke Masa
-          </p>
-        </div>
+        {/* SUNTIKAN STYLE ANIMASI MAINSTREAM & MOTION EFFECT */}
+        <style dangerouslySetInnerHTML={{ __html: `
+          @keyframes drawLine {
+            from { height: 0%; }
+            to { height: 100%; }
+          }
+          @keyframes fadeInUp {
+            from {
+              opacity: 0;
+              transform: translateY(40px) scale(0.98);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0) scale(1);
+            }
+          }
+          @keyframes blobFloat {
+            0%, 100% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-20px) scale(1.05); }
+          }
+          @keyframes pulseBorderGreen {
+            0%, 100% { border-color: rgba(3, 68, 27, 0.2); box-shadow: 0 0 0 0px rgba(3, 68, 27, 0.1); }
+            50% { border-color: rgba(3, 68, 27, 0.8); box-shadow: 0 0 15px 4px rgba(3, 68, 27, 0.15); }
+          }
+          @keyframes pulseBorderGold {
+            0%, 100% { border-color: rgba(212, 175, 55, 0.2); box-shadow: 0 0 0 0px rgba(212, 175, 55, 0.1); }
+            50% { border-color: rgba(212, 175, 55, 0.8); box-shadow: 0 0 15px 4px rgba(212, 175, 55, 0.15); }
+          }
+          .animate-draw-line {
+            animation: drawLine 2s cubic-bezier(0.16, 1, 0.3 1) forwards;
+          }
+          .animate-fade-up {
+            opacity: 0;
+            animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+          }
+          .animate-blob {
+            animation: blobFloat 8s ease-in-out infinite;
+          }
+          .glow-active-green {
+            animation: pulseBorderGreen 2s infinite;
+          }
+          .glow-active-gold {
+            animation: pulseBorderGold 2s infinite;
+          }
+        `}} />
 
-        {/* TAB SWITCHER (IPNU / IPPNU) */}
-        <div className="flex justify-center mb-16">
-          <div className="bg-slate-100 p-2 rounded-full flex items-center relative shadow-inner border border-slate-200">
-            <button
-              onClick={() => { setActiveTab("ipnu"); setExpandedIndex(null); }}
-              className={`px-10 py-3.5 rounded-full text-xs font-black uppercase tracking-widest transition-all duration-500 flex items-center gap-2.5 ${
-                activeTab === "ipnu"
-                  ? "bg-primary text-white shadow-xl transform scale-105"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <Users className="h-4 w-4" /> IPNU (Putera)
-            </button>
-            <button
-              onClick={() => { setActiveTab("ippnu"); setExpandedIndex(null); }}
-              className={`px-10 py-3.5 rounded-full text-xs font-black uppercase tracking-widest transition-all duration-500 flex items-center gap-2.5 ${
-                activeTab === "ippnu"
-                  ? "bg-gold text-gold-foreground shadow-xl transform scale-105"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <Heart className="h-4 w-4" /> IPPNU (Putri)
-            </button>
+        {/* BACKGROUND DEKORATIF GLOWING BLOB */}
+        <div className="absolute top-1/3 left-[10%] w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-blob pointer-events-none -z-10"></div>
+        <div className="absolute top-2/3 right-[10%] w-96 h-96 bg-gold/5 rounded-full blur-3xl animate-blob pointer-events-none -z-10" style={{ animationDelay: '3s' }}></div>
+
+        {/* HERO SECTION */}
+        <section className="relative py-24 bg-primary-deep text-primary-foreground overflow-hidden">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(212,175,55,0.2),transparent_50%)]"></div>
+          <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/5 rounded-full blur-2xl"></div>
+          <div className="container mx-auto px-5 lg:px-8 text-center relative z-10 space-y-5">
+            <span className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-gold/20 text-gold text-xs font-black uppercase tracking-widest rounded-full shadow-lg border border-gold/10">
+              <Sparkles className="h-3.5 w-3.5 animate-spin" /> Kenali Jati Diri Kami
+            </span>
+            <h1 className="font-display font-black text-4xl lg:text-7xl uppercase tracking-tight italic transition-all duration-700 hover:scale-[1.01]">
+              Belajar, Berjuang, <span className="text-gold">Bertaqwa</span>
+            </h1>
+            <p className="text-sm lg:text-lg text-primary-foreground/80 max-w-2xl mx-auto leading-relaxed font-medium">
+              Pimpinan Cabang Ikatan Pelajar Nahdlatul Ulama & Ikatan Pelajar Putri Nahdlatul Ulama Kota Bekasi merupakan wadah perjuangan intelektual muda Aswaja di tanah patriot.
+            </p>
           </div>
-        </div>
+        </section>
 
-        {/* VERTIKAL TIMELINE DENGAN ANIMASI PROGRESSIVE DRAW */}
-        <div className="relative ml-4 md:ml-32 space-y-16 py-4">
+        {/* INTERACTIVE HISTORY SECTION */}
+        <section className="container mx-auto px-5 lg:px-8 mt-20 max-w-5xl relative z-10">
           
-          {/* Garis Tengah Belakang (Animasi Draw-Line) */}
-          <div className="absolute left-[15px] top-4 bottom-4 w-1 bg-slate-200 rounded-full overflow-hidden">
-            <div className={`w-full bg-gradient-to-b animate-draw-line ${
-              activeTab === 'ipnu' ? 'from-primary to-emerald-800' : 'from-gold to-yellow-600'
-            }`} style={{ height: '100%' }}></div>
-          </div>
-          
-          {historyData.map((item, idx) => {
-            const IconComponent = item.icon;
-            const isExpanded = expandedIndex === idx;
-
-            return (
-              <div 
-                key={idx} 
-                className="relative group pl-8 md:pl-16 animate-fade-up"
-                style={{ animationDelay: `${idx * 200}ms` }}
-              >
-                
-                {/* Node Bulat Timeline (Tahun) */}
-                <div className={`absolute -left-[3px] md:-left-[3px] top-1.5 h-10 w-10 rounded-full border-4 bg-background flex items-center justify-center transition-all duration-500 group-hover:scale-125 z-10 cursor-pointer ${
-                  isExpanded 
-                    ? (activeTab === "ipnu" ? "bg-primary text-white border-primary shadow-lg shadow-primary/20" : "bg-gold text-gold-foreground border-gold shadow-lg shadow-gold/20") 
-                    : "border-slate-200 text-slate-400 hover:border-slate-400 hover:text-slate-600"
-                }`}>
-                  <IconComponent className="h-4 w-4" />
-                </div>
-
-                {/* Label Tahun di Sebelah Kiri (Desktop Only) */}
-                <div className="hidden md:block absolute -left-36 top-2 text-right w-28">
-                  <span className={`text-3xl font-black font-display tracking-tight transition-all duration-500 block ${
-                    isExpanded 
-                      ? (activeTab === "ipnu" ? "text-primary text-4xl scale-105" : "text-gold text-4xl scale-105") 
-                      : "text-slate-300 group-hover:text-slate-800"
-                  }`}>
-                    {item.year}
-                  </span>
-                </div>
-
-                {/* Kartu Konten Sejarah (3D Tilt & Shadow Hover Effect) */}
-                <div 
-                  onClick={() => toggleExpand(idx)}
-                  className={`bg-white rounded-3xl border p-6 md:p-8 shadow-sm hover:shadow-2xl hover:-translate-y-1 transform transition-all duration-500 cursor-pointer relative overflow-hidden group/card ${
-                    isExpanded 
-                      ? (activeTab === "ipnu" ? "border-primary/80 glow-active-green" : "border-gold/80 glow-active-gold") 
-                      : "border-slate-100 hover:border-slate-300"
-                  }`}
-                >
-                  {/* Efek Garis Glow Pojok Atas */}
-                  <div className={`absolute top-0 left-0 right-0 h-1.5 transition-all duration-500 ${
-                    isExpanded 
-                      ? (activeTab === "ipnu" ? "bg-primary" : "bg-gold") 
-                      : "bg-transparent group-hover/card:bg-slate-300"
-                  }`}></div>
-
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <div className="space-y-2">
-                      <div className="flex items-center gap-3">
-                        {/* Label Tahun Mobile */}
-                        <span className="md:hidden text-2xl font-black text-primary font-display">{item.year}</span>
-                        <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full ${
-                          activeTab === 'ipnu' ? 'bg-primary/10 text-primary' : 'bg-gold/10 text-gold-foreground'
-                        }`}>
-                          {item.badge}
-                        </span>
-                      </div>
-                      <h3 className="font-display font-black text-xl md:text-2xl text-foreground group-hover/card:text-primary transition-colors">
-                        {item.title}
-                      </h3>
-                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] flex items-center gap-2">
-                        <Calendar className="h-3.5 w-3.5" /> {item.date}
-                      </p>
-                    </div>
-                    
-                    {/* Tombol Panah Buka Tutup */}
-                    <div className="flex items-center gap-2.5 self-end sm:self-center">
-                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest hidden sm:inline-block opacity-0 group-hover/card:opacity-100 transition-opacity">
-                        {isExpanded ? "Tutup" : "Baca Detail"}
-                      </span>
-                      <div className={`p-3 rounded-full transition-all duration-500 ${
-                        isExpanded 
-                          ? (activeTab === "ipnu" ? "bg-primary text-white shadow-lg shadow-primary/20" : "bg-gold text-gold-foreground shadow-lg shadow-gold/20") 
-                          : "bg-slate-100 text-slate-500 group-hover/card:bg-primary group-hover/card:text-white"
-                      }`}>
-                        {isExpanded ? <ChevronDown className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Ringkasan Singkat */}
-                  <p className="mt-4 text-sm lg:text-base text-slate-500 leading-relaxed font-medium">
-                    {item.summary}
-                  </p>
-
-                  {/* Kisah Detail (Mulus Expand & Collapse) */}
-                  <div className={`transition-all duration-700 ease-in-out overflow-hidden ${
-                    isExpanded ? "max-h-[800px] opacity-100 mt-6 pt-6 border-t border-dashed border-slate-200" : "max-h-0 opacity-0 pointer-events-none"
-                  }`}>
-                    <div className="space-y-4 text-sm lg:text-base leading-relaxed text-slate-700">
-                      <p className="font-medium">{item.details}</p>
-                      <div className="flex flex-wrap gap-4 pt-3 text-xs uppercase font-black text-slate-400">
-                        <span className="flex items-center gap-1">📍 Lokasi: <strong className="text-slate-800 font-black">{item.location}</strong></span>
-                      </div>
-                    </div>
-                  </div>
-
-                </div>
-
-              </div>
-            );
-          })}
-
-        </div>
-
-      </section>
-
-      {/* 3. VISI & MISI DAN STRUKTURAL BANNER */}
-      <section className="container mx-auto px-5 lg:px-8 mt-32 max-w-5xl relative z-10">
-        <div className="grid md:grid-cols-2 gap-8">
-          
-          {/* Card Visi */}
-          <div className="bg-primary-deep text-primary-foreground p-10 rounded-3xl relative overflow-hidden shadow-2xl shadow-emerald-950/10 group transform transition-transform duration-500 hover:scale-[1.02]">
-            <div className="absolute -bottom-8 -right-8 h-32 w-32 rounded-full bg-white/5 blur-xl group-hover:scale-125 transition-transform duration-700"></div>
-            <h3 className="font-display font-black text-2xl lg:text-3xl uppercase tracking-tight text-gold flex items-center gap-2">
-              <Sparkles className="h-6 w-6 animate-pulse" /> Visi Juang
-            </h3>
-            <p className="mt-5 text-sm lg:text-base text-primary-foreground/85 leading-relaxed font-medium">
-              Terwujudnya kader pelajar, santri, dan mahasiswa NU Kota Bekasi yang bertakwa kepada Allah SWT, berakhlakul karimah, unggul dalam intelektualitas, tangguh dalam organisasi, serta setia menjaga kedaulatan paham Aswaja dan NKRI.
+          {/* Header Sejarah */}
+          <div className="text-center space-y-2 mb-12">
+            <h2 className="font-display font-black text-3xl lg:text-5xl text-primary uppercase tracking-tight">
+              Gerbang Lorong Waktu
+            </h2>
+            <p className="text-xs lg:text-sm text-muted-foreground uppercase font-black tracking-[0.2em]">
+              Alur Perjalanan Sejarah Berdirinya IPNU & IPPNU dari Masa ke Masa
             </p>
           </div>
 
-          {/* Card Misi */}
-          <div className="bg-white border border-slate-100 p-10 rounded-3xl relative overflow-hidden shadow-sm hover:shadow-xl group transform transition-transform duration-500 hover:scale-[1.02]">
-            <h3 className="font-display font-black text-2xl lg:text-3xl uppercase tracking-tight text-primary flex items-center gap-2">
-              <BookOpen className="h-6 w-6" /> Misi Juang
-            </h3>
-            <ul className="mt-5 space-y-4 text-sm lg:text-base text-slate-600 leading-relaxed list-none">
-              <li className="flex items-start gap-2.5">
-                <span className="h-2 w-2 rounded-full bg-primary mt-2 shrink-0"></span>
-                <span>Membangun basis pertahanan kaderisasi di sekolah umum, pesantren, dan kampus.</span>
-              </li>
-              <li className="flex items-start gap-2.5">
-                <span className="h-2 w-2 rounded-full bg-primary mt-2 shrink-0"></span>
-                <span>Mendorong literasi digital cerdas bagi pemuda NU di wilayah Kota Bekasi.</span>
-              </li>
-              <li className="flex items-start gap-2.5">
-                <span className="h-2 w-2 rounded-full bg-primary mt-2 shrink-0"></span>
-                <span>Mengawal pemahaman dakwah Islam wasathiyah (moderat) demi keutuhan NKRI.</span>
-              </li>
-            </ul>
+          {/* TAB SWITCHER (IPNU / IPPNU) */}
+          <div className="flex justify-center mb-16">
+            <div className="bg-slate-100 p-2 rounded-full flex items-center relative shadow-inner border border-slate-200">
+              <button
+                onClick={() => { setActiveTab("ipnu"); setExpandedIndex(null); }}
+                className={`px-10 py-3.5 rounded-full text-xs font-black uppercase tracking-widest transition-all duration-500 flex items-center gap-2.5 ${
+                  activeTab === "ipnu"
+                    ? "bg-primary text-white shadow-xl transform scale-105"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <Users className="h-4 w-4" /> IPNU (Putera)
+              </button>
+              <button
+                onClick={() => { setActiveTab("ippnu"); setExpandedIndex(null); }}
+                className={`px-10 py-3.5 rounded-full text-xs font-black uppercase tracking-widest transition-all duration-500 flex items-center gap-2.5 ${
+                  activeTab === "ippnu"
+                    ? "bg-gold text-gold-foreground shadow-xl transform scale-105"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <Heart className="h-4 w-4" /> IPPNU (Putri)
+              </button>
+            </div>
           </div>
 
-        </div>
+          {/* VERTIKAL TIMELINE DENGAN ANIMASI PROGRESSIVE DRAW */}
+          <div className="relative ml-4 md:ml-32 space-y-16 py-4">
+            
+            {/* Garis Tengah Belakang (Animasi Draw-Line) */}
+            <div className="absolute left-[15px] top-4 bottom-4 w-1 bg-slate-200 rounded-full overflow-hidden">
+              <div className={`w-full bg-gradient-to-b animate-draw-line ${
+                activeTab === 'ipnu' ? 'from-primary to-emerald-800' : 'from-gold to-yellow-600'
+              }`} style={{ height: '100%' }}></div>
+            </div>
+            
+            {historyData.map((item, idx) => {
+              const IconComponent = item.icon;
+              const isExpanded = expandedIndex === idx;
 
-        {/* CALL TO ACTION BUTTON KE HALAMAN STRUKTURAL */}
-        <div className="mt-20 text-center">
-          <Link 
-            to="/struktural" 
-            className="inline-flex items-center gap-3 px-10 py-5 bg-primary hover:bg-[#023314] text-white rounded-full font-brand font-black text-sm uppercase tracking-widest transition-all shadow-xl shadow-emerald-950/20 hover:shadow-emerald-900/30 active:scale-95 group hover:-translate-y-0.5"
-          >
-            Lihat Struktur Kepengurusan Kami <ArrowRight className="h-4 w-4 group-hover:translate-x-2 transition-transform" />
-          </Link>
-        </div>
+              return (
+                <div 
+                  key={idx} 
+                  className="relative group pl-8 md:pl-16 animate-fade-up"
+                  style={{ animationDelay: `${idx * 200}ms` }}
+                >
+                  
+                  {/* Node Bulat Timeline (Tahun) */}
+                  <div className={`absolute -left-[3px] md:-left-[3px] top-1.5 h-10 w-10 rounded-full border-4 bg-background flex items-center justify-center transition-all duration-500 group-hover:scale-125 z-10 cursor-pointer ${
+                    isExpanded 
+                      ? (activeTab === "ipnu" ? "bg-primary text-white border-primary shadow-lg shadow-primary/20" : "bg-gold text-gold-foreground border-gold shadow-lg shadow-gold/20") 
+                      : "border-slate-200 text-slate-400 hover:border-slate-400 hover:text-slate-600"
+                  }`}>
+                    <IconComponent className="h-4 w-4" />
+                  </div>
 
-      </section>
+                  {/* Label Tahun di Sebelah Kiri (Desktop Only) */}
+                  <div className="hidden md:block absolute -left-36 top-2 text-right w-28">
+                    <span className={`text-3xl font-black font-display tracking-tight transition-all duration-500 block ${
+                      isExpanded 
+                        ? (activeTab === "ipnu" ? "text-primary text-4xl scale-105" : "text-gold text-4xl scale-105") 
+                        : "text-slate-300 group-hover:text-slate-800"
+                    }`}>
+                      {item.year}
+                    </span>
+                  </div>
+
+                  {/* Kartu Konten Sejarah (3D Tilt & Shadow Hover Effect) */}
+                  <div 
+                    onClick={() => toggleExpand(idx)}
+                    className={`bg-white rounded-3xl border p-6 md:p-8 shadow-sm hover:shadow-2xl hover:-translate-y-1 transform transition-all duration-500 cursor-pointer relative overflow-hidden group/card ${
+                      isExpanded 
+                        ? (activeTab === "ipnu" ? "border-primary/80 glow-active-green" : "border-gold/80 glow-active-gold") 
+                        : "border-slate-100 hover:border-slate-300"
+                    }`}
+                  >
+                    {/* Efek Garis Glow Pojok Atas */}
+                    <div className={`absolute top-0 left-0 right-0 h-1.5 transition-all duration-500 ${
+                      isExpanded 
+                        ? (activeTab === "ipnu" ? "bg-primary" : "bg-gold") 
+                        : "bg-transparent group-hover/card:bg-slate-300"
+                    }`}></div>
+
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-3">
+                          {/* Label Tahun Mobile */}
+                          <span className="md:hidden text-2xl font-black text-primary font-display">{item.year}</span>
+                          <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full ${
+                            activeTab === 'ipnu' ? 'bg-primary/10 text-primary' : 'bg-gold/10 text-gold-foreground'
+                          }`}>
+                            {item.badge}
+                          </span>
+                        </div>
+                        <h3 className="font-display font-black text-xl md:text-2xl text-foreground group-hover/card:text-primary transition-colors">
+                          {item.title}
+                        </h3>
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] flex items-center gap-2">
+                          <Calendar className="h-3.5 w-3.5" /> {item.date}
+                        </p>
+                      </div>
+                      
+                      {/* Tombol Panah Buka Tutup */}
+                      <div className="flex items-center gap-2.5 self-end sm:self-center">
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest hidden sm:inline-block opacity-0 group-hover/card:opacity-100 transition-opacity">
+                          {isExpanded ? "Tutup" : "Baca Detail"}
+                        </span>
+                        <div className={`p-3 rounded-full transition-all duration-500 ${
+                          isExpanded 
+                            ? (activeTab === "ipnu" ? "bg-primary text-white shadow-lg shadow-primary/20" : "bg-gold text-gold-foreground shadow-lg shadow-gold/20") 
+                            : "bg-slate-100 text-slate-500 group-hover/card:bg-primary group-hover/card:text-white"
+                        }`}>
+                          {isExpanded ? <ChevronDown className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Ringkasan Singkat */}
+                    <p className="mt-4 text-sm lg:text-base text-slate-500 leading-relaxed font-medium">
+                      {item.summary}
+                    </p>
+
+                    {/* Kisah Detail (Mulus Expand & Collapse) */}
+                    <div className={`transition-all duration-700 ease-in-out overflow-hidden ${
+                      isExpanded ? "max-h-[800px] opacity-100 mt-6 pt-6 border-t border-dashed border-slate-200" : "max-h-0 opacity-0 pointer-events-none"
+                    }`}>
+                      <div className="space-y-4 text-sm lg:text-base leading-relaxed text-slate-700">
+                        <p className="font-medium">{item.details}</p>
+                        <div className="flex flex-wrap gap-4 pt-3 text-xs uppercase font-black text-slate-400">
+                          <span className="flex items-center gap-1">📍 Lokasi: <strong className="text-slate-800 font-black">{item.location}</strong></span>
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+
+                </div>
+              );
+            })}
+
+          </div>
+
+        </section>
+
+        {/* VISI & MISI DAN STRUKTURAL BANNER */}
+        <section className="container mx-auto px-5 lg:px-8 mt-32 max-w-5xl relative z-10">
+          <div className="grid md:grid-cols-2 gap-8">
+            
+            {/* Card Visi */}
+            <div className="bg-primary-deep text-primary-foreground p-10 rounded-3xl relative overflow-hidden shadow-2xl shadow-emerald-950/10 group transform transition-transform duration-500 hover:scale-[1.02]">
+              <div className="absolute -bottom-8 -right-8 h-32 w-32 rounded-full bg-white/5 blur-xl group-hover:scale-125 transition-transform duration-700"></div>
+              <h3 className="font-display font-black text-2xl lg:text-3xl uppercase tracking-tight text-gold flex items-center gap-2">
+                <Sparkles className="h-6 w-6 animate-pulse" /> Visi Juang
+              </h3>
+              <p className="mt-5 text-sm lg:text-base text-primary-foreground/85 leading-relaxed font-medium">
+                Terwujudnya kader pelajar, santri, dan mahasiswa NU Kota Bekasi yang bertakwa kepada Allah SWT, berakhlakul karimah, unggul dalam intelektualitas, tangguh dalam organisasi, serta setia menjaga kedaulatan paham Aswaja dan NKRI.
+              </p>
+            </div>
+
+            {/* Card Misi */}
+            <div className="bg-white border border-slate-100 p-10 rounded-3xl relative overflow-hidden shadow-sm hover:shadow-xl group transform transition-transform duration-500 hover:scale-[1.02]">
+              <h3 className="font-display font-black text-2xl lg:text-3xl uppercase tracking-tight text-primary flex items-center gap-2">
+                <BookOpen className="h-6 w-6" /> Misi Juang
+              </h3>
+              <ul className="mt-5 space-y-4 text-sm lg:text-base text-slate-600 leading-relaxed list-none">
+                <li className="flex items-start gap-2.5">
+                  <span className="h-2 w-2 rounded-full bg-primary mt-2 shrink-0"></span>
+                  <span>Membangun basis pertahanan kaderisasi di sekolah umum, pesantren, dan kampus.</span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <span className="h-2 w-2 rounded-full bg-primary mt-2 shrink-0"></span>
+                  <span>Mendorong literasi digital cerdas bagi pemuda NU di wilayah Kota Bekasi.</span>
+                </li>
+                <li className="flex items-start gap-2.5">
+                  <span className="h-2 w-2 rounded-full bg-primary mt-2 shrink-0"></span>
+                  <span>Mengawal pemahaman dakwah Islam wasathiyah (moderat) demi keutuhan NKRI.</span>
+                </li>
+              </ul>
+            </div>
+
+          </div>
+
+          {/* CALL TO ACTION BUTTON KE HALAMAN STRUKTURAL */}
+          <div className="mt-20 text-center">
+            <Link 
+              to="/struktural" 
+              className="inline-flex items-center gap-3 px-10 py-5 bg-primary hover:bg-[#023314] text-white rounded-full font-brand font-black text-sm uppercase tracking-widest transition-all shadow-xl shadow-emerald-950/20 hover:shadow-emerald-900/30 active:scale-95 group hover:-translate-y-0.5"
+            >
+              Lihat Struktur Kepengurusan Kami <ArrowRight className="h-4 w-4 group-hover:translate-x-2 transition-transform" />
+            </Link>
+          </div>
+
+        </section>
+
+      </main>
+
+      {/* 3. RENDER FOOTER UTAMA */}
+      <Footer />
 
     </div>
   );
