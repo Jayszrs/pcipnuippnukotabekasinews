@@ -10,7 +10,8 @@ import {
   Globe, 
   ShieldCheck,
   Users,
-  Calendar // <-- 1. IMPORT ICON CALENDAR BARU DI SINI
+  Calendar,
+  Star // <-- 1. IMPORT ICON STAR BARU DI SINI UNTUK MENU RATING
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -24,12 +25,13 @@ export const AdminLayout = ({ children, title, action }: { children: ReactNode; 
     navigate("/admin");
   };
 
-  // DAFTAR MENU SIDEBAR - Sudah disempurnakan dengan Menu Event & Countdown
+  // DAFTAR MENU SIDEBAR - Sudah disatukan dengan Menu Banner & Menu Rating Terbaru
   const links = [
     { to: "/admin/dashboard", icon: LayoutDashboard, label: "Dashboard" },
     { to: "/admin/news/new", icon: PlusCircle, label: "Tulis Berita" },
     { to: "/admin/cadres", icon: Users, label: "Struktural" }, 
-    { to: "/admin/events", icon: Calendar, label: "Banner & Countdown" }, // <-- 2. COPASTE MENU BARU ACARA BESAR LU DI SINI
+    { to: "/admin/events", icon: Calendar, label: "Banner & Countdown" },
+    { to: "/admin/ratings", icon: Star, label: "Rating & Langganan" }, // <-- 2. COPASTE MENU BARU MONITORING ULASAN LU DI SINI
   ];
 
   return (
@@ -122,3 +124,5 @@ export const AdminLayout = ({ children, title, action }: { children: ReactNode; 
     </div>
   );
 };
+
+export default AdminLayout;

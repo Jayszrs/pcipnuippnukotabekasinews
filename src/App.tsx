@@ -32,6 +32,10 @@ import { StructuralPage } from "./pages/StructuralPage"; // Halaman Publik
 import { CadreManager } from "./pages/admin/CadreManager"; // Halaman Admin
 import { EventManager } from "./pages/admin/EventManager"; // <-- TAMBAHAN: Halaman Admin Banner & Countdown
 
+// --- TAMBAHAN: IMPORT HALAMAN RATING PELAYANAN & NEWSLETTER ---
+import { RatingPelayanan } from "./pages/RatingPelayanan"; // <-- Halaman Publik Rating
+import { RatingManager } from "./pages/admin/RatingManager"; // <-- Halaman Admin Rating
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -56,6 +60,9 @@ const App = () => (
 
               {/* PERBAIKAN: RUTE STRUKTURAL PUBLIK */}
               <Route path="/struktural" element={<StructuralPage />} />
+
+              {/* TAMBAHAN: RUTE RATING PELAYANAN PUBLIK */}
+              <Route path="/rating" element={<RatingPelayanan />} />
 
               {/* Rute Admin & Auth */}
               <Route path="/admin" element={<AdminLogin />} />
@@ -83,6 +90,12 @@ const App = () => (
               <Route
                 path="/admin/events"
                 element={<ProtectedRoute><EventManager /></ProtectedRoute>}
+              />
+
+              {/* TAMBAHAN: RUTE MANAJEMEN RATING & SUBSCRIPTION */}
+              <Route
+                path="/admin/ratings"
+                element={<ProtectedRoute><RatingManager /></ProtectedRoute>}
               />
 
               <Route
