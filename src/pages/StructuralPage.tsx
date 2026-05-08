@@ -1,19 +1,28 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { ArrowLeft, Quote, MapPin, Calendar, Shield, Users, Sparkles, Heart } from "lucide-react";
+import { 
+  ArrowLeft, 
+  Quote, 
+  MapPin, 
+  Calendar, 
+  Shield, 
+  Users, 
+  Sparkles, 
+  Heart,
+  Loader2 // <-- INI DIA YANG TADI KETINGGALAN LAN, BIAR GAK BLANK LAGI!
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header"; 
 import { Footer } from "@/components/Footer"; 
 
 // ================= KOMPONEN KARTU KADER (3D FLIP EFFECT) =================
-// TETAP PERTAHANKAN FITUR PUTAR CARD 3D ANDALAN LU LAN!
 const CadreCard = ({ kader }: { kader: any }) => {
   const [isFlipped, setIsFlipped] = useState(false);
 
   return (
     <div 
       onClick={() => setIsFlipped(!isFlipped)}
-      className="w-full aspect-[4/5] cursor-pointer [perspective:1000px] group select-none max-w-[320px] mx-auto"
+      className="w-full aspect-[4/5] cursor-pointer [perspective:1000px] group select-none max-w-[320px] mx-auto animate-in fade-in duration-500"
     >
       {/* Container Card yang Berputar */}
       <div className={`relative w-full h-full transition-transform duration-700 [transform-style:preserve-3d] ${isFlipped ? '[transform:rotateY(180deg)]' : ''}`}>
@@ -124,7 +133,6 @@ export const StructuralPage = () => {
       const { data } = await supabase
         .from("cadres")
         .select("*")
-        // Diurutkan berdasarkan kasta jabatan, lalu urutan prioritasnya
         .order("position_level", { ascending: true })
         .order("order_priority", { ascending: true });
       if (data) setCadres(data);
@@ -139,7 +147,6 @@ export const StructuralPage = () => {
   // Pisahkan pengurus ke masing-masing level bertingkat
   const leaders = filteredCadres.filter(k => k.position_level === 1);
   const bphList = filteredCadres.filter(k => k.position_level === 2);
-  // Departemen diisi level 3 atau kader lama yang datanya belum punya position_level
   const departments = filteredCadres.filter(k => k.position_level === 3 || !k.position_level);
 
   return (
@@ -159,7 +166,7 @@ export const StructuralPage = () => {
           Kembali
         </button>
 
-        {/* Heading Jajaran Struktural - Sesuai tema lu */}
+        {/* Heading Jajaran Struktural */}
         <div className="text-center mb-12 space-y-4 max-w-2xl mx-auto px-4">
           <h1 className="text-4xl md:text-5xl font-brand font-black text-primary uppercase tracking-tighter leading-none">
             Struktural Pimpinan Cabang
@@ -177,7 +184,7 @@ export const StructuralPage = () => {
               onClick={() => setActiveTab("IPNU")}
               className={`px-8 py-3 rounded-full text-xs font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2 ${
                 activeTab === "IPNU"
-                  ? "bg-[#03441b] text-white shadow-lg"
+                  ? "bg-[#03441b] text-white shadow-lg animate-in fade-in"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -187,7 +194,7 @@ export const StructuralPage = () => {
               onClick={() => setActiveTab("IPPNU")}
               className={`px-8 py-3 rounded-full text-xs font-black uppercase tracking-widest transition-all duration-300 flex items-center gap-2 ${
                 activeTab === "IPPNU"
-                  ? "bg-gold text-gold-foreground shadow-lg"
+                  ? "bg-gold text-gold-foreground shadow-lg animate-in fade-in"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
@@ -198,7 +205,7 @@ export const StructuralPage = () => {
 
         {loading ? (
           <div className="flex justify-center py-24">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <Loader2 className="h-10 w-10 animate-spin text-primary" />
           </div>
         ) : (
           <div className="space-y-20">
@@ -223,7 +230,7 @@ export const StructuralPage = () => {
                   ))}
                 </div>
 
-                {/* Garis Vertikal Utama Penghubung Kebawah (Hanya jika ada jajaran di bawahnya) */}
+                {/* Garis Vertikal Utama Penghubung Kebawah */}
                 {(bphList.length > 0 || departments.length > 0) && (
                   <div className="hidden md:block w-0.5 h-16 bg-gradient-to-b from-gold/80 to-slate-200 mt-8"></div>
                 )}
@@ -261,7 +268,7 @@ export const StructuralPage = () => {
             {/* LEVEL 3: DEPARTEMEN & ANGGOTA (GRID BAWAH) */}
             {/* ======================================================== */}
             {departments.length > 0 && (
-              <div className="pt-4">
+              <div className="pt-4 animate-in fade-in duration-500">
                 <div className="text-center mb-12">
                   <h3 className="font-brand font-black text-xl text-primary uppercase tracking-wider flex items-center justify-center gap-2">
                     <Shield className="h-5 w-5 text-gold" /> Departemen & Lembaga
