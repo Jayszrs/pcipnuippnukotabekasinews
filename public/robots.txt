@@ -1,15 +1,12 @@
-# Mengatur aturan universal untuk semua robot pencari (Google, Bing, dll)
 User-agent: *
 Allow: /
 Disallow: /admin/
 Disallow: /reset-password
 
-# Aturan khusus untuk bot sosial media agar tetap bisa memunculkan preview gambar (Open Graph/OG Image) saat link di-share
 User-agent: Twitterbot
 Allow: /
 
 User-agent: facebookexternalhit
 Allow: /
 
-# Link sitemap yang benar (Tanpa double https dan langsung mengarah ke file sitemap.xml)
 Sitemap: https://ipnuippnukotabekasinews.lovable.app/sitemap.xml
