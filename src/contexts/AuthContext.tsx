@@ -20,6 +20,7 @@ interface AuthCtx {
   role: Role | null;
   loading: boolean;
   roleLoading: boolean;
+  roleError: string | null;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
@@ -34,12 +35,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [role, setRole] = useState<Role | null>(null);
   const [loading, setLoading] = useState(true);
   const [roleLoading, setRoleLoading] = useState(false);
+  const [roleError, setRoleError] = useState<string | null>(null);
   const roleRequestRef = useRef(0);
 
   const fetchRole = async (userId: string) => {
     const requestId = ++roleRequestRef.current;
     setRoleLoading(true);
     setRole(null);
+    setRoleError(null);
+    let lastError: unknown = null;
 
     for (const delay of [0, 800]) {
       if (delay) await wait(delay);
@@ -51,11 +55,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setRoleLoading(false);
         return;
       } catch (error) {
+        lastError = error;
         console.error("fetchRole error:", error);
       }
     }
 
-    if (requestId === roleRequestRef.current) setRoleLoading(false);
+    if (requestId === roleRequestRef.current) {
+      setRole("user");
+      setRoleError(
+        lastError instanceof Error
+          ? lastError.message
+          : "Gagal memuat akses akun. Periksa konfigurasi Firebase/Firestore.",
+      );
+      setRoleLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -73,6 +86,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       } else {
         roleRequestRef.current += 1;
         setRole(null);
+        setRoleError(null);
         setRoleLoading(false);
       }
       setLoading(false);
@@ -117,7 +131,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <Ctx.Provider value={{ user, role, loading, roleLoading, signIn, signUp, signOut }}>
+    <Ctx.Provider value={{ user, role, loading, roleLoading, roleError, signIn, signUp, signOut }}>
       {children}
     </Ctx.Provider>
   );

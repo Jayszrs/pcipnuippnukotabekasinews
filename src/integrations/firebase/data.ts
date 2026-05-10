@@ -45,6 +45,19 @@ type ListOptions = {
   limit?: number;
 };
 
+const withTimeout = async <T>(label: string, promise: Promise<T>, ms = 5000) => {
+  let timeoutId: ReturnType<typeof setTimeout> | undefined;
+  const timeout = new Promise<never>((_, reject) => {
+    timeoutId = setTimeout(() => reject(new Error(`${label} timeout`)), ms);
+  });
+
+  try {
+    return await Promise.race([promise, timeout]);
+  } finally {
+    if (timeoutId) clearTimeout(timeoutId);
+  }
+};
+
 const requireDb = () => {
   if (!db || !isFirebaseConfigured) throw new Error("Firebase belum dikonfigurasi.");
   return db;
@@ -95,7 +108,10 @@ const sortAndLimit = <T extends Record<string, unknown>>(rows: T[], options: Lis
 
 export const listCollection = async <T extends Record<string, unknown>>(name: string, options?: ListOptions) => {
   const database = requireDb();
-  const snap = await getDocs(query(collection(database, name), ...buildConstraints(options)));
+  const snap = await withTimeout(
+    `Memuat data ${name}`,
+    getDocs(query(collection(database, name), ...buildConstraints(options))),
+  );
   return sortAndLimit(snap.docs.map((item) => normalizeDoc<T>(item.id, item.data())), options);
 };
 
@@ -115,30 +131,30 @@ export const subscribeCollection = <T extends Record<string, unknown>>(
 
 export const getDocument = async <T extends Record<string, unknown>>(name: string, id: string) => {
   const database = requireDb();
-  const snap = await getDoc(doc(database, name, id));
+  const snap = await withTimeout(`Memuat dokumen ${name}`, getDoc(doc(database, name, id)));
   return snap.exists() ? normalizeDoc<T>(snap.id, snap.data()) : null;
 };
 
 export const addDocument = async <T extends Record<string, unknown>>(name: string, payload: Record<string, unknown>) => {
   const database = requireDb();
-  const created = await addDoc(collection(database, name), cleanPayload(payload));
-  const snap = await getDoc(created);
+  const created = await withTimeout(`Membuat data ${name}`, addDoc(collection(database, name), cleanPayload(payload)));
+  const snap = await withTimeout(`Memuat data ${name}`, getDoc(created));
   return normalizeDoc<T>(snap.id, snap.data() ?? {});
 };
 
 export const updateDocument = async (name: string, id: string, payload: Record<string, unknown>) => {
   const database = requireDb();
-  await updateDoc(doc(database, name, id), cleanPayload(payload));
+  await withTimeout(`Memperbarui data ${name}`, updateDoc(doc(database, name, id), cleanPayload(payload)));
 };
 
 export const upsertDocument = async (name: string, id: string, payload: Record<string, unknown>) => {
   const database = requireDb();
-  await setDoc(doc(database, name, id), cleanPayload(payload), { merge: true });
+  await withTimeout(`Menyimpan data ${name}`, setDoc(doc(database, name, id), cleanPayload(payload), { merge: true }));
 };
 
 export const deleteDocument = async (name: string, id: string) => {
   const database = requireDb();
-  await deleteDoc(doc(database, name, id));
+  await withTimeout(`Menghapus data ${name}`, deleteDoc(doc(database, name, id)));
 };
 
 export const uploadFile = async (folder: string, path: string, file: File) => {
