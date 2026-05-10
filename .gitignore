@@ -11,6 +11,13 @@ node_modules
 dist
 dist-ssr
 *.local
+.vercel
+Microsoft/Windows/PowerShell/
+
+# Environment files
+.env
+.env.*
+!.env.example
 
 # Editor directories and files
 .vscode/*
