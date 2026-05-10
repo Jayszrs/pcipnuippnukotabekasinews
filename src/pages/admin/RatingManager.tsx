@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { AdminLayout } from "@/components/AdminLayout";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/firebase/supabaseCompat";
 import { 
   Star, Trash2, MessageSquare, Send, Loader2, 
   MapPin, CheckCircle, ShieldCheck, Mail

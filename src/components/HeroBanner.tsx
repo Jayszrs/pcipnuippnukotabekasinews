@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/firebase/supabaseCompat";
 import { Clock, Instagram, Bell, Loader2 } from "lucide-react";
 
 // Struktur data type aman untuk Event

@@ -3,7 +3,8 @@ import { Link } from "react-router-dom";
 import { Logo } from "@/components/Logo";
 import { Mail, ArrowLeft, Loader2, KeyRound } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { sendPasswordResetEmail } from "firebase/auth";
+import { auth, isFirebaseConfigured } from "@/integrations/firebase/client";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState("");
@@ -11,22 +12,30 @@ const ForgotPassword = () => {
   const [sent, setSent] = useState(false);
 
   useEffect(() => {
-    document.title = "Lupa Password — IPNU IPPNU Bekasi";
+    document.title = "Lupa Password - IPNU IPPNU Bekasi";
   }, []);
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/reset-password`,
-    });
-    setLoading(false);
-    if (error) {
-      toast.error("Gagal mengirim email", { description: error.message });
+    if (!auth || !isFirebaseConfigured) {
+      toast.error("Firebase belum dikonfigurasi di Vercel");
       return;
     }
-    setSent(true);
-    toast.success("Email reset password terkirim");
+
+    setLoading(true);
+    try {
+      await sendPasswordResetEmail(auth, email, {
+        url: `${window.location.origin}/reset-password`,
+      });
+      setSent(true);
+      toast.success("Email reset password terkirim");
+    } catch (error) {
+      toast.error("Gagal mengirim email", {
+        description: error instanceof Error ? error.message : "Terjadi kesalahan",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

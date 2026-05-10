@@ -1,12 +1,22 @@
 import { createContext, useContext, useEffect, useRef, useState, ReactNode } from "react";
-import { isSupabaseConfigured, supabase } from "@/integrations/supabase/client";
-import type { Session, User } from "@supabase/supabase-js";
+import {
+  createUserWithEmailAndPassword,
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  signOut as firebaseSignOut,
+} from "firebase/auth";
+import { auth, isFirebaseConfigured } from "@/integrations/firebase/client";
+import { getUserRole, upsertDocument } from "@/integrations/firebase/data";
 
 type Role = "admin" | "editor" | "user";
+interface AppUser {
+  id: string;
+  uid: string;
+  email: string | null;
+}
 
 interface AuthCtx {
-  user: User | null;
-  session: Session | null;
+  user: AppUser | null;
   role: Role | null;
   loading: boolean;
   roleLoading: boolean;
@@ -20,8 +30,7 @@ const Ctx = createContext<AuthCtx | undefined>(undefined);
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<AppUser | null>(null);
   const [role, setRole] = useState<Role | null>(null);
   const [loading, setLoading] = useState(true);
   const [roleLoading, setRoleLoading] = useState(false);
@@ -35,97 +44,75 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     for (const delay of [0, 800]) {
       if (delay) await wait(delay);
 
-      const { data, error } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", userId);
-
-      if (requestId !== roleRequestRef.current) return;
-
-      if (!error) {
-        if (data && data.length > 0) {
-          const roles = data.map((r) => r.role as Role);
-          const best: Role = roles.includes("admin")
-            ? "admin"
-            : roles.includes("editor")
-            ? "editor"
-            : "user";
-          setRole(best);
-        } else {
-          setRole("user");
-        }
+      try {
+        const nextRole = (await getUserRole(userId)) as Role;
+        if (requestId !== roleRequestRef.current) return;
+        setRole(nextRole);
         setRoleLoading(false);
         return;
+      } catch (error) {
+        console.error("fetchRole error:", error);
       }
-
-      console.error("fetchRole error:", error);
     }
 
     if (requestId === roleRequestRef.current) setRoleLoading(false);
   };
 
   useEffect(() => {
-    if (!isSupabaseConfigured) {
+    if (!auth || !isFirebaseConfigured) {
       setLoading(false);
       setRoleLoading(false);
       return;
     }
 
-    // Set up listener FIRST
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, sess) => {
-      setSession(sess);
-      setUser(sess?.user ?? null);
-      if (sess?.user) {
+    const unsubscribe = onAuthStateChanged(auth, (nextUser) => {
+      setUser(nextUser ? { id: nextUser.uid, uid: nextUser.uid, email: nextUser.email } : null);
+      if (nextUser) {
         setRoleLoading(true);
-        // Defer Supabase call to avoid deadlock
-        setTimeout(() => fetchRole(sess.user.id), 0);
+        fetchRole(nextUser.uid);
       } else {
         roleRequestRef.current += 1;
         setRole(null);
         setRoleLoading(false);
       }
-    });
-
-    // THEN check existing session
-    supabase.auth.getSession().then(({ data: { session: sess } }) => {
-      setSession(sess);
-      setUser(sess?.user ?? null);
       setLoading(false);
-      if (sess?.user) {
-        fetchRole(sess.user.id);
-      }
     });
 
-    return () => subscription.unsubscribe();
+    return unsubscribe;
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    if (!isSupabaseConfigured) return { error: "Supabase belum dikonfigurasi di Vercel." };
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    return { error: error?.message ?? null };
+    if (!auth || !isFirebaseConfigured) return { error: "Firebase belum dikonfigurasi di Vercel." };
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      return { error: null };
+    } catch (error) {
+      return { error: error instanceof Error ? error.message : "Login gagal" };
+    }
   };
 
   const signUp = async (email: string, password: string, fullName: string) => {
-    if (!isSupabaseConfigured) return { error: "Supabase belum dikonfigurasi di Vercel." };
-    const redirectUrl = `${window.location.origin}/admin/dashboard`;
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: redirectUrl,
-        data: { full_name: fullName },
-      },
-    });
-    return { error: error?.message ?? null };
+    if (!auth || !isFirebaseConfigured) return { error: "Firebase belum dikonfigurasi di Vercel." };
+    try {
+      const credential = await createUserWithEmailAndPassword(auth, email, password);
+      await upsertDocument("profiles", credential.user.uid, {
+        full_name: fullName,
+        email,
+        updated_at: new Date().toISOString(),
+      });
+      return { error: null };
+    } catch (error) {
+      return { error: error instanceof Error ? error.message : "Registrasi gagal" };
+    }
   };
 
   const signOut = async () => {
-    if (!isSupabaseConfigured) return;
-    await supabase.auth.signOut();
+    if (!auth || !isFirebaseConfigured) return;
+    await firebaseSignOut(auth);
   };
 
   return (
-    <Ctx.Provider value={{ user, session, role, loading, roleLoading, signIn, signUp, signOut }}>
+    <Ctx.Provider value={{ user, role, loading, roleLoading, signIn, signUp, signOut }}>
       {children}
     </Ctx.Provider>
   );

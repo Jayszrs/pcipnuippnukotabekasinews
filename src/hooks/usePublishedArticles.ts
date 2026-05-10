@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/firebase/supabaseCompat";
 import { articles as mockArticles, type Article } from "@/data/news";
 
 interface DbNews {

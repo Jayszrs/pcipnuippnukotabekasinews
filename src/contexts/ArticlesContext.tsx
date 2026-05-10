@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { isSupabaseConfigured, supabase } from "@/integrations/supabase/client";
+import { isFirebaseConfigured } from "@/integrations/firebase/client";
+import { subscribeCollection } from "@/integrations/firebase/data";
 import { type Article, type Category } from "@/data/news";
 
 interface DbNews {
@@ -61,38 +62,34 @@ export const ArticlesProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!isSupabaseConfigured) {
+    if (!isFirebaseConfigured) {
       setArticles([]);
       setLoading(false);
       return;
     }
 
     let mounted = true;
-    const fetchArticles = async () => {
-      setLoading(true);
-      const { data } = await supabase
-        .from("news")
-        .select("*")
-        .eq("status", "published")
-        .order("published_at", { ascending: false });
-      
-      if (!mounted) return;
-      
-      if (data) {
-        setArticles(data.map((d) => dbToArticle(d as DbNews)));
-      }
-      setLoading(false);
+    const unsubscribe = subscribeCollection<DbNews>(
+      "news",
+      {
+        filters: [{ field: "status", op: "==", value: "published" }],
+        order: [{ field: "published_at", direction: "desc" }],
+      },
+      (data) => {
+        if (!mounted) return;
+        setArticles(data.map((d) => dbToArticle(d)));
+        setLoading(false);
+      },
+      (error) => {
+        console.error("Gagal memuat berita Firebase:", error);
+        setLoading(false);
+      },
+    );
+
+    return () => {
+      mounted = false;
+      unsubscribe();
     };
-
-    fetchArticles();
-
-    // Realtime updates: web otomatis update kalau lu tambah berita di Supabase
-    const ch = supabase
-      .channel("public:news")
-      .on("postgres_changes", { event: "*", schema: "public", table: "news" }, fetchArticles)
-      .subscribe();
-
-    return () => { mounted = false; supabase.removeChannel(ch); };
   }, []);
 
   const value: Ctx = {

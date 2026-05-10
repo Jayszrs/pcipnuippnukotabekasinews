@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { MessageCircle, X, Send, Bot, User, Loader2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client"; // Import Supabase Client lu
+import { supabase } from "@/integrations/firebase/supabaseCompat"; // Import Supabase Client lu
 
 // Tipe data untuk pesan
 interface Message {

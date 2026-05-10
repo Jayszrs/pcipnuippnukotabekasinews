@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { AdminLayout } from "@/components/AdminLayout";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/firebase/supabaseCompat";
 import { useAuth } from "@/contexts/AuthContext";
 import { 
   PlusCircle, Edit, Trash2, Eye, FileText, FileCheck2, 

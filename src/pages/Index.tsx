@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/firebase/supabaseCompat";
 import { Layout } from "@/components/Layout";
 import { Hero } from "@/components/Hero";
 import { CategorySection } from "@/components/CategorySection";

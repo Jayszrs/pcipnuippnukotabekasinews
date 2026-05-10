@@ -3,31 +3,28 @@ import { Link, useNavigate } from "react-router-dom";
 import { Logo } from "@/components/Logo";
 import { Lock, ArrowLeft, Loader2, ShieldCheck } from "lucide-react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
+import { confirmPasswordReset, verifyPasswordResetCode } from "firebase/auth";
+import { auth, isFirebaseConfigured } from "@/integrations/firebase/client";
 
 const ResetPassword = () => {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [loading, setLoading] = useState(false);
   const [ready, setReady] = useState(false);
+  const [oobCode, setOobCode] = useState<string | null>(null);
   const navigate = useNavigate();
 
   useEffect(() => {
-    document.title = "Reset Password — IPNU IPPNU Bekasi";
+    document.title = "Reset Password - IPNU IPPNU Bekasi";
+    const code = new URLSearchParams(window.location.search).get("oobCode");
+    if (!auth || !isFirebaseConfigured || !code) return;
 
-    // Supabase otomatis menukar token recovery dari URL hash menjadi session
-    const { data: sub } = supabase.auth.onAuthStateChange((event) => {
-      if (event === "PASSWORD_RECOVERY" || event === "SIGNED_IN") {
+    verifyPasswordResetCode(auth, code)
+      .then(() => {
+        setOobCode(code);
         setReady(true);
-      }
-    });
-
-    // Cek session yang sudah ada
-    supabase.auth.getSession().then(({ data }) => {
-      if (data.session) setReady(true);
-    });
-
-    return () => sub.subscription.unsubscribe();
+      })
+      .catch(() => setReady(false));
   }, []);
 
   const onSubmit = async (e: React.FormEvent) => {
@@ -40,16 +37,23 @@ const ResetPassword = () => {
       toast.error("Konfirmasi password tidak cocok");
       return;
     }
-    setLoading(true);
-    const { error } = await supabase.auth.updateUser({ password });
-    setLoading(false);
-    if (error) {
-      toast.error("Gagal mengubah password", { description: error.message });
+    if (!auth || !oobCode) {
+      toast.error("Tautan reset password tidak valid");
       return;
     }
-    toast.success("Password berhasil diubah!");
-    await supabase.auth.signOut();
-    navigate("/admin");
+
+    setLoading(true);
+    try {
+      await confirmPasswordReset(auth, oobCode, password);
+      toast.success("Password berhasil diubah!");
+      navigate("/admin");
+    } catch (error) {
+      toast.error("Gagal mengubah password", {
+        description: error instanceof Error ? error.message : "Terjadi kesalahan",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -68,7 +72,7 @@ const ResetPassword = () => {
           <div className="mt-8 p-6 rounded-sm border border-border bg-muted/30 text-center">
             <ShieldCheck className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
             <p className="text-sm text-muted-foreground">
-              Memverifikasi tautan reset... Pastikan Anda membuka halaman ini dari email reset password.
+              Memverifikasi tautan reset... Pastikan Anda membuka halaman ini dari email reset password Firebase.
             </p>
           </div>
         ) : (
