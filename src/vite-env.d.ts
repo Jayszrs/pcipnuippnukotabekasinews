@@ -9,6 +9,11 @@ interface ImportMetaEnv {
   readonly VITE_FIREBASE_APP_ID: string;
   readonly VITE_FIREBASE_FUNCTIONS_REGION?: string;
   readonly VITE_CHATBOT_FUNCTION_URL?: string;
+  readonly VITE_FIREBASE_DATACONNECT_LOCATION?: string;
+  readonly VITE_FIREBASE_DATACONNECT_SERVICE_ID?: string;
+  readonly VITE_FIREBASE_DATACONNECT_CONNECTOR_ID?: string;
+  readonly VITE_FIREBASE_DATACONNECT_EMULATOR_HOST?: string;
+  readonly VITE_FIREBASE_DATACONNECT_EMULATOR_PORT?: string;
 }
 
 interface ImportMeta {

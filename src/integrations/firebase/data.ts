@@ -16,9 +16,17 @@ import {
   type WhereFilterOp,
   type Timestamp,
 } from "firebase/firestore";
+import { executeMutation, executeQuery, mutationRef, queryRef } from "firebase/data-connect";
 import { httpsCallable } from "firebase/functions";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
-import { db, functions, isFirebaseConfigured, storage } from "./client";
+import {
+  dataConnect,
+  db,
+  functions,
+  isDataConnectConfigured,
+  isFirebaseConfigured,
+  storage,
+} from "./client";
 
 type Filter = {
   field: string;
@@ -140,6 +148,41 @@ export const uploadFile = async (folder: string, path: string, file: File) => {
   return getDownloadURL(fileRef);
 };
 
+export const callDataConnectQuery = async <Data, Variables extends Record<string, unknown> | undefined = undefined>(
+  operationName: string,
+  variables?: Variables,
+) => {
+  if (!dataConnect || !isDataConnectConfigured) {
+    throw new Error("Firebase Data Connect belum dikonfigurasi.");
+  }
+
+  const ref =
+    variables === undefined
+      ? queryRef<Data>(dataConnect, operationName)
+      : queryRef<Data, Variables>(dataConnect, operationName, variables);
+  const result = await executeQuery(ref);
+  return result.data;
+};
+
+export const callDataConnectMutation = async <
+  Data,
+  Variables extends Record<string, unknown> | undefined = undefined,
+>(
+  operationName: string,
+  variables?: Variables,
+) => {
+  if (!dataConnect || !isDataConnectConfigured) {
+    throw new Error("Firebase Data Connect belum dikonfigurasi.");
+  }
+
+  const ref =
+    variables === undefined
+      ? mutationRef<Data>(dataConnect, operationName)
+      : mutationRef<Data, Variables>(dataConnect, operationName, variables);
+  const result = await executeMutation(ref);
+  return result.data;
+};
+
 export const getUserRole = async (userId: string) => {
   const direct = await getDocument<{ role?: string }>("user_roles", userId);
   if (direct?.role) return direct.role;
@@ -156,13 +199,18 @@ export const getUserRole = async (userId: string) => {
 };
 
 export const callChatbot = async (messages: Array<{ role: string; content: string }>) => {
+  const endpoint = import.meta.env.VITE_CHATBOT_FUNCTION_URL;
+
   if (functions && isFirebaseConfigured) {
-    const callable = httpsCallable(functions, "chatbot");
-    const result = await callable({ messages });
-    return result.data as { reply?: string; error?: string };
+    try {
+      const callable = httpsCallable(functions, "chatbot");
+      const result = await callable({ messages });
+      return result.data as { reply?: string; error?: string };
+    } catch (error) {
+      if (!endpoint) throw error;
+    }
   }
 
-  const endpoint = import.meta.env.VITE_CHATBOT_FUNCTION_URL;
   if (!endpoint) throw new Error("Firebase chatbot function belum dikonfigurasi.");
   const response = await fetch(endpoint, {
     method: "POST",

@@ -1,5 +1,11 @@
 import { initializeApp, getApps, type FirebaseApp } from "firebase/app";
 import { getAuth, type Auth } from "firebase/auth";
+import {
+  connectDataConnectEmulator,
+  getDataConnect,
+  type DataConnect,
+  type ConnectorConfig,
+} from "firebase/data-connect";
 import { getFirestore, type Firestore } from "firebase/firestore";
 import { getFunctions, type Functions } from "firebase/functions";
 import { getStorage, type FirebaseStorage } from "firebase/storage";
@@ -30,9 +36,31 @@ export const firebaseApp: FirebaseApp | null = isFirebaseConfigured
   ? getApps()[0] ?? initializeApp(firebaseConfig)
   : null;
 
+const dataConnectConfig: ConnectorConfig = {
+  location: import.meta.env.VITE_FIREBASE_DATACONNECT_LOCATION || "asia-southeast2",
+  service: import.meta.env.VITE_FIREBASE_DATACONNECT_SERVICE_ID,
+  connector: import.meta.env.VITE_FIREBASE_DATACONNECT_CONNECTOR_ID,
+};
+
+export const isDataConnectConfigured = Boolean(
+  firebaseApp &&
+    dataConnectConfig.location &&
+    dataConnectConfig.service &&
+    dataConnectConfig.connector,
+);
+
 export const auth: Auth | null = firebaseApp ? getAuth(firebaseApp) : null;
 export const db: Firestore | null = firebaseApp ? getFirestore(firebaseApp) : null;
 export const storage: FirebaseStorage | null = firebaseApp ? getStorage(firebaseApp) : null;
 export const functions: Functions | null = firebaseApp
   ? getFunctions(firebaseApp, import.meta.env.VITE_FIREBASE_FUNCTIONS_REGION || "asia-southeast2")
   : null;
+export const dataConnect: DataConnect | null =
+  firebaseApp && isDataConnectConfigured ? getDataConnect(firebaseApp, dataConnectConfig) : null;
+
+const emulatorHost = import.meta.env.VITE_FIREBASE_DATACONNECT_EMULATOR_HOST;
+const emulatorPort = Number(import.meta.env.VITE_FIREBASE_DATACONNECT_EMULATOR_PORT || 9399);
+
+if (dataConnect && emulatorHost) {
+  connectDataConnectEmulator(dataConnect, emulatorHost, emulatorPort);
+}

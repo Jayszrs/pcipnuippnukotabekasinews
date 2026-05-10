@@ -3,6 +3,7 @@ import {
   Bot, MessageSquare, X, Send, Loader2, Sparkles, 
   RotateCcw, User, Phone, Check, Award, BookOpen, MapPin, Heart
 } from "lucide-react";
+import { callChatbot } from "@/integrations/firebase/data";
 import { toast } from "sonner";
 
 interface Message {
@@ -116,9 +117,9 @@ export const FloatingWidgets = () => {
       "Coba tanyakan lagi secara detail, kawan. Asisten belajar lu siap stand-by menjawab!";
   };
 
-  const handleSendMessage = (textToSend?: string) => {
+  const handleSendMessage = async (textToSend?: string) => {
     const text = textToSend || inputText;
-    if (!text.trim()) return;
+    if (!text.trim() || isThinking) return;
 
     const userMsg: Message = {
       id: `user-${Date.now()}`,
@@ -131,9 +132,13 @@ export const FloatingWidgets = () => {
     setInputText("");
     setIsThinking(true);
 
-    // Simulasi respons AI berpikir natural (1 - 1.5 Detik)
-    setTimeout(() => {
-      const aiReplyText = generateAiResponse(text);
+    try {
+      const apiMessages = [...messages, userMsg].map((message) => ({
+        role: message.sender === "user" ? "user" : "assistant",
+        content: message.text,
+      }));
+      const response = await callChatbot(apiMessages);
+      const aiReplyText = response.reply || response.error || generateAiResponse(text);
       const aiMsg: Message = {
         id: `ai-${Date.now()}`,
         sender: "ai",
@@ -141,8 +146,19 @@ export const FloatingWidgets = () => {
         timestamp: new Date(),
       };
       setMessages(prev => [...prev, aiMsg]);
+    } catch (error) {
+      console.error("Gagal memanggil Firebase chatbot:", error);
+      toast.warning("Chatbot Firebase belum aktif, memakai jawaban lokal sementara.");
+      const aiMsg: Message = {
+        id: `ai-${Date.now()}`,
+        sender: "ai",
+        text: generateAiResponse(text),
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, aiMsg]);
+    } finally {
       setIsThinking(false);
-    }, 1200);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {

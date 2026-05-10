@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { MessageCircle, X, Send, Bot, User, Loader2 } from "lucide-react";
-import { supabase } from "@/integrations/firebase/supabaseCompat"; // Import Supabase Client lu
+import { callChatbot } from "@/integrations/firebase/data";
 
 // Tipe data untuk pesan
 interface Message {
@@ -45,12 +45,8 @@ export const Chatbot = () => {
         content: m.text,
       }));
 
-      // 3. Panggil Edge Function 'chatbot' lewat Supabase
-      const { data, error } = await supabase.functions.invoke("chatbot", {
-        body: { messages: apiMessages },
-      });
-
-      if (error) throw error;
+      // 3. Panggil Firebase Function 'chatbot'
+      const data = await callChatbot(apiMessages);
 
       // 4. Tangkap balasan dari AI
       if (data && data.reply) {

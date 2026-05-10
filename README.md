@@ -20,6 +20,11 @@ Optional:
 
 - `VITE_FIREBASE_FUNCTIONS_REGION`
 - `VITE_CHATBOT_FUNCTION_URL`
+- `VITE_FIREBASE_DATACONNECT_LOCATION`
+- `VITE_FIREBASE_DATACONNECT_SERVICE_ID`
+- `VITE_FIREBASE_DATACONNECT_CONNECTOR_ID`
+- `VITE_FIREBASE_DATACONNECT_EMULATOR_HOST`
+- `VITE_FIREBASE_DATACONNECT_EMULATOR_PORT`
 
 ## Firebase Collections
 
@@ -38,6 +43,15 @@ Firebase Storage folders used by the app:
 - `avatars`
 - `news-media`
 - `cadres`
+
+## Firebase Data Connect
+
+The project includes generic helpers for Firebase Data Connect in `src/integrations/firebase/data.ts`:
+
+- `callDataConnectQuery(operationName, variables)`
+- `callDataConnectMutation(operationName, variables)`
+
+Use these when your Firebase Data Connect service and connector are deployed. Data Connect operations must already exist in the connector because Firebase calls deployed SQL-backed operations by name.
 
 ## Deploy To Vercel
 
