@@ -9,6 +9,7 @@ import {
   LogOut, 
   Globe, 
   ShieldCheck,
+  UserCog,
   Users,
   Calendar,
   Star // <-- 1. IMPORT ICON STAR BARU DI SINI UNTUK MENU RATING
@@ -32,6 +33,7 @@ export const AdminLayout = ({ children, title, action }: { children: ReactNode; 
     { to: "/admin/cadres", icon: Users, label: "Struktural" }, 
     { to: "/admin/events", icon: Calendar, label: "Banner & Countdown" },
     { to: "/admin/ratings", icon: Star, label: "Rating & Langganan" }, // <-- 2. COPASTE MENU BARU MONITORING ULASAN LU DI SINI
+    ...(role === "admin" ? [{ to: "/admin/users", icon: UserCog, label: "Role Management" }] : []),
   ];
 
   return (

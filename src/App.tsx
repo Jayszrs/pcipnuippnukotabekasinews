@@ -36,6 +36,7 @@ import { EventManager } from "./pages/admin/EventManager"; // <-- TAMBAHAN: Hala
 // --- TAMBAHAN: IMPORT HALAMAN RATING PELAYANAN & NEWSLETTER ---
 import { RatingPelayanan } from "./pages/RatingPelayanan"; // <-- Halaman Publik Rating
 import { RatingManager } from "./pages/admin/RatingManager"; // <-- Halaman Admin Rating
+import RoleManager from "./pages/admin/RoleManager";
 
 const queryClient = new QueryClient();
 
@@ -97,6 +98,10 @@ const App = () => (
               <Route
                 path="/admin/ratings"
                 element={<ProtectedRoute><RatingManager /></ProtectedRoute>}
+              />
+              <Route
+                path="/admin/users"
+                element={<ProtectedRoute><RoleManager /></ProtectedRoute>}
               />
 
               <Route
