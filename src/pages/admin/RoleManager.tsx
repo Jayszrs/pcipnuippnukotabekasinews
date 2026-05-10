@@ -30,6 +30,7 @@ type AccountRow = {
   role: Role;
   updatedAt?: string;
   hasProfile: boolean;
+  hasRoleRecord: boolean;
 };
 
 const roleLabels: Record<Role, string> = {
@@ -41,7 +42,7 @@ const roleLabels: Record<Role, string> = {
 const roleDescriptions: Record<Role, string> = {
   admin: "Akses penuh ke dashboard, role, dan konten.",
   editor: "Bisa mengelola konten redaksi.",
-  user: "Akun biasa tanpa akses dashboard.",
+  user: "Akses dashboard dicabut.",
 };
 
 export const RoleManager = () => {
@@ -65,6 +66,7 @@ export const RoleManager = () => {
         role: "user",
         updatedAt: profile.updated_at,
         hasProfile: true,
+        hasRoleRecord: false,
       });
     });
 
@@ -80,11 +82,16 @@ export const RoleManager = () => {
         role: nextRole,
         updatedAt: roleRow.updated_at || current?.updatedAt,
         hasProfile: current?.hasProfile ?? false,
+        hasRoleRecord: true,
       });
     });
 
     return Array.from(merged.values()).sort((a, b) => {
-      if (a.role !== b.role) return ["admin", "editor", "user"].indexOf(a.role) - ["admin", "editor", "user"].indexOf(b.role);
+      const rank = (item: AccountRow) => {
+        if (!item.hasRoleRecord) return 2;
+        return ["admin", "editor", "pending", "user"].indexOf(item.role);
+      };
+      if (rank(a) !== rank(b)) return rank(a) - rank(b);
       return a.email.localeCompare(b.email);
     });
   }, [profiles, roles]);
@@ -94,7 +101,8 @@ export const RoleManager = () => {
       total: rows.length,
       admin: rows.filter((item) => item.role === "admin").length,
       editor: rows.filter((item) => item.role === "editor").length,
-      user: rows.filter((item) => item.role === "user").length,
+      pending: rows.filter((item) => !item.hasRoleRecord).length,
+      user: rows.filter((item) => item.hasRoleRecord && item.role === "user").length,
     }),
     [rows],
   );
@@ -189,7 +197,7 @@ export const RoleManager = () => {
             { label: "Total Akun", value: stats.total, icon: Users },
             { label: "Admin", value: stats.admin, icon: ShieldCheck },
             { label: "Editor", value: stats.editor, icon: UserCog },
-            { label: "User", value: stats.user, icon: Users },
+            { label: "Menunggu Akses", value: stats.pending, icon: AlertCircle },
           ].map((item) => (
             <div key={item.label} className="bg-white border border-border rounded-sm p-5 shadow-sm">
               <div className="h-10 w-10 rounded-sm bg-primary/10 text-primary flex items-center justify-center mb-3">
@@ -224,7 +232,7 @@ export const RoleManager = () => {
                   <tr>
                     <th className="text-left px-5 py-3 font-bold">Akun</th>
                     <th className="text-left px-3 py-3 font-bold">UID</th>
-                    <th className="text-left px-3 py-3 font-bold">Role Saat Ini</th>
+                    <th className="text-left px-3 py-3 font-bold">Status Akses</th>
                     <th className="text-left px-3 py-3 font-bold">Ubah Role</th>
                     <th className="text-left px-5 py-3 font-bold">Catatan</th>
                   </tr>
@@ -248,13 +256,15 @@ export const RoleManager = () => {
                       </td>
                       <td className="px-3 py-4">
                         <span className={`inline-flex px-2.5 py-1 rounded-sm text-[10px] font-black uppercase tracking-wider ${
-                          account.role === "admin"
+                          !account.hasRoleRecord
+                            ? "bg-amber-100 text-amber-800"
+                            : account.role === "admin"
                             ? "bg-primary text-primary-foreground"
                             : account.role === "editor"
                               ? "bg-gold text-gold-foreground"
                               : "bg-muted text-foreground"
                         }`}>
-                          {roleLabels[account.role]}
+                          {account.hasRoleRecord ? roleLabels[account.role] : "Menunggu Akses"}
                         </span>
                       </td>
                       <td className="px-3 py-4">
@@ -275,6 +285,8 @@ export const RoleManager = () => {
                       <td className="px-5 py-4 text-xs text-muted-foreground max-w-xs">
                         {account.id === user?.id
                           ? "Akun Anda. Role sendiri tidak bisa diturunkan dari halaman ini."
+                          : !account.hasRoleRecord
+                            ? "Akun baru dari register. Pilih Editor atau Admin untuk memberi akses dashboard."
                           : account.hasProfile
                             ? roleDescriptions[account.role]
                             : "Role ada, tapi profile belum ditemukan."}
