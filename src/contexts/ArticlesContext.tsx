@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { isSupabaseConfigured, supabase } from "@/integrations/supabase/client";
 import { type Article, type Category } from "@/data/news";
 
 interface DbNews {
@@ -61,6 +61,12 @@ export const ArticlesProvider = ({ children }: { children: ReactNode }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!isSupabaseConfigured) {
+      setArticles([]);
+      setLoading(false);
+      return;
+    }
+
     let mounted = true;
     const fetchArticles = async () => {
       setLoading(true);
