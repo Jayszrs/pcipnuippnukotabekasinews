@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { AdminLayout } from "@/components/AdminLayout";
 import { useAuth } from "@/contexts/AuthContext";
-import { listCollection, upsertDocument } from "@/integrations/firebase/data";
-import { AlertCircle, Loader2, RefreshCw, ShieldCheck, UserCog, Users } from "lucide-react";
+import { deleteDocument, listCollection, upsertDocument } from "@/integrations/firebase/data";
+import { AlertCircle, Loader2, RefreshCw, ShieldCheck, Trash2, UserCog, Users } from "lucide-react";
 import { toast } from "sonner";
 
 type Role = "admin" | "editor" | "user";
@@ -51,6 +51,7 @@ export const RoleManager = () => {
   const [roles, setRoles] = useState<RoleRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [savingId, setSavingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const isAdmin = role === "admin";
 
@@ -161,6 +162,42 @@ export const RoleManager = () => {
     }
   };
 
+  const deleteAccountAccess = async (account: AccountRow) => {
+    if (!isAdmin) {
+      toast.error("Hanya admin yang bisa menghapus user.");
+      return;
+    }
+
+    if (account.id === user?.id) {
+      toast.error("Tidak bisa menghapus akun sendiri dari halaman ini.");
+      return;
+    }
+
+    const label = account.email !== "-" ? account.email : account.fullName;
+    const confirmed = window.confirm(
+      `Hapus ${label} dari role management?\n\nProfil dan role Firestore akan dihapus. Akun Firebase Auth masih ada, tetapi tidak punya akses dashboard.`,
+    );
+    if (!confirmed) return;
+
+    setDeletingId(account.id);
+    try {
+      await Promise.all([
+        deleteDocument("user_roles", account.id),
+        deleteDocument("profiles", account.id),
+      ]);
+      toast.success("User dihapus dari dashboard", {
+        description: "Profil dan role sudah dihapus. Akses dashboard user dicabut.",
+      });
+      await loadData();
+    } catch (error) {
+      toast.error("Gagal menghapus user", {
+        description: error instanceof Error ? error.message : "Periksa Firestore rules.",
+      });
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   if (!isAdmin) {
     return (
       <AdminLayout title="Role Management">
@@ -235,6 +272,7 @@ export const RoleManager = () => {
                     <th className="text-left px-3 py-3 font-bold">Status Akses</th>
                     <th className="text-left px-3 py-3 font-bold">Ubah Role</th>
                     <th className="text-left px-5 py-3 font-bold">Catatan</th>
+                    <th className="text-right px-5 py-3 font-bold">Aksi</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border">
@@ -290,6 +328,22 @@ export const RoleManager = () => {
                           : account.hasProfile
                             ? roleDescriptions[account.role]
                             : "Role ada, tapi profile belum ditemukan."}
+                      </td>
+                      <td className="px-5 py-4 text-right">
+                        <button
+                          type="button"
+                          onClick={() => deleteAccountAccess(account)}
+                          disabled={deletingId === account.id || account.id === user?.id}
+                          className="inline-flex items-center justify-center h-9 w-9 rounded-sm border border-destructive/20 text-destructive hover:bg-destructive hover:text-destructive-foreground disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-destructive transition-colors"
+                          title={account.id === user?.id ? "Akun sendiri tidak bisa dihapus" : "Hapus user"}
+                          aria-label="Hapus user"
+                        >
+                          {deletingId === account.id ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="h-4 w-4" />
+                          )}
+                        </button>
                       </td>
                     </tr>
                   ))}
