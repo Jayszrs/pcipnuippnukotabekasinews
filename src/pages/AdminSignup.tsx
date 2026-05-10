@@ -30,7 +30,9 @@ const AdminSignup = () => {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const parsed = schema.safeParse({ fullName, email, password });
+    const cleanEmail = email.trim().toLowerCase();
+    setEmail(cleanEmail);
+    const parsed = schema.safeParse({ fullName, email: cleanEmail, password });
     if (!parsed.success) {
       toast.error("Periksa data Anda", {
         description: parsed.error.issues[0].message,
@@ -38,7 +40,7 @@ const AdminSignup = () => {
       return;
     }
     setLoading(true);
-    const { error } = await signUp(email, password, fullName);
+    const { error } = await signUp(cleanEmail, password, fullName);
     if (error) {
       setLoading(false);
       if (error.toLowerCase().includes("already")) {

@@ -29,6 +29,33 @@ interface AuthCtx {
 const Ctx = createContext<AuthCtx | undefined>(undefined);
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const normalizeEmail = (email: string) => email.trim().toLowerCase();
+
+const getAuthErrorMessage = (error: unknown, fallback: string) => {
+  const message = error instanceof Error ? error.message : fallback;
+
+  if (
+    message.includes("auth/invalid-credential") ||
+    message.includes("auth/user-not-found") ||
+    message.includes("auth/wrong-password")
+  ) {
+    return "Email atau password salah, atau akun belum dibuat lewat halaman Buat Akun. Pemberian role hanya membuka akses dashboard, bukan membuat/mengubah password.";
+  }
+
+  if (message.includes("auth/email-already-in-use")) {
+    return "Email sudah terdaftar. Silakan login atau gunakan lupa password.";
+  }
+
+  if (message.includes("auth/too-many-requests")) {
+    return "Terlalu banyak percobaan login. Tunggu beberapa saat lalu coba lagi.";
+  }
+
+  if (message.includes("auth/operation-not-allowed")) {
+    return "Login email/password belum aktif di Firebase Authentication.";
+  }
+
+  return message;
+};
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<AppUser | null>(null);
@@ -98,25 +125,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const signIn = async (email: string, password: string) => {
     if (!auth || !isFirebaseConfigured) return { error: "Firebase belum dikonfigurasi di Vercel." };
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      await signInWithEmailAndPassword(auth, normalizeEmail(email), password);
       return { error: null };
     } catch (error) {
-      return { error: error instanceof Error ? error.message : "Login gagal" };
+      return { error: getAuthErrorMessage(error, "Login gagal") };
     }
   };
 
   const signUp = async (email: string, password: string, fullName: string) => {
     if (!auth || !isFirebaseConfigured) return { error: "Firebase belum dikonfigurasi di Vercel." };
     try {
-      const credential = await createUserWithEmailAndPassword(auth, email, password);
+      const normalizedEmail = normalizeEmail(email);
+      const credential = await createUserWithEmailAndPassword(auth, normalizedEmail, password);
       await upsertDocument("profiles", credential.user.uid, {
         full_name: fullName,
-        email,
+        email: normalizedEmail,
         updated_at: new Date().toISOString(),
       });
       return { error: null };
     } catch (error) {
-      return { error: error instanceof Error ? error.message : "Registrasi gagal" };
+      return { error: getAuthErrorMessage(error, "Registrasi gagal") };
     }
   };
 

@@ -23,7 +23,9 @@ const AdminLogin = () => {
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    const { error } = await signIn(email, password);
+    const cleanEmail = email.trim().toLowerCase();
+    setEmail(cleanEmail);
+    const { error } = await signIn(cleanEmail, password);
     setLoading(false);
     if (error) {
       toast.error("Login gagal", { description: error });
