@@ -1,0 +1,75 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isBootstrapAdmin() {
+      return signedIn()
+        && request.auth.token.email == "jaelanisuryasaputra@gmail.com";
+    }
+
+    function hasRole(role) {
+      return signedIn()
+        && exists(/databases/$(database)/documents/user_roles/$(request.auth.uid))
+        && get(/databases/$(database)/documents/user_roles/$(request.auth.uid)).data.role == role;
+    }
+
+    function isEditor() {
+      return hasRole("admin") || hasRole("editor");
+    }
+
+    function onlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    match /profiles/{userId} {
+      allow read: if signedIn();
+      allow create, update: if signedIn()
+        && (request.auth.uid == userId || hasRole("admin"))
+        && onlyAllowedFields(["id", "full_name", "email", "avatar_url", "updated_at"]);
+      allow delete: if hasRole("admin");
+    }
+
+    match /user_roles/{userId} {
+      allow read: if signedIn();
+      allow create, update: if hasRole("admin")
+        || (isBootstrapAdmin()
+          && request.auth.uid == userId
+          && request.resource.data.role == "admin"
+          && onlyAllowedFields(["user_id", "role", "updated_at"]));
+      allow delete: if hasRole("admin");
+    }
+
+    match /news/{document=**} {
+      allow read: if true;
+      allow write: if isEditor();
+    }
+
+    match /featured_events/{document=**} {
+      allow read: if true;
+      allow write: if isEditor();
+    }
+
+    match /cadres/{document=**} {
+      allow read: if true;
+      allow write: if isEditor();
+    }
+
+    match /service_ratings/{document=**} {
+      allow create: if true;
+      allow read, update, delete: if isEditor();
+    }
+
+    match /newsletter_subscriptions/{document=**} {
+      allow create: if true;
+      allow read, update, delete: if isEditor();
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
