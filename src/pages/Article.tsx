@@ -5,6 +5,14 @@ import { Sidebar } from "@/components/Sidebar";
 import { NewsCard } from "@/components/NewsCard";
 import { CategoryBadge } from "@/components/CategoryBadge";
 import { useArticles } from "@/contexts/ArticlesContext";
+import {
+  upsertMeta,
+  setCanonical,
+  setJsonLd,
+  removeJsonLd,
+  truncate,
+  applyDefaultMeta,
+} from "@/lib/seo";
 import { 
   Clock, 
   Eye, 
@@ -45,10 +53,64 @@ const Article = () => {
   const article = slug ? getBySlug(slug) : undefined;
 
   useEffect(() => {
-    if (article) {
-      document.title = `${article.title} — IPNU IPPNU Bekasi`;
-      window.scrollTo({ top: 0, behavior: "instant" });
-    }
+    if (!article) return;
+    const pageUrl =
+      typeof window !== "undefined" ? window.location.href : "";
+    const title = `${article.title} — PC IPNU IPPNU Kota Bekasi`;
+    const desc = truncate(article.excerpt || article.content?.join(" ") || "", 155);
+    const image = article.image || "/placeholder.svg";
+
+    document.title = title;
+    upsertMeta("name", "description", desc);
+    upsertMeta("name", "keywords", `IPNU IPPNU Bekasi, Pelajar NU Bekasi, ${article.category}, ${(article.tags || []).join(", ")}`);
+    setCanonical(pageUrl);
+
+    upsertMeta("property", "og:type", "article");
+    upsertMeta("property", "og:title", title);
+    upsertMeta("property", "og:description", desc);
+    upsertMeta("property", "og:image", image);
+    upsertMeta("property", "og:url", pageUrl);
+    upsertMeta("property", "og:site_name", "IPNU IPPNU Kota Bekasi");
+
+    upsertMeta("name", "twitter:card", "summary_large_image");
+    upsertMeta("name", "twitter:title", title);
+    upsertMeta("name", "twitter:description", desc);
+    upsertMeta("name", "twitter:image", image);
+
+    const publishedIso = article.publishedAt
+      ? new Date(article.publishedAt).toISOString()
+      : new Date().toISOString();
+
+    setJsonLd("article-jsonld", {
+      "@context": "https://schema.org",
+      "@type": "NewsArticle",
+      headline: article.title,
+      image: [image],
+      datePublished: publishedIso,
+      dateModified: publishedIso,
+      author: {
+        "@type": "Person",
+        name: article.author || "LPP IPNU IPPNU Kota Bekasi",
+      },
+      publisher: {
+        "@type": "Organization",
+        name: "PC IPNU IPPNU Kota Bekasi",
+        logo: {
+          "@type": "ImageObject",
+          url: "https://ipnuippnukotabekasinews.lovable.app/icon-web.ico",
+        },
+      },
+      mainEntityOfPage: { "@type": "WebPage", "@id": pageUrl },
+      description: desc,
+      articleSection: article.category,
+    });
+
+    window.scrollTo({ top: 0, behavior: "instant" });
+
+    return () => {
+      removeJsonLd("article-jsonld");
+      applyDefaultMeta();
+    };
   }, [article]);
 
   if (loading && !article) {
