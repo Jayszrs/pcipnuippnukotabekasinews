@@ -100,6 +100,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         email,
         updated_at: new Date().toISOString(),
       });
+      await upsertDocument("user_roles", credential.user.uid, {
+        user_id: credential.user.uid,
+        role: "user",
+        updated_at: new Date().toISOString(),
+      });
       return { error: null };
     } catch (error) {
       return { error: error instanceof Error ? error.message : "Registrasi gagal" };

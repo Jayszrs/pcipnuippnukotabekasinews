@@ -17,7 +17,7 @@ const AdminSignup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const { signUp, signIn, user, role } = useAuth();
+  const { signUp, signOut, user, role } = useAuth();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -48,16 +48,12 @@ const AdminSignup = () => {
       }
       return;
     }
-    // Auto login (auto-confirm enabled)
-    const signInRes = await signIn(email, password);
+    await signOut();
     setLoading(false);
-    if (signInRes.error) {
-      toast.success("Akun dibuat! Silakan login.");
-      navigate("/admin");
-      return;
-    }
-    toast.success("Selamat datang!", { description: "Akun admin berhasil dibuat." });
-    navigate("/admin/dashboard");
+    toast.success("Akun berhasil dibuat", {
+      description: "Akun perlu diberi akses admin/editor sebelum bisa masuk dashboard.",
+    });
+    navigate("/admin");
   };
 
   return (
@@ -93,7 +89,7 @@ const AdminSignup = () => {
           <span className="section-label">Pendaftaran</span>
           <h1 className="mt-2 font-display font-black text-3xl sm:text-4xl">Buat Akun Admin</h1>
           <p className="mt-2 text-muted-foreground">
-            Pengguna pertama otomatis menjadi <span className="font-bold text-primary">Admin</span>.
+            Buat akun terlebih dahulu. Akses dashboard diberikan oleh admin yang sudah aktif.
           </p>
 
           <form onSubmit={onSubmit} className="mt-8 space-y-5">
@@ -139,7 +135,7 @@ const AdminSignup = () => {
               className="w-full py-3.5 rounded-sm gradient-primary text-primary-foreground font-brand font-bold uppercase tracking-wider text-sm hover:opacity-95 transition-opacity shadow-elevated disabled:opacity-60 flex items-center justify-center gap-2"
             >
               {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-              Daftar & Masuk Dashboard
+              Buat Akun
             </button>
           </form>
 
