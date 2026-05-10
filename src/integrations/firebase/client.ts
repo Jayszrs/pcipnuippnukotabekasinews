@@ -1,4 +1,5 @@
 import { initializeApp, getApps, type FirebaseApp } from "firebase/app";
+import { getAnalytics, isSupported, type Analytics } from "firebase/analytics";
 import { getAuth, type Auth } from "firebase/auth";
 import {
   connectDataConnectEmulator,
@@ -17,6 +18,7 @@ const firebaseConfig = {
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
 export const isFirebaseConfigured = Boolean(
@@ -55,6 +57,12 @@ export const storage: FirebaseStorage | null = firebaseApp ? getStorage(firebase
 export const functions: Functions | null = firebaseApp
   ? getFunctions(firebaseApp, import.meta.env.VITE_FIREBASE_FUNCTIONS_REGION || "asia-southeast2")
   : null;
+export const analytics: Promise<Analytics | null> =
+  firebaseApp && firebaseConfig.measurementId && typeof window !== "undefined"
+    ? isSupported()
+        .then((supported) => (supported ? getAnalytics(firebaseApp) : null))
+        .catch(() => null)
+    : Promise.resolve(null);
 export const dataConnect: DataConnect | null =
   firebaseApp && isDataConnectConfigured ? getDataConnect(firebaseApp, dataConnectConfig) : null;
 
