@@ -20,6 +20,7 @@ interface DbNews {
 
 export interface ArticleWithVideo extends Article {
   videoUrl?: string | null;
+  publishedAt?: string;
 }
 
 const dbToArticle = (n: DbNews): ArticleWithVideo => ({
@@ -38,6 +39,7 @@ const dbToArticle = (n: DbNews): ArticleWithVideo => ({
   views: n.views,
   tags: n.tags ?? [],
   videoUrl: n.video_url,
+  publishedAt: n.published_at ?? n.created_at,
 });
 
 interface Ctx {

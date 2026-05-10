@@ -9,6 +9,7 @@ import { NewsCard } from "@/components/NewsCard";
 import { useArticles } from "@/contexts/ArticlesContext";
 import { ArrowRight, Sparkles, Clock, Instagram, Bell, Loader2, Star } from "lucide-react"; // <-- IMPORT STAR DI SINI
 import { Link } from "react-router-dom";
+import { applyDefaultMeta } from "@/lib/seo";
 
 // ================= COMPONENT DYNAMIC EVENT BANNER & COUNTDOWN =================
 const HeroBannerLocal = () => {
@@ -83,7 +84,7 @@ const HeroBannerLocal = () => {
         {/* Gambar Spanduk 8x2 Pelantikan Dari Admin Panel */}
         <img 
           src={activeEvent.banner_url} 
-          alt={activeEvent.title} 
+          alt={`Banner kegiatan PC IPNU IPPNU Kota Bekasi - ${activeEvent.title}`} 
           className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.01]"
         />
 
@@ -152,7 +153,7 @@ const Index = () => {
   const { articles } = useArticles();
 
   useEffect(() => {
-    document.title = "IPNU IPPNU Kota Bekasi — Portal Berita Pelajar NU";
+    applyDefaultMeta();
   }, []);
 
   const latest = (articles || []).slice(1, 7);

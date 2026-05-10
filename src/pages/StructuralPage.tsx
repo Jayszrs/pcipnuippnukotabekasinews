@@ -32,7 +32,7 @@ const CadreCard = ({ kader }: { kader: any }) => {
           {kader.image_url ? (
             <img 
               src={kader.image_url} 
-              alt={kader.name}
+              alt={`Pengurus Struktural PC IPNU IPPNU Kota Bekasi - ${kader.name}${kader.position ? ` (${kader.position})` : ""}`}
               className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-102"
             />
           ) : (
