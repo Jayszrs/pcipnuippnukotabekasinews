@@ -1,5 +1,7 @@
 // Lightweight SEO helpers — manipulate <head> tags directly without extra deps.
 
+import { SITE_CONFIG } from "@/config/site";
+
 type MetaKind = "name" | "property";
 
 export function upsertMeta(kind: MetaKind, key: string, content: string) {
@@ -51,10 +53,11 @@ export function applyDefaultMeta() {
   const title = "IPNU IPPNU Kota Bekasi — Portal Berita Resmi Pelajar NU Bekasi";
   const desc =
     "Portal berita resmi Pimpinan Cabang IPNU IPPNU Kota Bekasi. Menyajikan informasi kegiatan, opini, dan ruang literasi digital untuk pelajar NU se-Kota Bekasi.";
-  const url = typeof window !== "undefined" ? window.location.origin + "/" : "";
+  const url = `${SITE_CONFIG.siteUrl}/`;
   const img =
     "https://storage.googleapis.com/gpt-engineer-file-uploads/zL6Gvu2knSUTfdostHxZrEIx6L53/social-images/social-1778220015335-Gemini_Generated_Image_cne4dhcne4dhcne4.webp";
   document.title = title;
+  setCanonical(url);
   upsertMeta("name", "description", desc);
   upsertMeta("property", "og:type", "website");
   upsertMeta("property", "og:title", title);

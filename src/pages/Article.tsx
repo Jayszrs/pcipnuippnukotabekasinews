@@ -27,6 +27,7 @@ import {
   Instagram,
   Image as ImageIcon
 } from "lucide-react";
+import { SITE_CONFIG } from "@/config/site";
 
 // Helper untuk deteksi file video langsung
 const isDirectVideoFile = (url: string) => /\.(mp4|webm|ogg|mov)(\?.*)?$/i.test(url);
@@ -54,8 +55,7 @@ const Article = () => {
 
   useEffect(() => {
     if (!article) return;
-    const pageUrl =
-      typeof window !== "undefined" ? window.location.href : "";
+    const pageUrl = `${SITE_CONFIG.siteUrl}/berita/${article.slug}`;
     const title = `${article.title} — PC IPNU IPPNU Kota Bekasi`;
     const desc = truncate(article.excerpt || article.content?.join(" ") || "", 155);
     const image = article.image || "/placeholder.svg";
@@ -97,7 +97,7 @@ const Article = () => {
         name: "PC IPNU IPPNU Kota Bekasi",
         logo: {
           "@type": "ImageObject",
-          url: "https://ipnuippnukotabekasinews.lovable.app/icon-web.ico",
+          url: `${SITE_CONFIG.siteUrl}/icon-web.ico`,
         },
       },
       mainEntityOfPage: { "@type": "WebPage", "@id": pageUrl },

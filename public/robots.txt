@@ -9,4 +9,4 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
-Sitemap: https://ipnuippnukotabekasinews.lovable.app/sitemap.xml
+Sitemap: https://ipnubekasi.my.id/sitemap.xml
