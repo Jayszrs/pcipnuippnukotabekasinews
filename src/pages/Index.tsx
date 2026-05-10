@@ -9,6 +9,7 @@ import { NewsCard } from "@/components/NewsCard";
 import { useArticles } from "@/contexts/ArticlesContext";
 import { ArrowRight, Sparkles, Clock, Instagram, Bell, Loader2, Star } from "lucide-react"; // <-- IMPORT STAR DI SINI
 import { Link } from "react-router-dom";
+import { applyDefaultMeta } from "@/lib/seo";
 
 // ================= COMPONENT DYNAMIC EVENT BANNER & COUNTDOWN =================
 const HeroBannerLocal = () => {
