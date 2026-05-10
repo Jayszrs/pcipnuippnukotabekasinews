@@ -18,14 +18,13 @@ import {
 } from "firebase/firestore";
 import { executeMutation, executeQuery, mutationRef, queryRef } from "firebase/data-connect";
 import { httpsCallable } from "firebase/functions";
-import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
+import { uploadToCloudinary } from "@/integrations/cloudinary/client";
 import {
   dataConnect,
   db,
   functions,
   isDataConnectConfigured,
   isFirebaseConfigured,
-  storage,
 } from "./client";
 
 type Filter = {
@@ -158,10 +157,7 @@ export const deleteDocument = async (name: string, id: string) => {
 };
 
 export const uploadFile = async (folder: string, path: string, file: File) => {
-  if (!storage || !isFirebaseConfigured) throw new Error("Firebase Storage belum dikonfigurasi.");
-  const fileRef = ref(storage, `${folder}/${path}`);
-  await uploadBytes(fileRef, file);
-  return getDownloadURL(fileRef);
+  return uploadToCloudinary(folder, path, file);
 };
 
 export const callDataConnectQuery = async <Data, Variables extends Record<string, unknown> | undefined = undefined>(
