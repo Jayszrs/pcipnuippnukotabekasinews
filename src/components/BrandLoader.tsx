@@ -100,7 +100,7 @@ export const BrandLoader = () => {
           </div>
           <div className="brand-loader-ring" aria-hidden="true" />
           <div className="brand-loader-shape">
-            <img src={logoIpnuIppnu} alt="" className="h-full w-full object-contain" />
+            <img src={logoIpnuIppnu} alt="" className="h-full w-full object-cover object-right" />
           </div>
         </div>
 

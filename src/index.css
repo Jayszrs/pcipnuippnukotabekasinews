@@ -228,14 +228,14 @@
     position: relative;
     display: grid;
     place-items: center;
-    height: 12.5rem;
-    width: min(28rem, 86vw);
+    height: 12.25rem;
+    width: 12.25rem;
     perspective: 900px;
   }
 
   .brand-loader-ring {
     position: absolute;
-    inset: 0.3rem 3.1rem;
+    inset: 0.2rem;
     border-radius: 9999px;
     border: 1px solid hsl(var(--gold) / 0.45);
     border-top-color: hsl(var(--gold));
@@ -284,11 +284,11 @@
     position: relative;
     display: grid;
     place-items: center;
-    height: 9.75rem;
-    width: min(25rem, 82vw);
-    padding: 1.1rem 1.35rem;
+    height: 9.85rem;
+    width: 9.85rem;
+    padding: 0.25rem;
     overflow: hidden;
-    border-radius: 2rem;
+    border-radius: 9999px;
     background: linear-gradient(135deg, hsl(0 0% 100% / 0.96), hsl(48 100% 92% / 0.92));
     box-shadow:
       0 24px 70px hsl(0 0% 0% / 0.36),
