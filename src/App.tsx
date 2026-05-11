@@ -8,7 +8,6 @@ import { ArticlesProvider } from "@/contexts/ArticlesContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { FloatingWidgets } from "@/components/FloatingWidgets";
 import { ThemeProvider } from "next-themes";
-import { BrandLoader } from "@/components/BrandLoader";
 
 // Import Halaman Utama
 import Index from "./pages/Index.tsx";
@@ -49,7 +48,6 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
-          <BrandLoader />
           <AuthProvider>
             <ArticlesProvider>
               <Routes>
