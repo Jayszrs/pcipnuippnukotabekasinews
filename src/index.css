@@ -188,8 +188,11 @@
     isolation: isolate;
     overflow: hidden;
     background:
-      linear-gradient(135deg, hsl(var(--primary-deep)) 0%, hsl(150 58% 11%) 45%, hsl(132 85% 8%) 100%);
-    animation: brand-loader-in 360ms ease-out both;
+      radial-gradient(circle at 50% 38%, hsl(var(--primary-glow) / 0.35), transparent 28rem),
+      radial-gradient(circle at 18% 22%, hsl(var(--gold) / 0.22), transparent 18rem),
+      radial-gradient(circle at 82% 72%, hsl(var(--primary) / 0.24), transparent 20rem),
+      linear-gradient(135deg, hsl(var(--primary-deep)) 0%, hsl(150 58% 11%) 48%, hsl(132 85% 8%) 100%);
+    animation: brand-loader-in 520ms ease-out both;
   }
 
   .brand-loader.is-hidden {
@@ -203,9 +206,10 @@
     position: absolute;
     inset: 0;
     background:
-      linear-gradient(115deg, transparent 0 42%, hsl(var(--gold) / 0.08) 42% 43%, transparent 43% 100%),
-      linear-gradient(145deg, transparent 0 54%, hsl(0 0% 100% / 0.06) 54% 55%, transparent 55% 100%);
+      linear-gradient(115deg, transparent 0 39%, hsl(var(--gold) / 0.08) 39% 40%, transparent 40% 100%),
+      linear-gradient(145deg, transparent 0 57%, hsl(0 0% 100% / 0.06) 57% 58%, transparent 58% 100%);
     opacity: 0.9;
+    animation: brand-loader-sheen 3200ms ease-in-out infinite alternate;
   }
 
   .brand-loader-grid {
@@ -217,40 +221,98 @@
     background-size: 44px 44px;
     mask-image: linear-gradient(to bottom, transparent, black 20%, black 80%, transparent);
     transform: rotate(-7deg) scale(1.08);
-    animation: brand-loader-grid 2200ms ease-in-out both;
+    animation: brand-loader-grid 4200ms ease-in-out infinite alternate;
   }
 
   .brand-loader-mark {
     position: relative;
     display: grid;
     place-items: center;
-    height: 9.5rem;
-    width: 9.5rem;
+    height: 12.5rem;
+    width: min(28rem, 86vw);
+    perspective: 900px;
   }
 
   .brand-loader-ring {
     position: absolute;
-    inset: 0;
+    inset: 0.3rem 3.1rem;
     border-radius: 9999px;
-    border: 2px solid hsl(var(--gold) / 0.65);
+    border: 1px solid hsl(var(--gold) / 0.45);
     border-top-color: hsl(var(--gold));
+    border-right-color: hsl(0 0% 100% / 0.3);
     filter: drop-shadow(0 18px 35px hsl(0 0% 0% / 0.28));
-    animation: brand-loader-ring 1650ms cubic-bezier(0.22, 1, 0.36, 1) infinite;
+    opacity: 0.75;
+    animation: brand-loader-ring 3600ms cubic-bezier(0.22, 1, 0.36, 1) infinite;
+  }
+
+  .brand-loader-orbit {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    animation: brand-loader-float 3200ms ease-in-out infinite alternate;
+  }
+
+  .brand-loader-orbit span {
+    position: absolute;
+    display: block;
+    height: 0.55rem;
+    width: 0.55rem;
+    border-radius: 9999px;
+    background: hsl(var(--gold));
+    box-shadow: 0 0 18px hsl(var(--gold) / 0.85);
+  }
+
+  .brand-loader-orbit span:nth-child(1) {
+    left: 10%;
+    top: 18%;
+    animation: brand-loader-particle 2400ms ease-in-out infinite;
+  }
+
+  .brand-loader-orbit span:nth-child(2) {
+    right: 12%;
+    top: 28%;
+    animation: brand-loader-particle 2800ms ease-in-out 180ms infinite;
+  }
+
+  .brand-loader-orbit span:nth-child(3) {
+    bottom: 12%;
+    left: 48%;
+    animation: brand-loader-particle 2600ms ease-in-out 360ms infinite;
   }
 
   .brand-loader-shape {
     position: relative;
     display: grid;
     place-items: center;
-    height: 7.5rem;
-    width: 7.5rem;
-    padding: 1rem;
-    background: hsl(0 0% 100% / 0.98);
+    height: 9.75rem;
+    width: min(25rem, 82vw);
+    padding: 1.1rem 1.35rem;
+    overflow: hidden;
+    border-radius: 2rem;
+    background: linear-gradient(135deg, hsl(0 0% 100% / 0.96), hsl(48 100% 92% / 0.92));
     box-shadow:
-      0 20px 50px hsl(0 0% 0% / 0.32),
-      inset 0 0 0 1px hsl(var(--gold) / 0.35);
-    clip-path: circle(0% at 50% 50%);
-    animation: brand-logo-morph 2550ms cubic-bezier(0.22, 1, 0.36, 1) both;
+      0 24px 70px hsl(0 0% 0% / 0.36),
+      0 0 65px hsl(var(--gold) / 0.14),
+      inset 0 0 0 1px hsl(var(--gold) / 0.42),
+      inset 0 20px 40px hsl(0 0% 100% / 0.55);
+    transform-origin: center;
+    animation: brand-logo-arrive 3200ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .brand-loader-shape::before {
+    content: "";
+    position: absolute;
+    inset: -60% -35%;
+    background: linear-gradient(110deg, transparent 36%, hsl(0 0% 100% / 0.78) 48%, transparent 60%);
+    transform: translateX(-80%) rotate(8deg);
+    animation: brand-logo-shimmer 2600ms ease-in-out 420ms infinite;
+  }
+
+  .brand-loader-shape img {
+    position: relative;
+    z-index: 1;
+    filter: drop-shadow(0 12px 18px hsl(0 0% 0% / 0.16));
+    animation: brand-logo-breathe 2400ms ease-in-out 900ms infinite alternate;
   }
 
   .brand-loader-progress {
@@ -268,12 +330,12 @@
     border-radius: inherit;
     background: linear-gradient(90deg, hsl(var(--gold)), hsl(var(--primary-glow)), hsl(var(--gold)));
     transform: translateX(-100%);
-    animation: brand-loader-progress 1800ms ease-in-out both;
+    animation: brand-loader-progress 3000ms ease-in-out both;
   }
 
   .brand-loader.is-leaving {
     pointer-events: none;
-    animation: brand-loader-out 760ms cubic-bezier(0.83, 0, 0.17, 1) both;
+    animation: brand-loader-out 1100ms cubic-bezier(0.65, 0, 0.35, 1) both;
   }
 
   .brand-page-exit .brand-loader {
@@ -284,13 +346,12 @@
   }
 
   .brand-page-exit .brand-loader-shape {
-    clip-path: polygon(50% 0, 100% 100%, 0 100%);
-    animation: brand-exit-pulse 720ms ease-in-out infinite alternate;
+    animation: brand-exit-pulse 960ms ease-in-out infinite alternate;
   }
 
   .brand-page-exit .brand-loader-progress span {
     transform: translateX(0);
-    animation: brand-loader-progress 680ms ease-out both;
+    animation: brand-loader-progress 980ms ease-out both;
   }
 }
 
@@ -349,43 +410,41 @@
 @keyframes brand-loader-out {
   0% {
     opacity: 1;
-    clip-path: inset(0 0 0 0);
+    transform: scale(1);
+    filter: blur(0);
   }
-  65% {
+  48% {
     opacity: 1;
-    clip-path: polygon(50% 0, 100% 100%, 0 100%);
+    transform: scale(1.018);
+    filter: blur(0);
   }
   100% {
     opacity: 0;
-    clip-path: polygon(50% 0, 50% 100%, 50% 100%);
+    transform: scale(1.04);
+    filter: blur(10px);
   }
 }
 
-@keyframes brand-logo-morph {
+@keyframes brand-logo-arrive {
   0% {
     opacity: 0;
-    transform: scale(0.78) rotate(-8deg);
-    clip-path: circle(0% at 50% 50%);
+    transform: translateY(26px) scale(0.84) rotateX(8deg);
   }
-  24% {
+  28% {
     opacity: 1;
-    transform: scale(1.04) rotate(0deg);
-    clip-path: circle(50% at 50% 50%);
+    transform: translateY(-4px) scale(1.035) rotateX(0deg);
   }
-  62% {
+  56% {
     opacity: 1;
-    transform: scale(1) rotate(0deg);
-    clip-path: circle(50% at 50% 50%);
+    transform: translateY(0) scale(1) rotateX(0deg);
   }
   82% {
     opacity: 1;
-    transform: scale(0.96) rotate(0deg);
-    clip-path: polygon(50% 0, 100% 100%, 0 100%);
+    transform: translateY(-3px) scale(1.012) rotateX(0deg);
   }
   100% {
-    opacity: 0.92;
-    transform: translateY(-10px) scale(0.86);
-    clip-path: polygon(50% 0, 100% 100%, 0 100%);
+    opacity: 1;
+    transform: translateY(0) scale(1) rotateX(0deg);
   }
 }
 
@@ -406,6 +465,38 @@
 @keyframes brand-loader-grid {
   from { transform: rotate(-7deg) scale(1.08) translateY(18px); }
   to { transform: rotate(-7deg) scale(1.08) translateY(-18px); }
+}
+
+@keyframes brand-loader-sheen {
+  from { transform: translateX(-1.5%) translateY(0); }
+  to { transform: translateX(1.5%) translateY(-1.5%); }
+}
+
+@keyframes brand-loader-float {
+  from { transform: translateY(8px) rotate(-1deg); }
+  to { transform: translateY(-8px) rotate(1deg); }
+}
+
+@keyframes brand-loader-particle {
+  0%, 100% {
+    opacity: 0.35;
+    transform: translate3d(0, 0, 0) scale(0.82);
+  }
+  50% {
+    opacity: 1;
+    transform: translate3d(8px, -12px, 0) scale(1.1);
+  }
+}
+
+@keyframes brand-logo-shimmer {
+  0%, 38% { transform: translateX(-88%) rotate(8deg); opacity: 0; }
+  52% { opacity: 1; }
+  78%, 100% { transform: translateX(88%) rotate(8deg); opacity: 0; }
+}
+
+@keyframes brand-logo-breathe {
+  from { transform: translateY(0) scale(1); }
+  to { transform: translateY(-3px) scale(1.018); }
 }
 
 @keyframes brand-loader-progress {

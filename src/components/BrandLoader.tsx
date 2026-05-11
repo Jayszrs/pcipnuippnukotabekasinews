@@ -21,18 +21,18 @@ export const BrandLoader = () => {
   }, [clearTimers]);
 
   const playLoader = useCallback(
-    (holdMs = 520) => {
+    (holdMs = 1000) => {
       showLoader();
       timers.current = [
         window.setTimeout(() => setLeaving(true), holdMs),
-        window.setTimeout(() => setVisible(false), holdMs + 760),
+        window.setTimeout(() => setVisible(false), holdMs + 1100),
       ];
     },
     [showLoader],
   );
 
   useEffect(() => {
-    playLoader(1750);
+    playLoader(2850);
 
     const handleBeforeUnload = () => {
       document.documentElement.classList.add("brand-page-exit");
@@ -77,7 +77,7 @@ export const BrandLoader = () => {
       return;
     }
 
-    playLoader(520);
+    playLoader(1050);
   }, [location.key, playLoader]);
 
   return (
@@ -93,6 +93,11 @@ export const BrandLoader = () => {
 
       <div className="relative z-10 flex flex-col items-center px-6 text-center">
         <div className="brand-loader-mark">
+          <div className="brand-loader-orbit" aria-hidden="true">
+            <span />
+            <span />
+            <span />
+          </div>
           <div className="brand-loader-ring" aria-hidden="true" />
           <div className="brand-loader-shape">
             <img src={logoIpnuIppnu} alt="" className="h-full w-full object-contain" />
