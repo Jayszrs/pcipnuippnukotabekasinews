@@ -8,6 +8,7 @@ import { ArticlesProvider } from "@/contexts/ArticlesContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { FloatingWidgets } from "@/components/FloatingWidgets";
 import { ThemeProvider } from "next-themes";
+import { InitialPageLoader } from "@/components/InitialPageLoader";
 
 // Import Halaman Utama
 import Index from "./pages/Index.tsx";
@@ -44,6 +45,7 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+      <InitialPageLoader />
       <TooltipProvider>
         <Toaster />
         <Sonner />
