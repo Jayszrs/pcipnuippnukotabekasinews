@@ -6,6 +6,7 @@ export const Logo = ({ variant = "default" }: { variant?: "default" | "light" })
   return (
     <Link
       to="/"
+      data-nav-loader-label="Beranda"
       className="flex items-center gap-2.5 group shrink-0"
       aria-label="IPNU IPPNU Kota Bekasi"
     >

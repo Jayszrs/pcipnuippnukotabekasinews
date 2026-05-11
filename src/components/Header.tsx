@@ -39,16 +39,16 @@ export const Header = () => {
             <span className="capitalize">{today}</span>
           </div>
           <div className="flex items-center gap-6 opacity-90">
-            <Link to="/tentang-kami" className="hover:text-gold transition-colors">Tentang Kami</Link>
-            <Link to="/redaksi" className="hover:text-gold transition-colors">Redaksi</Link>
-            <Link to="/kontak" className="hover:text-gold transition-colors">Kontak</Link>
+            <Link to="/tentang-kami" data-nav-loader-label="Tentang Kami" className="hover:text-gold transition-colors">Tentang Kami</Link>
+            <Link to="/redaksi" data-nav-loader-label="Redaksi" className="hover:text-gold transition-colors">Redaksi</Link>
+            <Link to="/kontak" data-nav-loader-label="Kontak" className="hover:text-gold transition-colors">Kontak</Link>
             
             {/* Quick Link Rating Emas di Bar Atas */}
-            <Link to="/rating" className="hover:text-gold text-gold font-bold flex items-center gap-1 transition-colors">
+            <Link to="/rating" data-nav-loader-label="Rating Layanan" className="hover:text-gold text-gold font-bold flex items-center gap-1 transition-colors">
               Rating <Star className="h-3 w-3 fill-gold text-gold" />
             </Link>
 
-            <Link to="/admin" className="px-3 py-1 bg-gold text-gold-foreground rounded-sm font-black hover:bg-white transition-all dark:hover:bg-gold-soft">
+            <Link to="/admin" data-nav-loader-label="Admin Login" className="px-3 py-1 bg-gold text-gold-foreground rounded-sm font-black hover:bg-white transition-all dark:hover:bg-gold-soft">
               ADMIN LOGIN
             </Link>
           </div>
@@ -66,6 +66,7 @@ export const Header = () => {
               key={item.to}
               to={item.to}
               end={item.to === "/"}
+              data-nav-loader-label={item.label}
               className={({ isActive }) =>
                 `relative px-3 py-2 text-[11px] font-black font-brand uppercase tracking-wider transition-all duration-300 flex items-center gap-1.5 ${
                   isActive ? "text-primary" : "text-foreground/70 hover:text-primary"
@@ -123,6 +124,7 @@ export const Header = () => {
                 key={item.to}
                 to={item.to}
                 end={item.to === "/"}
+                data-nav-loader-label={item.label}
                 onClick={() => setOpen(false)}
                 className={({ isActive }) =>
                   `px-4 py-4 rounded-xl text-sm font-black font-brand uppercase tracking-widest transition-all flex items-center justify-between ${
@@ -143,10 +145,11 @@ export const Header = () => {
             
             {/* Quick Links Mobile (Diubah Jadi 3 Kolom yang Rapi & Seimbang) */}
             <div className="grid grid-cols-3 gap-2 mt-4 pt-4 border-t border-border">
-              <Link to="/tentang-kami" onClick={() => setOpen(false)} className="text-[10px] font-black uppercase p-3 bg-muted rounded-lg text-center">Tentang</Link>
-              <Link to="/kontak" onClick={() => setOpen(false)} className="text-[10px] font-black uppercase p-3 bg-muted rounded-lg text-center">Kontak</Link>
+              <Link to="/tentang-kami" data-nav-loader-label="Tentang Kami" onClick={() => setOpen(false)} className="text-[10px] font-black uppercase p-3 bg-muted rounded-lg text-center">Tentang</Link>
+              <Link to="/kontak" data-nav-loader-label="Kontak" onClick={() => setOpen(false)} className="text-[10px] font-black uppercase p-3 bg-muted rounded-lg text-center">Kontak</Link>
               <Link 
                 to="/rating" 
+                data-nav-loader-label="Rating Layanan"
                 onClick={() => setOpen(false)} 
                 className="text-[10px] font-black uppercase p-3 bg-gold/10 text-gold border border-gold/20 rounded-lg text-center flex items-center justify-center gap-1"
               >

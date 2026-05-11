@@ -9,6 +9,7 @@ import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { FloatingWidgets } from "@/components/FloatingWidgets";
 import { ThemeProvider } from "next-themes";
 import { InitialPageLoader } from "@/components/InitialPageLoader";
+import { MenuNavigationLoader } from "@/components/MenuNavigationLoader";
 
 // Import Halaman Utama
 import Index from "./pages/Index.tsx";
@@ -50,6 +51,7 @@ const App = () => (
         <Toaster />
         <Sonner />
         <BrowserRouter>
+          <MenuNavigationLoader />
           <AuthProvider>
             <ArticlesProvider>
               <Routes>
