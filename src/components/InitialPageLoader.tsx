@@ -36,8 +36,13 @@ export const InitialPageLoader = () => {
           <span />
         </div>
 
-        <div className="initial-loader-logo-card">
-          <img src={logoIpnuIppnu} alt="Logo IPNU IPPNU" className="initial-loader-logo" />
+        <div className="initial-loader-logo-stage" aria-label="Logo IPPNU dan IPNU">
+          <div className="initial-loader-logo-card initial-loader-logo-card--triangle">
+            <img src={logoIpnuIppnu} alt="Logo IPPNU" className="initial-loader-logo initial-loader-logo--triangle" />
+          </div>
+          <div className="initial-loader-logo-card initial-loader-logo-card--circle">
+            <img src={logoIpnuIppnu} alt="Logo IPNU" className="initial-loader-logo initial-loader-logo--circle" />
+          </div>
         </div>
 
         <div className="mt-8 text-center">
