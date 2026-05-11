@@ -211,7 +211,7 @@ export const getUserRole = async (userId: string) => {
 };
 
 export const callChatbot = async (messages: Array<{ role: string; content: string }>) => {
-  const endpoint = import.meta.env.VITE_CHATBOT_FUNCTION_URL;
+  const endpoint = import.meta.env.VITE_CHATBOT_FUNCTION_URL || "/api/chatbot";
 
   if (functions && isFirebaseConfigured) {
     try {
@@ -223,11 +223,14 @@ export const callChatbot = async (messages: Array<{ role: string; content: strin
     }
   }
 
-  if (!endpoint) throw new Error("Firebase chatbot function belum dikonfigurasi.");
   const response = await fetch(endpoint, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ messages }),
   });
-  return response.json() as Promise<{ reply?: string; error?: string }>;
+  const data = (await response.json()) as { reply?: string; error?: string; provider?: string; model?: string };
+  if (!response.ok) {
+    throw new Error(data.error || "Chatbot endpoint gagal dipanggil.");
+  }
+  return data;
 };

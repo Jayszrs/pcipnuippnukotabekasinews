@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
-import { Menu, Search, X, Calendar, Moon, Sun, Star } from "lucide-react"; // <-- IMPORT STAR DI SINI
+import { Menu, Search, X, Calendar, Star } from "lucide-react"; // <-- IMPORT STAR DI SINI
 import { Logo } from "./Logo";
+import { ThemeToggle } from "./ThemeToggle";
 
 // Navigasi Utama - Ditambahkan "Struktural" & "Rating Layanan" dengan Flag Spesial
 const navItems = [
@@ -18,14 +19,6 @@ const navItems = [
 export const Header = () => {
   const [open, setOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const [dark, setDark] = useState(false);
-
-  // Logic Dark Mode
-  useEffect(() => {
-    const root = document.documentElement;
-    if (dark) root.classList.add("dark");
-    else root.classList.remove("dark");
-  }, [dark]);
 
   // Format Tanggal Hari Ini
   const today = new Date().toLocaleDateString("id-ID", {
@@ -36,10 +29,10 @@ export const Header = () => {
   });
 
   return (
-    <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-md border-b border-border transition-all duration-300">
+    <header className="sticky top-0 z-50 border-b border-border bg-background/90 shadow-sm shadow-black/5 backdrop-blur-xl transition-colors duration-300 dark:bg-background/85 dark:shadow-black/30">
       
       {/* 1. TOP UTILITY BAR (Desktop Only) */}
-      <div className="hidden md:block bg-primary-deep text-primary-foreground text-[10px] font-black uppercase tracking-widest">
+      <div className="hidden md:block bg-primary-deep text-primary-foreground text-[10px] font-black uppercase tracking-widest dark:bg-card">
         <div className="container-news flex items-center justify-between h-10">
           <div className="flex items-center gap-2 opacity-90">
             <Calendar className="h-3.5 w-3.5 text-gold" />
@@ -55,7 +48,7 @@ export const Header = () => {
               Rating <Star className="h-3 w-3 fill-gold text-gold" />
             </Link>
 
-            <Link to="/admin" className="px-3 py-1 bg-gold text-primary-deep rounded-sm font-black hover:bg-white transition-all">
+            <Link to="/admin" className="px-3 py-1 bg-gold text-gold-foreground rounded-sm font-black hover:bg-white transition-all dark:hover:bg-gold-soft">
               ADMIN LOGIN
             </Link>
           </div>
@@ -102,24 +95,18 @@ export const Header = () => {
         <div className="flex items-center gap-1">
           <button
             onClick={() => setSearchOpen((s) => !s)}
-            className="p-2.5 rounded-full hover:bg-muted transition-colors"
+            className="p-2.5 rounded-full border border-transparent hover:border-border hover:bg-muted transition-colors"
             aria-label="Cari"
           >
             <Search className="h-5 w-5 text-foreground" />
           </button>
           
-          <button
-            onClick={() => setDark((d) => !d)}
-            className="p-2.5 rounded-full hover:bg-muted transition-colors"
-            aria-label="Toggle dark mode"
-          >
-            {dark ? <Sun className="h-5 w-5 text-gold" /> : <Moon className="h-5 w-5 text-foreground" />}
-          </button>
+          <ThemeToggle />
 
           {/* Hamburger Menu (Mobile Only) */}
           <button
             onClick={() => setOpen((o) => !o)}
-            className="lg:hidden p-2.5 rounded-full hover:bg-muted transition-colors"
+            className="lg:hidden p-2.5 rounded-full border border-transparent hover:border-border hover:bg-muted transition-colors"
             aria-label="Menu"
           >
             {open ? <X className="h-6 w-6 text-primary" /> : <Menu className="h-6 w-6 text-foreground" />}
@@ -129,7 +116,7 @@ export const Header = () => {
 
       {/* 3. MOBILE NAVIGATION MENU */}
       {open && (
-        <div className="lg:hidden border-t border-border bg-background animate-in fade-in slide-in-from-top-4 duration-300 shadow-2xl">
+        <div className="lg:hidden border-t border-border bg-background/98 animate-in fade-in slide-in-from-top-4 duration-300 shadow-2xl shadow-black/10 backdrop-blur-xl dark:shadow-black/40">
           <nav className="container-news py-6 flex flex-col gap-2">
             {navItems.map((item) => (
               <NavLink
@@ -139,7 +126,7 @@ export const Header = () => {
                 onClick={() => setOpen(false)}
                 className={({ isActive }) =>
                   `px-4 py-4 rounded-xl text-sm font-black font-brand uppercase tracking-widest transition-all flex items-center justify-between ${
-                    isActive ? "bg-primary text-white shadow-lg" : "hover:bg-muted"
+                    isActive ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20" : "hover:bg-muted"
                   }`
                 }
               >

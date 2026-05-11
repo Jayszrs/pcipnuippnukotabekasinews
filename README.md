@@ -20,11 +20,30 @@ Optional:
 
 - `VITE_FIREBASE_FUNCTIONS_REGION`
 - `VITE_CHATBOT_FUNCTION_URL`
+- `CHATBOT_PROVIDER`
+- `CHATBOT_PROVIDER_ORDER`
+- `GEMINI_API_KEY`
+- `GEMINI_MODEL`
+- `OPENAI_API_KEY`
+- `OPENAI_MODEL`
+- `GITHUB_MODELS_TOKEN`
+- `GITHUB_MODELS_MODEL`
+- `COPILOT_MODEL`
 - `VITE_FIREBASE_DATACONNECT_LOCATION`
 - `VITE_FIREBASE_DATACONNECT_SERVICE_ID`
 - `VITE_FIREBASE_DATACONNECT_CONNECTOR_ID`
 - `VITE_FIREBASE_DATACONNECT_EMULATOR_HOST`
 - `VITE_FIREBASE_DATACONNECT_EMULATOR_PORT`
+
+## Chatbot AI
+
+The chatbot calls `/api/chatbot` by default. The endpoint keeps AI keys on the server and can use these providers:
+
+- Gemini: set `GEMINI_API_KEY`, optional `GEMINI_MODEL` such as `gemini-2.5-flash`.
+- OpenAI/ChatGPT: set `OPENAI_API_KEY`, optional `OPENAI_MODEL` such as `chat-latest`.
+- GitHub Models/Copilot-style fallback: set `GITHUB_MODELS_TOKEN`, optional `GITHUB_MODELS_MODEL` or `COPILOT_MODEL`.
+
+Set `CHATBOT_PROVIDER=auto` to try providers in `CHATBOT_PROVIDER_ORDER`, or set it to `gemini`, `openai`, or `copilot` to force one provider.
 
 ## Firebase Collections
 

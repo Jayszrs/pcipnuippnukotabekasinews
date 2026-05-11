@@ -68,7 +68,7 @@ const HeroBannerLocal = () => {
   if (loading) {
     return (
       <div className="container-news mb-10">
-        <div className="w-full min-h-[150px] bg-slate-50 border rounded-[2.5rem] flex items-center justify-center">
+        <div className="w-full min-h-[150px] bg-muted/60 border border-border rounded-[2.5rem] flex items-center justify-center">
           <Loader2 className="h-6 w-6 animate-spin text-primary/30" />
         </div>
       </div>
@@ -200,16 +200,16 @@ const Index = () => {
             <Sidebar />
 
             {/* BANNER AJAKAN RATING LAYANAN PUBLIK (SINKRON KE TENTANG KAMI STYLE) */}
-            <div className="relative overflow-hidden rounded-[2rem] bg-white border border-slate-100 p-6 shadow-sm hover:shadow-2xl hover:-translate-y-1 transform transition-all duration-500 group/rating">
+            <div className="relative overflow-hidden rounded-[2rem] bg-card border border-border p-6 shadow-card hover:shadow-2xl hover:-translate-y-1 transform transition-all duration-500 group/rating">
               {/* Glow Effect di Background */}
               <div className="absolute -top-10 -right-10 h-24 w-24 rounded-full bg-gold/10 blur-xl group-hover/rating:scale-125 transition-transform duration-500"></div>
               
               <div className="flex items-center gap-2.5 mb-3">
-                <div className="p-2.5 bg-amber-50 rounded-2xl text-gold border border-amber-100 shrink-0 shadow-sm">
+                <div className="p-2.5 bg-gold/10 rounded-2xl text-gold border border-gold/20 shrink-0 shadow-sm">
                   <Star className="h-5 w-5 text-gold fill-gold animate-pulse" />
                 </div>
                 <div>
-                  <h3 className="font-brand font-black text-xs uppercase tracking-wider text-slate-800">Suara Publik</h3>
+                  <h3 className="font-brand font-black text-xs uppercase tracking-wider text-card-foreground">Suara Publik</h3>
                   <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Rating Pelayanan</p>
                 </div>
               </div>
@@ -220,7 +220,7 @@ const Index = () => {
 
               <Link 
                 to="/rating" 
-                className="w-full py-4 bg-[#03441b] hover:bg-[#023113] text-white text-[10px] font-brand font-black uppercase tracking-widest rounded-2xl flex items-center justify-center gap-2 transition-all shadow-md shadow-emerald-950/10 active:scale-95 group/btn"
+                className="w-full py-4 bg-primary hover:bg-primary-deep text-primary-foreground text-[10px] font-brand font-black uppercase tracking-widest rounded-2xl flex items-center justify-center gap-2 transition-all shadow-md shadow-primary/15 active:scale-95 group/btn"
               >
                 Beri Nilai Sekarang 
                 <ArrowRight className="h-3.5 w-3.5 group-hover/btn:translate-x-1.5 transition-transform duration-300" />

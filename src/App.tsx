@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { ArticlesProvider } from "@/contexts/ArticlesContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { FloatingWidgets } from "@/components/FloatingWidgets";
+import { ThemeProvider } from "next-themes";
 
 // Import Halaman Utama
 import Index from "./pages/Index.tsx";
@@ -42,13 +43,14 @@ const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <AuthProvider>
-          <ArticlesProvider>
-            <Routes>
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <AuthProvider>
+            <ArticlesProvider>
+              <Routes>
               {/* Rute Publik */}
               <Route path="/" element={<Index />} />
               <Route path="/berita/:slug" element={<Article />} />
@@ -115,13 +117,14 @@ const App = () => (
               
               {/* Catch-all Route untuk 404 */}
               <Route path="*" element={<NotFound />} />
-            </Routes>
-            
-            <FloatingWidgets />
-          </ArticlesProvider>
-        </AuthProvider>
-      </BrowserRouter>
-    </TooltipProvider>
+              </Routes>
+              
+              <FloatingWidgets />
+            </ArticlesProvider>
+          </AuthProvider>
+        </BrowserRouter>
+      </TooltipProvider>
+    </ThemeProvider>
   </QueryClientProvider>
 );
 
