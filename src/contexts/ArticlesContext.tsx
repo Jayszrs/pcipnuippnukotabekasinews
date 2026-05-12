@@ -8,12 +8,12 @@ interface DbNews {
   slug: string;
   title: string;
   excerpt: string;
-  content: string;
+  content: string | string[] | null;
   category: string;
-  image_url: string | null;
+  image_url: string | string[] | null;
   video_url: string | null;
-  tags: string[] | null;
-  views: number;
+  tags: string[] | string | null;
+  views: number | null;
   author_name: string | null;
   published_at: string | null;
   created_at: string;
@@ -24,24 +24,55 @@ export interface ArticleWithVideo extends Article {
   publishedAt?: string;
 }
 
-const dbToArticle = (n: DbNews): ArticleWithVideo => ({
-  id: n.id,
-  slug: n.slug,
-  title: n.title,
-  excerpt: n.excerpt,
-  content: n.content.split(/\n\n+/),
-  image: n.image_url || "/placeholder.svg",
-  category: n.category as Category,
-  author: n.author_name ?? "Redaksi",
-  date: new Date(n.published_at ?? n.created_at).toLocaleDateString("id-ID", {
+const isCategory = (category: string): category is Category =>
+  ["Kegiatan IPNU", "Kegiatan IPPNU", "Bekasi Update", "Nasional", "Opini"].includes(category);
+
+const normalizeContent = (content: DbNews["content"]) => {
+  if (Array.isArray(content)) return content.filter((item): item is string => typeof item === "string" && item.trim() !== "");
+  if (typeof content === "string") return content.split(/\n\n+/).map((item) => item.trim()).filter(Boolean);
+  return [];
+};
+
+const normalizeTags = (tags: DbNews["tags"]) => {
+  if (Array.isArray(tags)) return tags.filter((item): item is string => typeof item === "string" && item.trim() !== "");
+  if (typeof tags === "string") return tags.split(",").map((item) => item.trim()).filter(Boolean);
+  return [];
+};
+
+const normalizeImage = (imageUrl: DbNews["image_url"]) => {
+  if (Array.isArray(imageUrl)) return imageUrl.find((item) => typeof item === "string" && item.trim() !== "") ?? "/placeholder.svg";
+  return imageUrl || "/placeholder.svg";
+};
+
+const normalizePublishedAt = (publishedAt: string | null, createdAt: string) => {
+  const fallback = new Date().toISOString();
+  const value = publishedAt || createdAt || fallback;
+  return Number.isNaN(new Date(value).getTime()) ? fallback : value;
+};
+
+const dbToArticle = (n: DbNews): ArticleWithVideo => {
+  const content = normalizeContent(n.content);
+  const publishedAt = normalizePublishedAt(n.published_at, n.created_at);
+
+  return {
+    id: n.id,
+    slug: n.slug || n.id,
+    title: n.title || "Berita tanpa judul",
+    excerpt: n.excerpt || "",
+    content,
+    image: normalizeImage(n.image_url),
+    category: isCategory(n.category) ? n.category : "Bekasi Update",
+    author: n.author_name ?? "Redaksi",
+    date: new Date(publishedAt).toLocaleDateString("id-ID", {
     day: "numeric", month: "long", year: "numeric",
-  }),
-  readTime: Math.max(1, Math.round(n.content.split(/\s+/).length / 200)),
-  views: n.views,
-  tags: n.tags ?? [],
-  videoUrl: n.video_url,
-  publishedAt: n.published_at ?? n.created_at,
-});
+    }),
+    readTime: Math.max(1, Math.round(content.join(" ").split(/\s+/).filter(Boolean).length / 200)),
+    views: n.views ?? 0,
+    tags: normalizeTags(n.tags),
+    videoUrl: n.video_url,
+    publishedAt,
+  };
+};
 
 interface Ctx {
   articles: ArticleWithVideo[];
