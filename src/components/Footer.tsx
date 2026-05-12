@@ -1,6 +1,6 @@
 import { Logo } from "./Logo";
 import { Instagram, Youtube, Mail, MapPin, Phone, Star } from "lucide-react"; // <-- IMPORT STAR DI SINI
-import { categories } from "@/data/news";
+import { categories, categoryToSlug } from "@/data/news";
 import { Link } from "react-router-dom";
 
 export const Footer = () => {
@@ -43,7 +43,7 @@ export const Footer = () => {
               {categories.map((c) => (
                 <li key={c}>
                   <Link
-                    to={`/kategori/${encodeURIComponent(c.toLowerCase().replace(/\s+/g, "-"))}`}
+                    to={`/kategori/${categoryToSlug(c)}`}
                     className="text-primary-foreground/75 hover:text-gold transition-colors"
                   >
                     {c}

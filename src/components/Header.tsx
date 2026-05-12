@@ -7,7 +7,7 @@ import { ThemeToggle } from "./ThemeToggle";
 // Navigasi Utama - Ditambahkan "Struktural" & "Rating Layanan" dengan Flag Spesial
 const navItems = [
   { label: "Beranda", to: "/" },
-  { label: "Kegiatan IPNU", to: "/kategori/kegiatan-ipnu" },
+  { label: "Kegiatan IPNU & IPPNU", to: "/kategori/kegiatan-ipnu-ippnu" },
   { label: "Bekasi Update", to: "/kategori/bekasi-update" },
   { label: "Nasional", to: "/kategori/nasional" },
   { label: "Opini", to: "/kategori/opini" },

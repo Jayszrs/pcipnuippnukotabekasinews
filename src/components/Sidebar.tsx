@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { Flame, Hash, TrendingUp, Bell } from "lucide-react";
-import { categories } from "@/data/news";
+import { categories, categoryToSlug } from "@/data/news";
 import { useArticles } from "@/contexts/ArticlesContext";
 
 export const Sidebar = () => {
@@ -67,7 +67,7 @@ export const Sidebar = () => {
           {categories.map((c) => (
             <li key={c}>
               <Link
-                to={`/kategori/${encodeURIComponent(c.toLowerCase().replace(/\s+/g, "-"))}`}
+                to={`/kategori/${categoryToSlug(c)}`}
                 className="flex items-center justify-between py-2.5 px-3 rounded-sm hover:bg-muted transition-colors text-sm font-semibold"
               >
                 <span>{c}</span>

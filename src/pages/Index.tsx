@@ -179,7 +179,7 @@ const Index = () => {
                 </span>
                 <h2 className="font-display font-black text-3xl lg:text-4xl text-foreground uppercase italic">Berita Terbaru</h2>
               </div>
-              <Link to="/kategori/kegiatan-ipnu" className="text-xs font-bold text-primary inline-flex items-center gap-1 hover:gap-2 transition-all group">
+              <Link to="/kategori/kegiatan-ipnu-ippnu" className="text-xs font-bold text-primary inline-flex items-center gap-1 hover:gap-2 transition-all group">
                 LIHAT SEMUA <ArrowRight className="h-3 w-3 group-hover:translate-x-1 transition-transform" />
               </Link>
             </div>

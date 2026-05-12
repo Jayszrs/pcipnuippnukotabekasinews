@@ -13,7 +13,17 @@ import {
 import { toast } from "sonner";
 import { z } from "zod";
 
-const CATEGORIES = ["Kegiatan IPNU", "Kegiatan IPPNU", "Bekasi Update", "Nasional", "Opini"] as const;
+const CATEGORIES = ["Kegiatan IPNU & IPPNU", "Bekasi Update", "Nasional", "Opini"] as const;
+
+const normalizeCategory = (value: string) => {
+  if (value === "Kegiatan IPNU" || value === "Kegiatan IPPNU" || value === "Kegiatan IPNU & IPPNU") {
+    return "Kegiatan IPNU & IPPNU";
+  }
+
+  return CATEGORIES.includes(value as (typeof CATEGORIES)[number])
+    ? (value as (typeof CATEGORIES)[number])
+    : "Kegiatan IPNU & IPPNU";
+};
 
 const slugify = (s: string) =>
   s.toLowerCase().trim()
@@ -41,7 +51,7 @@ const NewsForm = () => {
   const [title, setTitle] = useState("");
   const [excerpt, setExcerpt] = useState("");
   const [content, setContent] = useState("");
-  const [category, setCategory] = useState<string>("Kegiatan IPNU");
+  const [category, setCategory] = useState<string>("Kegiatan IPNU & IPPNU");
   const [tags, setTags] = useState("");
   const [publishedAt, setPublishedAt] = useState(new Date().toISOString().slice(0, 16));
   
@@ -65,7 +75,7 @@ const NewsForm = () => {
           if (draft.title) setTitle(draft.title);
           if (draft.excerpt) setExcerpt(draft.excerpt);
           if (draft.content) setContent(draft.content);
-          if (draft.category) setCategory(draft.category);
+          if (draft.category) setCategory(normalizeCategory(draft.category));
           if (draft.tags) setTags(draft.tags);
           if (draft.publishedAt) setPublishedAt(draft.publishedAt);
           if (draft.images) setImages(draft.images);
@@ -113,7 +123,7 @@ const NewsForm = () => {
       setTitle(data.title);
       setExcerpt(data.excerpt);
       setContent(data.content);
-      setCategory(data.category);
+      setCategory(normalizeCategory(data.category));
       setTags((data.tags ?? []).join(", "));
       setPublishedAt(new Date(data.published_at || data.created_at).toISOString().slice(0, 16));
       

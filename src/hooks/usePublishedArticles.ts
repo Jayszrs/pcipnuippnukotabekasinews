@@ -18,8 +18,14 @@ interface DbNews {
   created_at: string;
 }
 
-const isCategory = (category: string): category is Article["category"] =>
-  ["Kegiatan IPNU", "Kegiatan IPPNU", "Bekasi Update", "Nasional", "Opini"].includes(category);
+const normalizeCategory = (category: string): Article["category"] => {
+  if (category === "Kegiatan IPNU" || category === "Kegiatan IPPNU" || category === "Kegiatan IPNU & IPPNU") {
+    return "Kegiatan IPNU & IPPNU";
+  }
+
+  if (category === "Bekasi Update" || category === "Nasional" || category === "Opini") return category;
+  return "Bekasi Update";
+};
 
 const normalizeContent = (content: DbNews["content"]) => {
   if (Array.isArray(content)) return content.filter((item): item is string => typeof item === "string" && item.trim() !== "");
@@ -55,7 +61,7 @@ const dbToArticle = (n: DbNews): Article => {
     excerpt: n.excerpt || "",
     content,
     image: normalizeImage(n.image_url),
-    category: isCategory(n.category) ? n.category : "Bekasi Update",
+    category: normalizeCategory(n.category),
     author: n.author_name ?? "Redaksi",
     date: new Date(publishedAt).toLocaleDateString("id-ID", {
     day: "numeric", month: "long", year: "numeric",

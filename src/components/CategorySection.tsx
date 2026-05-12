@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { ArrowRight } from "lucide-react";
-import { categories } from "@/data/news";
+import { categories, categoryToSlug } from "@/data/news";
 import { useArticles } from "@/contexts/ArticlesContext";
 import { NewsCard } from "./NewsCard";
 
@@ -21,7 +21,7 @@ export const CategorySection = () => {
         {categories.slice(0, 4).map((cat) => {
           const items = articles.filter((a) => a.category === cat).slice(0, 2);
           if (items.length === 0) return null;
-          const slug = encodeURIComponent(cat.toLowerCase().replace(/\s+/g, "-"));
+          const slug = categoryToSlug(cat);
           return (
             <div key={cat}>
               <div className="flex items-center justify-between mb-4 pb-2 border-b border-border">

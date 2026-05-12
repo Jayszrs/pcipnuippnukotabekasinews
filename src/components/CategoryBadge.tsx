@@ -1,9 +1,8 @@
 import { Link } from "react-router-dom";
-import type { Category } from "@/data/news";
+import { categoryToSlug, type Category } from "@/data/news";
 
 const colors: Record<Category, string> = {
-  "Kegiatan IPNU": "bg-primary text-primary-foreground",
-  "Kegiatan IPPNU": "bg-gold text-gold-foreground",
+  "Kegiatan IPNU & IPPNU": "bg-primary text-primary-foreground",
   "Bekasi Update": "bg-primary-deep text-primary-foreground",
   Nasional: "bg-foreground text-background",
   Opini: "bg-secondary text-primary border border-primary/20",
@@ -18,7 +17,7 @@ export const CategoryBadge = ({
   size?: "sm" | "md";
   className?: string;
 }) => {
-  const slug = encodeURIComponent(category.toLowerCase().replace(/\s+/g, "-"));
+  const slug = categoryToSlug(category);
   return (
     <Link
       to={`/kategori/${slug}`}

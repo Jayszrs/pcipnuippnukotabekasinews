@@ -13,8 +13,7 @@ import n11 from "@/assets/news-11.jpg";
 import n12 from "@/assets/news-12.jpg";
 
 export type Category =
-  | "Kegiatan IPNU"
-  | "Kegiatan IPPNU"
+  | "Kegiatan IPNU & IPPNU"
   | "Bekasi Update"
   | "Nasional"
   | "Opini";
@@ -36,12 +35,24 @@ export interface Article {
 }
 
 export const categories: Category[] = [
-  "Kegiatan IPNU",
-  "Kegiatan IPPNU",
+  "Kegiatan IPNU & IPPNU",
   "Bekasi Update",
   "Nasional",
   "Opini",
 ];
+
+export const categoryToSlug = (category: Category) => {
+  if (category === "Kegiatan IPNU & IPPNU") return "kegiatan-ipnu-ippnu";
+  return category.toLowerCase().replace(/\s+/g, "-");
+};
+
+export const categoryFromSlug = (slug: string | undefined) => {
+  if (slug === "kegiatan-ipnu" || slug === "kegiatan-ippnu" || slug === "kegiatan-ipnu-ippnu") {
+    return "Kegiatan IPNU & IPPNU";
+  }
+
+  return categories.find((category) => categoryToSlug(category) === slug);
+};
 
 export const articles: Article[] = [
   {
@@ -58,7 +69,7 @@ export const articles: Article[] = [
       "Konfercab akan berlangsung selama tiga hari dan diisi dengan berbagai agenda strategis, mulai dari sidang komisi, pemilihan ketua baru, hingga pelatihan kepemimpinan untuk kader muda.",
     ],
     image: hero,
-    category: "Kegiatan IPNU",
+    category: "Kegiatan IPNU & IPPNU",
     author: "Redaksi PC IPNU Bekasi",
     date: "25 April 2026",
     readTime: 4,
@@ -79,7 +90,7 @@ export const articles: Article[] = [
       "Ketua PC IPPNU Bekasi mengatakan kegiatan ini adalah bagian dari program literasi digital berkelanjutan yang akan digelar setiap bulan di lokasi yang berbeda-beda.",
     ],
     image: n1,
-    category: "Kegiatan IPPNU",
+    category: "Kegiatan IPNU & IPPNU",
     author: "Siti Nurhaliza",
     date: "21 April 2026",
     readTime: 3,
@@ -116,7 +127,7 @@ export const articles: Article[] = [
       "Acara dihadiri oleh PC IPNU IPPNU Kota Bekasi, MWC NU Medan Satria, serta para alumni dan senior organisasi.",
     ],
     image: n3,
-    category: "Kegiatan IPNU",
+    category: "Kegiatan IPNU & IPPNU",
     author: "Redaksi",
     date: "18 April 2026",
     readTime: 2,
@@ -134,7 +145,7 @@ export const articles: Article[] = [
       "Aksi ini melibatkan ratusan relawan kader IPNU IPPNU dari seluruh PAC se-Kota Bekasi.",
     ],
     image: n4,
-    category: "Kegiatan IPPNU",
+    category: "Kegiatan IPNU & IPPNU",
     author: "Tim Sosial",
     date: "15 April 2026",
     readTime: 3,
@@ -152,7 +163,7 @@ export const articles: Article[] = [
       "Kegiatan ini diikuti 300 santri dan pelajar yang dibagi dalam puluhan kelompok bergiliran membaca Al-Qur'an.",
     ],
     image: n5,
-    category: "Kegiatan IPNU",
+    category: "Kegiatan IPNU & IPPNU",
     author: "Muhammad Hasan",
     date: "12 April 2026",
     readTime: 2,
@@ -208,7 +219,7 @@ export const articles: Article[] = [
       "Kemenangan ini menjadi bukti kuatnya tradisi keilmuan pelajar NU Kota Bekasi yang konsisten dibina melalui kajian mingguan.",
     ],
     image: n7,
-    category: "Kegiatan IPNU",
+    category: "Kegiatan IPNU & IPPNU",
     author: "Tim Redaksi",
     date: "5 April 2026",
     readTime: 3,
@@ -227,7 +238,7 @@ export const articles: Article[] = [
       "Pendaftaran dibuka melalui website resmi PC IPPNU Bekasi dan ditargetkan menampung 500 peserta dari berbagai jenjang pendidikan.",
     ],
     image: n8,
-    category: "Kegiatan IPPNU",
+    category: "Kegiatan IPNU & IPPNU",
     author: "Nur Fadilah",
     date: "3 April 2026",
     readTime: 3,
@@ -247,7 +258,7 @@ export const articles: Article[] = [
       "Kegiatan ini bertujuan memperkuat sanad keilmuan pesantren di kalangan pelajar generasi Z.",
     ],
     image: n9,
-    category: "Kegiatan IPNU",
+    category: "Kegiatan IPNU & IPPNU",
     author: "Abdul Karim",
     date: "1 April 2026",
     readTime: 3,
@@ -305,7 +316,7 @@ export const articles: Article[] = [
       "Ketua PC IPNU Bekasi menegaskan bahwa menjaga lingkungan adalah bagian dari ajaran Aswaja.",
     ],
     image: n12,
-    category: "Kegiatan IPNU",
+    category: "Kegiatan IPNU & IPPNU",
     author: "Departemen Lingkungan",
     date: "25 Maret 2026",
     readTime: 3,
@@ -343,7 +354,7 @@ export const articles: Article[] = [
       "Para peserta nantinya akan tergabung dalam Tim Media PC IPNU IPPNU yang bertugas memproduksi konten berita harian.",
     ],
     image: n11,
-    category: "Kegiatan IPNU",
+    category: "Kegiatan IPNU & IPPNU",
     author: "Tim Media",
     date: "20 Maret 2026",
     readTime: 3,

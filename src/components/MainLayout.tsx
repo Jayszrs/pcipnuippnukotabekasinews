@@ -10,7 +10,7 @@ export const MainLayout = ({ children }: { children: React.ReactNode }) => {
   // Navigasi menu utama
   const navItems = [
     { name: "BERANDA", path: "/" },
-    { name: "KEGIATAN IPNU", path: "/kegiatan-ipnu" },
+    { name: "KEGIATAN IPNU & IPPNU", path: "/kategori/kegiatan-ipnu-ippnu" },
     { name: "BEKASI UPDATE", path: "/bekasi-update" },
     { name: "NASIONAL", path: "/nasional" },
     { name: "OPINI", path: "/opini" },
