@@ -47,10 +47,6 @@ export const Header = () => {
             <Link to="/rating" data-nav-loader-label="Rating Layanan" className="hover:text-gold text-gold font-bold flex items-center gap-1 transition-colors">
               Rating <Star className="h-3 w-3 fill-gold text-gold" />
             </Link>
-
-            <Link to="/admin" data-nav-loader-label="Admin Login" className="px-3 py-1 bg-gold text-gold-foreground rounded-sm font-black hover:bg-white transition-all dark:hover:bg-gold-soft">
-              ADMIN LOGIN
-            </Link>
           </div>
         </div>
       </div>

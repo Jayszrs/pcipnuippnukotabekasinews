@@ -15,6 +15,9 @@ import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header"; 
 import { Footer } from "@/components/Footer"; 
 
+const displayPeriodStart = (periodStart?: string | number | null) =>
+  String(periodStart || "2026") === "2025" ? "2026" : String(periodStart || "2026");
+
 // ================= KOMPONEN KARTU KADER (3D FLIP EFFECT) =================
 const CadreCard = ({ kader }: { kader: any }) => {
   const [isFlipped, setIsFlipped] = useState(false);
@@ -53,7 +56,7 @@ const CadreCard = ({ kader }: { kader: any }) => {
                 {kader.organization || "IPNU"}
               </span>
               <span className="text-[9px] text-muted-foreground font-bold uppercase tracking-wider shrink-0 z-10">
-                Khidmah {kader.period_start || "2025"}—{kader.period_end || "2028"}
+                Khidmah {displayPeriodStart(kader.period_start)}—{kader.period_end || "2028"}
               </span>
             </div>
 
@@ -172,7 +175,7 @@ export const StructuralPage = () => {
             Struktural Pimpinan Cabang
           </h1>
           <p className="text-muted-foreground font-brand font-black uppercase tracking-[0.4em] text-[10px]">
-            Masa Khidmah 2025 — 2028
+            Masa Khidmah 2026 — 2028
           </p>
           <div className="h-1.5 w-20 bg-gold mx-auto rounded-full shadow-sm" />
         </div>

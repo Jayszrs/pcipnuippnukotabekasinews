@@ -32,7 +32,6 @@ export const MainLayout = ({ children }: { children: React.ReactNode }) => {
               <Link to="/tentang-kami" className="hover:text-gold transition-colors">Tentang Kami</Link>
               <Link to="/redaksi" className="hover:text-gold transition-colors">Redaksi</Link>
               <Link to="/kontak" className="hover:text-gold transition-colors">Kontak</Link>
-              <Link to="/admin/dashboard" className="bg-gold text-primary px-2.5 py-0.5 rounded-sm font-black hover:opacity-90 transition-all">Admin Login</Link>
             </div>
           </div>
         </div>
@@ -111,7 +110,6 @@ export const MainLayout = ({ children }: { children: React.ReactNode }) => {
               <li><Link to="/" className="hover:text-white transition-colors">Halaman Beranda</Link></li>
               <li><Link to="/struktural" className="hover:text-white transition-colors">Struktural Pengurus</Link></li>
               <li><Link to="/kontak" className="hover:text-white transition-colors">Hubungi Kami</Link></li>
-              <li><Link to="/admin/dashboard" className="hover:text-white transition-colors">Portal Admin</Link></li>
             </ul>
           </div>
 

@@ -7,6 +7,9 @@ import {
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 
+const normalizePeriodStart = (periodStart?: string | number | null) =>
+  String(periodStart || "2026") === "2025" ? "2026" : String(periodStart || "2026");
+
 export const CadreManager = () => {
   const navigate = useNavigate();
   const [cadres, setCadres] = useState<any[]>([]);
@@ -18,10 +21,10 @@ export const CadreManager = () => {
   const [isUpdateSuccess, setIsUpdateSuccess] = useState(false); 
   const [lastCreatedCadre, setLastCreatedCadre] = useState<any>(null);
 
-  // Form State - Default khidmah disetel ke 2025 - 2028 + Fitur Hierarki & Urutan
+  // Form State - Default khidmah disetel ke 2026 - 2028 + Fitur Hierarki & Urutan
   const [formData, setFormData] = useState({
     name: "", position: "", division: "", organization: "IPNU", 
-    period_start: "2025", period_end: "2028", quote: "",
+    period_start: "2026", period_end: "2028", quote: "",
     origin: "", birth_info: "", 
     position_level: 2, // <-- INTEGRASI BARU (1: Ketua, 2: BPH, 3: Departemen)
     order_priority: 1  // <-- INTEGRASI BARU (Urutan Grid Tampil)
@@ -52,7 +55,7 @@ export const CadreManager = () => {
       position: cadre.position,
       division: cadre.division,
       organization: cadre.organization,
-      period_start: cadre.period_start,
+      period_start: normalizePeriodStart(cadre.period_start),
       period_end: cadre.period_end,
       quote: cadre.quote || "",
       origin: cadre.origin || "",
@@ -69,7 +72,7 @@ export const CadreManager = () => {
     setEditingId(null);
     setFormData({
       name: "", position: "", division: "", organization: "IPNU", 
-      period_start: "2025", period_end: "2028", quote: "", origin: "", birth_info: "",
+      period_start: "2026", period_end: "2028", quote: "", origin: "", birth_info: "",
       position_level: 2, order_priority: 1
     });
     setImageFile(null);
