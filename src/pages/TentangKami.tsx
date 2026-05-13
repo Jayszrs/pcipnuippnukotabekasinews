@@ -15,6 +15,7 @@ import {
 import { Header } from "@/components/Header"; // <-- IMPORT HEADER ASLI LU
 import { Footer } from "@/components/Footer"; // <-- IMPORT FOOTER ASLI LU
 import tentangHeroBg from "@/assets/hero-news.jpg";
+import historyParallaxBg from "@/assets/news-12.jpg";
 
 // DATA SEJARAH YANG SUDAH DIPERKAYA & DISTRUKTURKAN
 const IPNU_HISTORY = [
@@ -135,6 +136,13 @@ export const TentangKami = () => {
     setExpandedIndex(expandedIndex === index ? null : index);
   };
 
+  const getHistoryParallaxOffset = (index: number, strength = 1) => {
+    const sectionStart = 560;
+    const itemDistance = 260;
+    const rawOffset = (parallaxY - sectionStart - index * itemDistance) * 0.035 * strength;
+    return Math.max(-22, Math.min(22, rawOffset));
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
       
@@ -208,6 +216,12 @@ export const TentangKami = () => {
           .tentang-hero-photo img {
             animation: slowZoom 8s ease-in-out infinite alternate;
           }
+          .history-parallax-card,
+          .history-parallax-year,
+          .history-parallax-node,
+          .history-parallax-bg {
+            will-change: transform;
+          }
         `}} />
 
         {/* BACKGROUND DEKORATIF GLOWING BLOB */}
@@ -247,7 +261,22 @@ export const TentangKami = () => {
         </section>
 
         {/* INTERACTIVE HISTORY SECTION */}
-        <section className="container mx-auto px-5 lg:px-8 mt-20 max-w-5xl relative z-10">
+        <section className="relative z-10 mt-20 overflow-hidden py-16">
+          <div
+            className="history-parallax-bg pointer-events-none absolute inset-x-0 top-12 bottom-10 -z-10 opacity-100"
+            style={{ transform: `translate3d(0, ${Math.max(Math.min((parallaxY - 520) * -0.045, 26), -46)}px, 0)` }}
+            aria-hidden="true"
+          >
+            <img
+              src={historyParallaxBg}
+              alt=""
+              className="absolute inset-0 h-full w-full object-cover opacity-[0.08] mix-blend-multiply"
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-background via-emerald-50/80 to-background dark:via-emerald-950/10" />
+            <div className="absolute left-[8%] top-20 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
+            <div className="absolute right-[10%] bottom-24 h-80 w-80 rounded-full bg-gold/10 blur-3xl" />
+          </div>
+          <div className="container mx-auto px-5 lg:px-8 max-w-5xl relative z-10">
           
           {/* Header Sejarah */}
           <div className="text-center space-y-2 mb-12">
@@ -298,6 +327,9 @@ export const TentangKami = () => {
             {historyData.map((item, idx) => {
               const IconComponent = item.icon;
               const isExpanded = expandedIndex === idx;
+              const cardOffset = getHistoryParallaxOffset(idx, idx % 2 === 0 ? -0.75 : 0.55);
+              const yearOffset = getHistoryParallaxOffset(idx, idx % 2 === 0 ? 0.95 : -0.8);
+              const nodeOffset = getHistoryParallaxOffset(idx, idx % 2 === 0 ? -0.35 : 0.35);
 
               return (
                 <div 
@@ -311,12 +343,15 @@ export const TentangKami = () => {
                     isExpanded 
                       ? (activeTab === "ipnu" ? "bg-primary text-white border-primary shadow-lg shadow-primary/20" : "bg-gold text-gold-foreground border-gold shadow-lg shadow-gold/20") 
                       : "border-slate-200 text-slate-400 hover:border-slate-400 hover:text-slate-600"
-                  }`}>
+                  } history-parallax-node`} style={{ top: `calc(0.375rem + ${nodeOffset}px)` }}>
                     <IconComponent className="h-4 w-4" />
                   </div>
 
                   {/* Label Tahun di Sebelah Kiri (Desktop Only) */}
-                  <div className="hidden md:block absolute -left-36 top-2 text-right w-28">
+                  <div
+                    className="history-parallax-year hidden md:block absolute -left-36 top-2 text-right w-28"
+                    style={{ transform: `translate3d(0, ${yearOffset}px, 0)` }}
+                  >
                     <span className={`text-3xl font-black font-display tracking-tight transition-all duration-500 block ${
                       isExpanded 
                         ? (activeTab === "ipnu" ? "text-primary text-4xl scale-105" : "text-gold text-4xl scale-105") 
@@ -327,8 +362,12 @@ export const TentangKami = () => {
                   </div>
 
                   {/* Kartu Konten Sejarah (3D Tilt & Shadow Hover Effect) */}
-                  <div 
-                    onClick={() => toggleExpand(idx)}
+                  <div
+                    className="history-parallax-card"
+                    style={{ transform: `translate3d(0, ${cardOffset}px, 0)` }}
+                  >
+                    <div 
+                      onClick={() => toggleExpand(idx)}
                     className={`bg-white rounded-3xl border p-6 md:p-8 shadow-sm hover:shadow-2xl hover:-translate-y-1 transform transition-all duration-500 cursor-pointer relative overflow-hidden group/card ${
                       isExpanded 
                         ? (activeTab === "ipnu" ? "border-primary/80 glow-active-green" : "border-gold/80 glow-active-gold") 
@@ -393,6 +432,7 @@ export const TentangKami = () => {
                       </div>
                     </div>
 
+                    </div>
                   </div>
 
                 </div>
@@ -400,7 +440,7 @@ export const TentangKami = () => {
             })}
 
           </div>
-
+          </div>
         </section>
 
         {/* VISI & MISI DAN STRUKTURAL BANNER */}
