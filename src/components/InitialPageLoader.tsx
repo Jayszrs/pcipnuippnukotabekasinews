@@ -47,9 +47,6 @@ export const InitialPageLoader = () => {
 
         <div className="mt-8 text-center">
           <p className="text-[10px] font-black uppercase tracking-[0.42em] text-gold">Portal Berita Resmi</p>
-          <h1 className="mt-2 font-brand text-xl font-black uppercase tracking-[0.18em] sm:text-2xl">
-            PC IPNU IPPNU Kota Bekasi
-          </h1>
         </div>
 
         <div className="initial-loader-progress mt-8" aria-hidden="true">
