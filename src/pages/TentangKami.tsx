@@ -325,11 +325,11 @@ export const TentangKami = () => {
           </div>
 
           {/* TAB SWITCHER (IPNU / IPPNU) */}
-          <div className="flex justify-center mb-16">
-            <div className="bg-slate-100 p-2 rounded-full flex items-center relative shadow-inner border border-slate-200">
+          <div className="flex justify-center mb-16 px-1">
+            <div className="grid w-full max-w-xl grid-cols-2 bg-slate-100 p-1.5 sm:p-2 rounded-full relative shadow-inner border border-slate-200 dark:bg-card dark:border-border">
               <button
                 onClick={() => { setActiveTab("ipnu"); setExpandedIndex(null); }}
-                className={`px-10 py-3.5 rounded-full text-xs font-black uppercase tracking-widest transition-all duration-500 flex items-center gap-2.5 ${
+                className={`justify-center px-3 sm:px-10 py-3.5 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all duration-500 flex items-center gap-2 sm:gap-2.5 ${
                   activeTab === "ipnu"
                     ? "bg-primary text-white shadow-xl transform scale-105"
                     : "text-muted-foreground hover:text-foreground"
@@ -339,7 +339,7 @@ export const TentangKami = () => {
               </button>
               <button
                 onClick={() => { setActiveTab("ippnu"); setExpandedIndex(null); }}
-                className={`px-10 py-3.5 rounded-full text-xs font-black uppercase tracking-widest transition-all duration-500 flex items-center gap-2.5 ${
+                className={`justify-center px-3 sm:px-10 py-3.5 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all duration-500 flex items-center gap-2 sm:gap-2.5 ${
                   activeTab === "ippnu"
                     ? "bg-gold text-gold-foreground shadow-xl transform scale-105"
                     : "text-muted-foreground hover:text-foreground"
@@ -388,7 +388,7 @@ export const TentangKami = () => {
                   <div className={`absolute -left-[3px] md:-left-[3px] top-1.5 h-10 w-10 rounded-full border-4 bg-background flex items-center justify-center transition-all duration-500 group-hover:scale-125 z-10 cursor-pointer ${
                     isExpanded 
                       ? (activeTab === "ipnu" ? "bg-primary text-white border-primary shadow-lg shadow-primary/20" : "bg-gold text-gold-foreground border-gold shadow-lg shadow-gold/20") 
-                      : "border-slate-200 text-slate-400 hover:border-slate-400 hover:text-slate-600"
+                      : "border-slate-200 text-slate-400 hover:border-slate-400 hover:text-slate-600 dark:border-border dark:text-muted-foreground dark:hover:text-foreground"
                   } history-parallax-node`} style={{ top: `calc(0.375rem + ${nodeOffset}px)` }}>
                     <IconComponent className="h-4 w-4" />
                   </div>
@@ -401,7 +401,7 @@ export const TentangKami = () => {
                     <span className={`text-3xl font-black font-display tracking-tight transition-all duration-500 block ${
                       isExpanded 
                         ? (activeTab === "ipnu" ? "text-primary text-4xl scale-105" : "text-gold text-4xl scale-105") 
-                        : "text-slate-300 group-hover:text-slate-800"
+                        : "text-slate-300 group-hover:text-slate-800 dark:text-muted-foreground/35 dark:group-hover:text-primary"
                     }`}>
                       {item.year}
                     </span>
@@ -414,14 +414,14 @@ export const TentangKami = () => {
                   >
                     <div 
                       onClick={() => toggleExpand(idx)}
-                    className={`history-card-surface bg-white/95 rounded-3xl border p-6 md:p-8 shadow-sm hover:shadow-2xl hover:-translate-y-1 transform transition-all duration-500 cursor-pointer relative overflow-hidden group/card ${
+                    className={`history-card-surface bg-white/95 dark:bg-card/95 rounded-3xl border p-5 sm:p-6 md:p-8 shadow-sm hover:shadow-2xl hover:-translate-y-1 transform transition-all duration-500 cursor-pointer relative overflow-hidden group/card ${
                       isExpanded 
                         ? (activeTab === "ipnu" ? "border-primary/80 glow-active-green" : "border-gold/80 glow-active-gold") 
-                        : "border-slate-100 hover:border-slate-300"
+                        : "border-slate-100 hover:border-slate-300 dark:border-border dark:hover:border-primary/50"
                     }`}
                   >
-                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/70 via-white/25 to-emerald-50/55 opacity-80" aria-hidden="true" />
-                    <div className="pointer-events-none absolute -right-16 -top-16 h-36 w-36 rounded-full bg-primary/5 blur-2xl transition-transform duration-700 group-hover/card:scale-125" aria-hidden="true" />
+                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/70 via-white/25 to-emerald-50/55 opacity-80 dark:from-white/5 dark:via-transparent dark:to-emerald-950/35" aria-hidden="true" />
+                    <div className="pointer-events-none absolute -right-16 -top-16 h-36 w-36 rounded-full bg-primary/5 dark:bg-primary/15 blur-2xl transition-transform duration-700 group-hover/card:scale-125" aria-hidden="true" />
                     <div className="relative z-10">
                     {/* Efek Garis Glow Pojok Atas */}
                     <div className={`absolute -left-6 -right-6 -top-6 h-1.5 transition-all duration-500 md:-left-8 md:-right-8 md:-top-8 ${
@@ -444,20 +444,20 @@ export const TentangKami = () => {
                         <h3 className="font-display font-black text-xl md:text-2xl text-foreground group-hover/card:text-primary transition-colors">
                           {item.title}
                         </h3>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] flex items-center gap-2">
+                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] flex items-center gap-2 dark:text-muted-foreground">
                           <Calendar className="h-3.5 w-3.5" /> {item.date}
                         </p>
                       </div>
                       
                       {/* Tombol Panah Buka Tutup */}
                       <div className="flex items-center gap-2.5 self-end sm:self-center">
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest hidden sm:inline-block opacity-0 group-hover/card:opacity-100 transition-opacity">
+                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest hidden sm:inline-block opacity-0 group-hover/card:opacity-100 transition-opacity dark:text-muted-foreground">
                           {isExpanded ? "Tutup" : "Baca Detail"}
                         </span>
                         <div className={`p-3 rounded-full transition-all duration-500 ${
                           isExpanded 
                             ? (activeTab === "ipnu" ? "bg-primary text-white shadow-lg shadow-primary/20" : "bg-gold text-gold-foreground shadow-lg shadow-gold/20") 
-                            : "bg-slate-100 text-slate-500 group-hover/card:bg-primary group-hover/card:text-white"
+                            : "bg-slate-100 text-slate-500 group-hover/card:bg-primary group-hover/card:text-white dark:bg-muted dark:text-muted-foreground"
                         }`}>
                           {isExpanded ? <ChevronDown className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
                         </div>
@@ -465,18 +465,18 @@ export const TentangKami = () => {
                     </div>
 
                     {/* Ringkasan Singkat */}
-                    <p className="mt-4 text-sm lg:text-base text-slate-500 leading-relaxed font-medium">
+                    <p className="mt-4 text-sm lg:text-base text-slate-600 leading-relaxed font-semibold dark:text-foreground/78">
                       {item.summary}
                     </p>
 
                     {/* Kisah Detail (Mulus Expand & Collapse) */}
                     <div className={`transition-all duration-700 ease-in-out overflow-hidden ${
-                      isExpanded ? "max-h-[800px] opacity-100 mt-6 pt-6 border-t border-dashed border-slate-200" : "max-h-0 opacity-0 pointer-events-none"
+                      isExpanded ? "max-h-[800px] opacity-100 mt-6 pt-6 border-t border-dashed border-slate-200 dark:border-border" : "max-h-0 opacity-0 pointer-events-none"
                     }`}>
-                      <div className="space-y-4 text-sm lg:text-base leading-relaxed text-slate-700">
+                      <div className="space-y-4 text-sm lg:text-base leading-relaxed text-slate-700 dark:text-foreground/86">
                         <p className="font-medium">{item.details}</p>
-                        <div className="flex flex-wrap gap-4 pt-3 text-xs uppercase font-black text-slate-400">
-                          <span className="flex items-center gap-1">📍 Lokasi: <strong className="text-slate-800 font-black">{item.location}</strong></span>
+                        <div className="flex flex-wrap gap-4 pt-3 text-xs uppercase font-black text-slate-500 dark:text-muted-foreground">
+                          <span className="flex items-center gap-1">📍 Lokasi: <strong className="text-slate-800 font-black dark:text-foreground">{item.location}</strong></span>
                         </div>
                       </div>
                     </div>
@@ -509,11 +509,11 @@ export const TentangKami = () => {
             </div>
 
             {/* Card Misi */}
-            <div className="bg-white border border-slate-100 p-10 rounded-3xl relative overflow-hidden shadow-sm hover:shadow-xl group transform transition-transform duration-500 hover:scale-[1.02]">
+            <div className="bg-white dark:bg-card border border-slate-100 dark:border-border p-10 rounded-3xl relative overflow-hidden shadow-sm hover:shadow-xl group transform transition-transform duration-500 hover:scale-[1.02]">
               <h3 className="font-display font-black text-2xl lg:text-3xl uppercase tracking-tight text-primary flex items-center gap-2">
                 <BookOpen className="h-6 w-6" /> Misi Juang
               </h3>
-              <ul className="mt-5 space-y-4 text-sm lg:text-base text-slate-600 leading-relaxed list-none">
+              <ul className="mt-5 space-y-4 text-sm lg:text-base text-slate-600 dark:text-foreground/78 leading-relaxed list-none">
                 <li className="flex items-start gap-2.5">
                   <span className="h-2 w-2 rounded-full bg-primary mt-2 shrink-0"></span>
                   <span>Membangun basis pertahanan kaderisasi di sekolah umum, pesantren, dan kampus.</span>
