@@ -75,13 +75,13 @@ export const Hero = () => {
                   <CategoryBadge category={main.category} size="sm" className="bg-white/10 backdrop-blur-md border-white/20 text-white" />
                 </div>
                 
-                <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8 text-white z-20">
+                <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-7 text-white z-20">
                   {/* UKURAN TEKS DIPERBAIKI: Responsif dan tidak menutupi gambar utama */}
-                  <h1 className="font-display font-bold text-lg sm:text-2xl lg:text-3xl leading-snug mb-2 drop-shadow-md">
+                  <h1 className="font-display font-bold text-base sm:text-xl lg:text-2xl leading-snug mb-2 max-w-3xl line-clamp-3 drop-shadow-md">
                     {main.title}
                   </h1>
                   
-                  <p className="hidden sm:block text-[13px] text-white/80 line-clamp-2 max-w-2xl mb-4 font-medium">
+                  <p className="hidden sm:block text-xs lg:text-[13px] text-white/80 line-clamp-2 max-w-2xl mb-4 font-medium">
                     {main.excerpt}
                   </p>
                   

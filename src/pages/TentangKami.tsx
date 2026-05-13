@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Header } from "@/components/Header"; // <-- IMPORT HEADER ASLI LU
 import { Footer } from "@/components/Footer"; // <-- IMPORT FOOTER ASLI LU
+import tentangHeroBg from "@/assets/hero-news.jpg";
 
 // DATA SEJARAH YANG SUDAH DIPERKAYA & DISTRUKTURKAN
 const IPNU_HISTORY = [
@@ -105,10 +106,27 @@ const IPPNU_HISTORY = [
 export const TentangKami = () => {
   const [activeTab, setActiveTab] = useState<"ipnu" | "ippnu">("ipnu");
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+  const [parallaxY, setParallaxY] = useState(0);
 
   useEffect(() => {
     document.title = "Tentang Kami — PC IPNU IPPNU Kota Bekasi";
     window.scrollTo(0, 0);
+
+    let frame = 0;
+    const onScroll = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(() => {
+        setParallaxY(window.scrollY);
+        frame = 0;
+      });
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
   }, []);
 
   const historyData = activeTab === "ipnu" ? IPNU_HISTORY : IPPNU_HISTORY;
@@ -146,6 +164,20 @@ export const TentangKami = () => {
             0%, 100% { transform: translateY(0px) scale(1); }
             50% { transform: translateY(-20px) scale(1.05); }
           }
+          @keyframes parallaxReveal {
+            from {
+              opacity: 0;
+              filter: blur(8px);
+            }
+            to {
+              opacity: 1;
+              filter: blur(0);
+            }
+          }
+          @keyframes slowZoom {
+            from { opacity: 0.5; }
+            to { opacity: 0.62; }
+          }
           @keyframes pulseBorderGreen {
             0%, 100% { border-color: rgba(3, 68, 27, 0.2); box-shadow: 0 0 0 0px rgba(3, 68, 27, 0.1); }
             50% { border-color: rgba(3, 68, 27, 0.8); box-shadow: 0 0 15px 4px rgba(3, 68, 27, 0.15); }
@@ -170,6 +202,12 @@ export const TentangKami = () => {
           .glow-active-gold {
             animation: pulseBorderGold 2s infinite;
           }
+          .tentang-hero-copy {
+            animation: parallaxReveal 900ms cubic-bezier(0.16, 1, 0.3, 1) both;
+          }
+          .tentang-hero-photo img {
+            animation: slowZoom 8s ease-in-out infinite alternate;
+          }
         `}} />
 
         {/* BACKGROUND DEKORATIF GLOWING BLOB */}
@@ -177,17 +215,32 @@ export const TentangKami = () => {
         <div className="absolute top-2/3 right-[10%] w-96 h-96 bg-gold/5 rounded-full blur-3xl animate-blob pointer-events-none -z-10" style={{ animationDelay: '3s' }}></div>
 
         {/* HERO SECTION */}
-        <section className="relative py-24 bg-primary-deep text-primary-foreground overflow-hidden">
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_bottom_left,rgba(212,175,55,0.2),transparent_50%)]"></div>
-          <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/5 rounded-full blur-2xl"></div>
-          <div className="container mx-auto px-5 lg:px-8 text-center relative z-10 space-y-5">
-            <span className="inline-flex items-center gap-1.5 px-4 py-1.5 bg-gold/20 text-gold text-xs font-black uppercase tracking-widest rounded-full shadow-lg border border-gold/10">
+        <section className="relative min-h-[460px] overflow-hidden bg-primary-deep py-20 text-primary-foreground sm:min-h-[500px] lg:py-24">
+          <div
+            className="tentang-hero-photo absolute -inset-x-6 -top-16 bottom-[-7rem]"
+            style={{ transform: `translate3d(0, ${Math.min(parallaxY * 0.18, 90)}px, 0) scale(1.08)` }}
+            aria-hidden="true"
+          >
+            <img
+              src={tentangHeroBg}
+              alt=""
+              className="h-full w-full object-cover opacity-55 mix-blend-luminosity"
+            />
+          </div>
+          <div className="absolute inset-0 bg-gradient-to-br from-[#022b12]/95 via-[#03441b]/88 to-[#0b6623]/72" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(255,215,0,0.22),transparent_26rem),radial-gradient(circle_at_82%_76%,rgba(255,255,255,0.13),transparent_24rem)]"></div>
+          <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-background to-transparent"></div>
+          <div
+            className="tentang-hero-copy container mx-auto px-5 lg:px-8 text-center relative z-10 flex min-h-[300px] flex-col items-center justify-center space-y-5"
+            style={{ transform: `translate3d(0, ${Math.max(parallaxY * -0.08, -42)}px, 0)` }}
+          >
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-gold/20 bg-gold/20 px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.22em] text-gold shadow-lg backdrop-blur-md sm:text-xs">
               <Sparkles className="h-3.5 w-3.5 animate-spin" /> Kenali Jati Diri Kami
             </span>
-            <h1 className="font-display font-black text-4xl lg:text-7xl uppercase tracking-tight italic transition-all duration-700 hover:scale-[1.01]">
+            <h1 className="mx-auto max-w-5xl font-display text-3xl font-black uppercase italic leading-[1.05] tracking-normal transition-all duration-700 hover:scale-[1.01] sm:text-5xl lg:text-6xl">
               Belajar, Berjuang, <span className="text-gold">Bertaqwa</span>
             </h1>
-            <p className="text-sm lg:text-lg text-primary-foreground/80 max-w-2xl mx-auto leading-relaxed font-medium">
+            <p className="mx-auto max-w-2xl text-sm font-semibold leading-relaxed text-primary-foreground/85 lg:text-base">
               Pimpinan Cabang Ikatan Pelajar Nahdlatul Ulama & Ikatan Pelajar Putri Nahdlatul Ulama Kota Bekasi merupakan wadah perjuangan intelektual muda Aswaja di tanah patriot.
             </p>
           </div>
