@@ -184,7 +184,19 @@
     @apply scale-105;
   }
 
+  .site-logo {
+    transform-origin: left center;
+  }
+
+  .site-logo--landing {
+    opacity: 0;
+    animation: header-logo-reveal 560ms cubic-bezier(0.2, 1, 0.22, 1) 3900ms both;
+  }
+
   .initial-loader {
+    --initial-logo-landing-x: calc(-50vw + clamp(5.4rem, 11vw, 9.6rem));
+    --initial-logo-landing-y: calc(-50vh + 5.8rem);
+    --initial-logo-landing-scale: 0.22;
     isolation: isolate;
     overflow: hidden;
     background:
@@ -363,6 +375,16 @@
   .initial-loader.is-leaving {
     pointer-events: none;
     animation: initial-loader-out 800ms cubic-bezier(0.65, 0, 0.35, 1) both;
+  }
+
+  .initial-loader.is-leaving .initial-loader-logo-stage {
+    animation: initial-logo-land-to-header 780ms cubic-bezier(0.65, 0, 0.35, 1) both;
+  }
+
+  .initial-loader.is-leaving .initial-loader-orbit,
+  .initial-loader.is-leaving .initial-loader-content > .mt-8,
+  .initial-loader.is-leaving .initial-loader-progress {
+    animation: initial-loader-detail-fade 420ms ease both;
   }
 
   .menu-navigation-loader {
@@ -591,6 +613,24 @@
 }
 .animate-ticker:hover { animation-play-state: paused; }
 
+@keyframes header-logo-reveal {
+  0% {
+    opacity: 0;
+    transform: translate3d(-10px, 4px, 0) scale(0.92);
+    filter: blur(4px);
+  }
+  62% {
+    opacity: 1;
+    transform: translate3d(2px, 0, 0) scale(1.015);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: blur(0);
+  }
+}
+
 @keyframes initial-loader-in {
   from {
     opacity: 0;
@@ -610,6 +650,26 @@
     opacity: 0;
     transform: scale(1.035);
     filter: blur(10px);
+  }
+}
+
+@keyframes initial-logo-land-to-header {
+  0% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 0.92;
+    transform: translate3d(var(--initial-logo-landing-x), var(--initial-logo-landing-y), 0) scale(var(--initial-logo-landing-scale));
+    filter: blur(0);
+  }
+}
+
+@keyframes initial-loader-detail-fade {
+  to {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
   }
 }
 
@@ -819,7 +879,20 @@
   }
 }
 
+@media (max-width: 767px) {
+  .initial-loader {
+    --initial-logo-landing-x: calc(-50vw + 5.4rem);
+    --initial-logo-landing-y: calc(-50vh + 2.15rem);
+    --initial-logo-landing-scale: 0.18;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .site-logo--landing {
+    opacity: 1;
+    animation-delay: 0ms;
+  }
+
   .initial-loader,
   .initial-loader::before,
   .initial-loader-grid,

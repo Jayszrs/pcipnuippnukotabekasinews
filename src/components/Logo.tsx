@@ -1,13 +1,13 @@
 import { Link } from "react-router-dom";
 import logoImg from "@/assets/logo-ipnu-ippnu.png";
 
-export const Logo = ({ variant = "default" }: { variant?: "default" | "light" }) => {
+export const Logo = ({ variant = "default", landing = false }: { variant?: "default" | "light"; landing?: boolean }) => {
   const isLight = variant === "light";
   return (
     <Link
       to="/"
       data-nav-loader-label="Beranda"
-      className="flex items-center gap-2.5 group shrink-0"
+      className={`site-logo flex items-center gap-2.5 group shrink-0 ${landing ? "site-logo--landing" : ""}`}
       aria-label="IPNU IPPNU Kota Bekasi"
     >
       <img

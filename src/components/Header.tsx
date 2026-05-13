@@ -53,7 +53,7 @@ export const Header = () => {
 
       {/* 2. MAIN NAVIGATION BAR */}
       <div className="container-news flex items-center justify-between h-16 lg:h-20 gap-4">
-        <Logo />
+        <Logo landing />
 
         {/* Desktop Menu */}
         <nav className="hidden lg:flex items-center gap-1">
