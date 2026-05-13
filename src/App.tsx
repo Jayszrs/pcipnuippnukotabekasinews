@@ -10,6 +10,7 @@ import { FloatingWidgets } from "@/components/FloatingWidgets";
 import { ThemeProvider } from "next-themes";
 import { InitialPageLoader } from "@/components/InitialPageLoader";
 import { MenuNavigationLoader } from "@/components/MenuNavigationLoader";
+import { AnalyticsTracker } from "@/components/AnalyticsTracker";
 
 // Import Halaman Utama
 import Index from "./pages/Index.tsx";
@@ -54,6 +55,7 @@ const App = () => (
           <MenuNavigationLoader />
           <AuthProvider>
             <ArticlesProvider>
+              <AnalyticsTracker />
               <Routes>
               {/* Rute Publik */}
               <Route path="/" element={<Index />} />

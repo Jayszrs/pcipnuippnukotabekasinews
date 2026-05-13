@@ -68,6 +68,22 @@ service cloud.firestore {
       allow read, update, delete: if isEditor();
     }
 
+    match /site_analytics/{document=**} {
+      allow create: if onlyAllowedFields([
+        "visitor_id",
+        "path",
+        "search",
+        "page_type",
+        "article_id",
+        "article_slug",
+        "article_title",
+        "referrer",
+        "user_agent",
+        "created_at"
+      ]);
+      allow read, update, delete: if isEditor();
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }
