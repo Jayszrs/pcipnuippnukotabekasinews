@@ -14,6 +14,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { Header } from "@/components/Header"; 
 import { Footer } from "@/components/Footer"; 
+import structuralParallaxBg from "@/assets/hero-news.jpg";
 
 const displayPeriodStart = (periodStart?: string | number | null) =>
   String(periodStart || "2026") === "2025" ? "2026" : String(periodStart || "2026");
@@ -128,6 +129,7 @@ export const StructuralPage = () => {
   const [cadres, setCadres] = useState<any[]>([]);
   const [activeTab, setActiveTab] = useState<"IPNU" | "IPPNU">("IPNU");
   const [loading, setLoading] = useState(true);
+  const [parallaxY, setParallaxY] = useState(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -144,6 +146,24 @@ export const StructuralPage = () => {
     loadData();
   }, []);
 
+  useEffect(() => {
+    let frame = 0;
+    const onScroll = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(() => {
+        setParallaxY(window.scrollY);
+        frame = 0;
+      });
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (frame) window.cancelAnimationFrame(frame);
+    };
+  }, []);
+
   // Filter pengurus berdasarkan Organisasi Aktif (IPNU / IPPNU)
   const filteredCadres = cadres.filter(k => k.organization === activeTab);
 
@@ -151,6 +171,10 @@ export const StructuralPage = () => {
   const leaders = filteredCadres.filter(k => k.position_level === 1);
   const bphList = filteredCadres.filter(k => k.position_level === 2);
   const departments = filteredCadres.filter(k => k.position_level === 3 || !k.position_level);
+  const getParallaxOffset = (index: number, strength = 1) => {
+    const rawOffset = (parallaxY - 260 - index * 180) * 0.032 * strength;
+    return Math.max(-26, Math.min(26, rawOffset));
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground animate-in fade-in duration-1000">
@@ -158,7 +182,61 @@ export const StructuralPage = () => {
       <Header />
 
       {/* 2. AREA KONTEN TENGAH STRUKTURAL */}
-      <main className="container-news flex-grow py-12 bg-background relative z-10">
+      <main className="relative z-10 flex-grow overflow-hidden bg-background py-12">
+        <style dangerouslySetInnerHTML={{ __html: `
+          @keyframes structuralFloat {
+            0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.5; }
+            50% { transform: translate3d(22px, -18px, 0) scale(1.08); opacity: 0.8; }
+          }
+          @keyframes structuralLineGlow {
+            0%, 100% { filter: drop-shadow(0 0 0 rgba(255, 215, 0, 0)); }
+            50% { filter: drop-shadow(0 0 12px rgba(255, 215, 0, 0.45)); }
+          }
+          .structural-parallax-layer,
+          .structural-parallax-card,
+          .structural-parallax-title,
+          .structural-parallax-line {
+            will-change: transform;
+          }
+          .structural-parallax-stage {
+            perspective: 1400px;
+            transform-style: preserve-3d;
+          }
+          .structural-parallax-card {
+            transform-style: preserve-3d;
+            transition: transform 180ms linear;
+          }
+          .structural-card-depth {
+            transform: translateZ(20px);
+          }
+          .structural-line-glow {
+            animation: structuralLineGlow 3.5s ease-in-out infinite;
+          }
+          .structural-float {
+            animation: structuralFloat 9s ease-in-out infinite;
+          }
+        `}} />
+
+        <div
+          className="structural-parallax-layer pointer-events-none absolute inset-x-0 top-0 bottom-0 -z-10"
+          style={{ transform: `translate3d(0, ${Math.max(Math.min((parallaxY - 120) * -0.055, 38), -62)}px, 0) scale(1.04)` }}
+          aria-hidden="true"
+        >
+          <img
+            src={structuralParallaxBg}
+            alt=""
+            className="absolute inset-0 h-full w-full object-cover opacity-[0.08] mix-blend-multiply"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-background via-emerald-50/80 to-background dark:via-emerald-950/10" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(3,68,27,0.12),transparent_24rem),radial-gradient(circle_at_82%_38%,rgba(255,215,0,0.14),transparent_22rem)]" />
+          <div className="structural-float absolute left-[7%] top-28 h-80 w-80 rounded-full bg-primary/10 blur-3xl" />
+          <div className="structural-float absolute right-[8%] top-[34rem] h-96 w-96 rounded-full bg-gold/10 blur-3xl" style={{ animationDelay: "2s" }} />
+          <div className="absolute left-1/2 top-52 -translate-x-1/2 select-none font-brand text-[8rem] font-black uppercase leading-none tracking-tight text-primary/[0.035] md:text-[13rem]">
+            Struktural
+          </div>
+        </div>
+
+        <div className="container-news structural-parallax-stage relative z-10">
         
         {/* Tombol Kembali Minimalis */}
         <button 
@@ -170,7 +248,10 @@ export const StructuralPage = () => {
         </button>
 
         {/* Heading Jajaran Struktural */}
-        <div className="text-center mb-12 space-y-4 max-w-2xl mx-auto px-4">
+        <div
+          className="structural-parallax-title text-center mb-12 space-y-4 max-w-2xl mx-auto px-4"
+          style={{ transform: `translate3d(0, ${Math.max(Math.min((parallaxY - 80) * -0.035, 18), -28)}px, 0)` }}
+        >
           <h1 className="text-4xl md:text-5xl font-brand font-black text-primary uppercase tracking-tighter leading-none">
             Struktural Pimpinan Cabang
           </h1>
@@ -226,16 +307,23 @@ export const StructuralPage = () => {
                 
                 {/* Grid Ketua */}
                 <div className="flex flex-wrap justify-center gap-8 w-full">
-                  {leaders.map((kader) => (
-                    <div key={kader.id} className="w-72 sm:w-80">
+                  {leaders.map((kader, idx) => {
+                    const offset = getParallaxOffset(idx, -0.7);
+                    const tilt = Math.max(-2, Math.min(2, offset * 0.08));
+                    return (
+                    <div
+                      key={kader.id}
+                      className="structural-parallax-card structural-card-depth w-72 sm:w-80"
+                      style={{ transform: `translate3d(0, ${offset}px, 0) rotateX(${tilt}deg)` }}
+                    >
                       <CadreCard kader={kader} />
                     </div>
-                  ))}
+                  )})}
                 </div>
 
                 {/* Garis Vertikal Utama Penghubung Kebawah */}
                 {(bphList.length > 0 || departments.length > 0) && (
-                  <div className="hidden md:block w-0.5 h-16 bg-gradient-to-b from-gold/80 to-slate-200 mt-8"></div>
+                  <div className="structural-parallax-line structural-line-glow hidden md:block w-0.5 h-16 bg-gradient-to-b from-gold/80 to-slate-200 mt-8"></div>
                 )}
               </div>
             )}
@@ -246,22 +334,29 @@ export const StructuralPage = () => {
             {bphList.length > 0 && (
               <div className="relative">
                 {/* Garis Horizontal Penghubung jajaran BPH */}
-                <div className="hidden md:block absolute top-0 left-24 right-24 h-0.5 bg-slate-200"></div>
+                <div className="structural-parallax-line structural-line-glow hidden md:block absolute top-0 left-24 right-24 h-0.5 bg-gradient-to-r from-transparent via-slate-300 to-transparent"></div>
 
                 <div className="flex flex-wrap justify-center gap-10 pt-10">
-                  {bphList.map((kader) => (
-                    <div key={kader.id} className="relative flex flex-col items-center w-64 sm:w-72">
+                  {bphList.map((kader, idx) => {
+                    const offset = getParallaxOffset(idx + 2, idx % 2 === 0 ? 0.55 : -0.45);
+                    const tilt = Math.max(-2.4, Math.min(2.4, offset * -0.07));
+                    return (
+                    <div
+                      key={kader.id}
+                      className="structural-parallax-card structural-card-depth relative flex flex-col items-center w-64 sm:w-72"
+                      style={{ transform: `translate3d(0, ${offset}px, 0) rotateX(${tilt}deg)` }}
+                    >
                       {/* Garis Vertikal Mini di atas setiap kartu BPH */}
-                      <div className="hidden md:block absolute -top-10 w-0.5 h-10 bg-slate-200"></div>
+                      <div className="structural-line-glow hidden md:block absolute -top-10 w-0.5 h-10 bg-slate-200"></div>
                       <CadreCard kader={kader} />
                     </div>
-                  ))}
+                  )})}
                 </div>
 
                 {/* Garis Pembatas Menurun Menuju Departemen */}
                 {departments.length > 0 && (
                   <div className="flex justify-center mt-16">
-                    <div className="w-0.5 h-16 bg-dashed bg-slate-200"></div>
+                    <div className="structural-line-glow w-0.5 h-16 bg-slate-200"></div>
                   </div>
                 )}
               </div>
@@ -280,9 +375,18 @@ export const StructuralPage = () => {
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-16">
-                  {departments.map((kader) => (
-                    <CadreCard key={kader.id} kader={kader} />
-                  ))}
+                  {departments.map((kader, idx) => {
+                    const offset = getParallaxOffset(idx + 4, idx % 3 === 0 ? -0.55 : idx % 3 === 1 ? 0.45 : -0.25);
+                    const tilt = Math.max(-2, Math.min(2, offset * 0.06));
+                    return (
+                    <div
+                      key={kader.id}
+                      className="structural-parallax-card structural-card-depth"
+                      style={{ transform: `translate3d(0, ${offset}px, 0) rotateX(${tilt}deg)` }}
+                    >
+                      <CadreCard kader={kader} />
+                    </div>
+                  )})}
                 </div>
               </div>
             )}
@@ -297,6 +401,7 @@ export const StructuralPage = () => {
           </div>
         )}
 
+        </div>
       </main>
 
       {/* 3. RENDER FOOTER ASLI LU */}
