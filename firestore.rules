@@ -64,7 +64,12 @@ service cloud.firestore {
     }
 
     match /newsletter_subscriptions/{document=**} {
-      allow create: if true;
+      allow create: if onlyAllowedFields(["id", "email", "status", "source", "created_at", "updated_at"])
+        && request.resource.data.email is string
+        && request.resource.data.status == "active";
+      allow update: if onlyAllowedFields(["id", "email", "status", "source", "created_at", "updated_at"])
+        && request.resource.data.email == resource.data.email
+        && request.resource.data.status == "active";
       allow read, update, delete: if isEditor();
     }
 

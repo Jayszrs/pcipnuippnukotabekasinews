@@ -112,7 +112,15 @@ class FirebaseQuery {
       if (this.action === "insert") {
         const items = Array.isArray(this.payload) ? this.payload : [this.payload ?? {}];
         const created = [];
-        for (const item of items) created.push(await addDocument(this.collectionName, item));
+        for (const item of items) {
+          const payload = item ?? {};
+          if (payload.id) {
+            await upsertDocument(this.collectionName, String(payload.id), payload);
+            created.push({ id: String(payload.id), ...payload });
+          } else {
+            created.push(await addDocument(this.collectionName, payload));
+          }
+        }
         return { data: created as T, error: null };
       }
 

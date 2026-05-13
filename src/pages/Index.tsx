@@ -231,7 +231,7 @@ const Index = () => {
         </div>
       </section>
 
-      <div className="bg-foreground py-16"><VideoHighlight /></div>
+      <VideoHighlight />
       <CategorySection />
     </Layout>
   );

@@ -39,9 +39,11 @@ export const VideoHighlight = () => {
   const fillers = others.length < 3 ? articles.slice(0, 3 - others.length) : [];
 
   return (
-    <section className="bg-foreground text-background py-14 lg:py-20">
+    <section className="relative overflow-hidden bg-[#06140c] text-white py-14 lg:py-20 dark:bg-[#020806]">
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,hsl(var(--primary)_/_0.32),transparent_34rem),linear-gradient(135deg,hsl(var(--primary-deep)_/_0.92),transparent_52%)]" />
+      <div className="absolute inset-x-0 top-0 h-px bg-gold/60" />
       <div className="container-news">
-        <div className="flex items-end justify-between mb-8">
+        <div className="relative flex items-end justify-between mb-8">
           <div>
             <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-gold">
               <span className="block h-[3px] w-8 bg-gold" />
@@ -57,7 +59,7 @@ export const VideoHighlight = () => {
         </div>
 
         <div className="grid lg:grid-cols-[1.6fr_1fr] gap-6">
-          <div className="relative aspect-video overflow-hidden rounded-sm bg-black">
+          <div className="relative aspect-video overflow-hidden rounded-sm bg-black shadow-2xl shadow-black/35 ring-1 ring-white/10">
             <VideoPlayer video={main} />
             <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/90 to-transparent pointer-events-none">
               <span className="text-xs font-bold uppercase tracking-wider text-gold">Video Utama</span>
@@ -69,12 +71,12 @@ export const VideoHighlight = () => {
 
           <div className="grid grid-cols-2 lg:grid-cols-1 gap-4">
             {others.map((v) => (
-              <Link key={v.id} to={`/berita/${v.slug}`} className="relative aspect-video lg:aspect-[16/9] overflow-hidden rounded-sm group cursor-pointer">
+              <Link key={v.id} to={`/berita/${v.slug}`} className="relative aspect-video lg:aspect-[16/9] overflow-hidden rounded-sm group cursor-pointer shadow-xl shadow-black/20 ring-1 ring-white/10">
                 <img src={v.image} alt={v.title} loading="lazy" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
-                <div className="absolute inset-0 bg-black/40 group-hover:bg-black/25 transition-colors" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10 group-hover:from-black/75 group-hover:via-black/25 transition-colors" />
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="h-12 w-12 rounded-full bg-white/90 flex items-center justify-center">
-                    <Play className="h-5 w-5 text-foreground fill-current ml-0.5" />
+                  <div className="h-12 w-12 rounded-full bg-white/92 flex items-center justify-center shadow-lg shadow-black/25 ring-1 ring-white/40">
+                    <Play className="h-5 w-5 text-primary-deep fill-current ml-0.5" />
                   </div>
                 </div>
                 <div className="absolute bottom-0 left-0 right-0 p-3">
@@ -83,9 +85,9 @@ export const VideoHighlight = () => {
               </Link>
             ))}
             {fillers.map((v) => (
-              <Link key={v.id} to={`/berita/${v.slug}`} className="relative aspect-video lg:aspect-[16/9] overflow-hidden rounded-sm group cursor-pointer">
+              <Link key={v.id} to={`/berita/${v.slug}`} className="relative aspect-video lg:aspect-[16/9] overflow-hidden rounded-sm group cursor-pointer shadow-xl shadow-black/20 ring-1 ring-white/10">
                 <img src={v.image} alt={v.title} loading="lazy" className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-black/40" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/10" />
                 <div className="absolute bottom-0 left-0 right-0 p-3">
                   <h4 className="text-white text-sm font-bold line-clamp-2 leading-snug">{v.title}</h4>
                 </div>
