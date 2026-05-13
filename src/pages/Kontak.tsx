@@ -89,7 +89,7 @@ export const KontakKami = () => {
             <div className="space-y-8">
               <div className="space-y-6">
                 <h2 className="text-3xl font-brand font-black text-slate-800 uppercase tracking-tighter leading-none flex items-center gap-2">
-                  <Mail className="h-6 w-6 text-primary" /> Kami Siap Membantu Lu
+                  <Mail className="h-6 w-6 text-primary" /> Kami Siap Membantu Kalian
                 </h2>
                 <div className="h-1 w-16 bg-gold rounded-full" />
                 <p className="text-slate-600 text-sm md:text-base leading-relaxed font-medium">
