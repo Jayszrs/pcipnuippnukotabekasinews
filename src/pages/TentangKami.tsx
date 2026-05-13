@@ -186,6 +186,14 @@ export const TentangKami = () => {
             from { opacity: 0.5; }
             to { opacity: 0.62; }
           }
+          @keyframes historyGlowDrift {
+            0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.55; }
+            50% { transform: translate3d(18px, -18px, 0) scale(1.08); opacity: 0.8; }
+          }
+          @keyframes historyLinePulse {
+            0%, 100% { filter: drop-shadow(0 0 0 rgba(3, 68, 27, 0)); }
+            50% { filter: drop-shadow(0 0 12px rgba(3, 68, 27, 0.35)); }
+          }
           @keyframes pulseBorderGreen {
             0%, 100% { border-color: rgba(3, 68, 27, 0.2); box-shadow: 0 0 0 0px rgba(3, 68, 27, 0.1); }
             50% { border-color: rgba(3, 68, 27, 0.8); box-shadow: 0 0 15px 4px rgba(3, 68, 27, 0.15); }
@@ -221,6 +229,32 @@ export const TentangKami = () => {
           .history-parallax-node,
           .history-parallax-bg {
             will-change: transform;
+          }
+          .history-parallax-shell {
+            perspective: 1400px;
+            transform-style: preserve-3d;
+          }
+          .history-parallax-card {
+            transform-style: preserve-3d;
+            transition: transform 180ms linear;
+          }
+          .history-card-surface {
+            transform: translateZ(22px);
+            backdrop-filter: blur(12px);
+          }
+          .history-parallax-year span {
+            text-shadow: 0 18px 42px rgba(3, 68, 27, 0.14);
+          }
+          .history-parallax-watermark {
+            -webkit-text-stroke: 1px rgba(3, 68, 27, 0.1);
+            color: transparent;
+            will-change: transform;
+          }
+          .history-parallax-glow {
+            animation: historyGlowDrift 9s ease-in-out infinite;
+          }
+          .history-timeline-line {
+            animation: historyLinePulse 3.8s ease-in-out infinite;
           }
         `}} />
 
@@ -261,20 +295,22 @@ export const TentangKami = () => {
         </section>
 
         {/* INTERACTIVE HISTORY SECTION */}
-        <section className="relative z-10 mt-20 overflow-hidden py-16">
+        <section className="history-parallax-shell relative z-10 mt-20 overflow-hidden py-16">
           <div
-            className="history-parallax-bg pointer-events-none absolute inset-x-0 top-12 bottom-10 -z-10 opacity-100"
-            style={{ transform: `translate3d(0, ${Math.max(Math.min((parallaxY - 520) * -0.045, 26), -46)}px, 0)` }}
+            className="history-parallax-bg pointer-events-none absolute inset-x-0 top-0 bottom-0 -z-10 opacity-100"
+            style={{ transform: `translate3d(0, ${Math.max(Math.min((parallaxY - 520) * -0.065, 34), -64)}px, 0) scale(1.04)` }}
             aria-hidden="true"
           >
             <img
               src={historyParallaxBg}
               alt=""
-              className="absolute inset-0 h-full w-full object-cover opacity-[0.08] mix-blend-multiply"
+              className="absolute inset-0 h-full w-full object-cover opacity-[0.1] mix-blend-multiply"
             />
-            <div className="absolute inset-0 bg-gradient-to-b from-background via-emerald-50/80 to-background dark:via-emerald-950/10" />
-            <div className="absolute left-[8%] top-20 h-72 w-72 rounded-full bg-primary/10 blur-3xl" />
-            <div className="absolute right-[10%] bottom-24 h-80 w-80 rounded-full bg-gold/10 blur-3xl" />
+            <div className="absolute inset-0 bg-gradient-to-b from-background via-emerald-50/85 to-background dark:via-emerald-950/10" />
+            <div className="absolute inset-0 bg-[linear-gradient(115deg,transparent_0_30%,rgba(3,68,27,0.06)_30%_31%,transparent_31%_100%)]" />
+            <div className="history-parallax-glow absolute left-[8%] top-20 h-72 w-72 rounded-full bg-primary/12 blur-3xl" />
+            <div className="history-parallax-glow absolute right-[10%] bottom-24 h-80 w-80 rounded-full bg-gold/12 blur-3xl" style={{ animationDelay: "2.2s" }} />
+            <div className="absolute left-1/2 top-1/2 h-[42rem] w-[42rem] -translate-x-1/2 -translate-y-1/2 rounded-full border border-primary/5" />
           </div>
           <div className="container mx-auto px-5 lg:px-8 max-w-5xl relative z-10">
           
@@ -318,8 +354,8 @@ export const TentangKami = () => {
           <div className="relative ml-4 md:ml-32 space-y-16 py-4">
             
             {/* Garis Tengah Belakang (Animasi Draw-Line) */}
-            <div className="absolute left-[15px] top-4 bottom-4 w-1 bg-slate-200 rounded-full overflow-hidden">
-              <div className={`w-full bg-gradient-to-b animate-draw-line ${
+            <div className="absolute left-[15px] top-4 bottom-4 w-1 overflow-hidden rounded-full bg-slate-200/80 shadow-inner">
+              <div className={`history-timeline-line w-full bg-gradient-to-b animate-draw-line ${
                 activeTab === 'ipnu' ? 'from-primary to-emerald-800' : 'from-gold to-yellow-600'
               }`} style={{ height: '100%' }}></div>
             </div>
@@ -330,6 +366,9 @@ export const TentangKami = () => {
               const cardOffset = getHistoryParallaxOffset(idx, idx % 2 === 0 ? -0.75 : 0.55);
               const yearOffset = getHistoryParallaxOffset(idx, idx % 2 === 0 ? 0.95 : -0.8);
               const nodeOffset = getHistoryParallaxOffset(idx, idx % 2 === 0 ? -0.35 : 0.35);
+              const cardTilt = Math.max(-2.2, Math.min(2.2, cardOffset * 0.08));
+              const cardScale = 1 - Math.min(Math.abs(cardOffset) * 0.0012, 0.025);
+              const watermarkOffset = getHistoryParallaxOffset(idx, idx % 2 === 0 ? -1.35 : 1.15);
 
               return (
                 <div 
@@ -337,6 +376,13 @@ export const TentangKami = () => {
                   className="relative group pl-8 md:pl-16 animate-fade-up"
                   style={{ animationDelay: `${idx * 200}ms` }}
                 >
+                  <div
+                    className="history-parallax-watermark pointer-events-none absolute -right-4 -top-14 hidden select-none font-display text-[8rem] font-black leading-none opacity-45 md:block"
+                    style={{ transform: `translate3d(0, ${watermarkOffset}px, -80px)` }}
+                    aria-hidden="true"
+                  >
+                    {item.year}
+                  </div>
                   
                   {/* Node Bulat Timeline (Tahun) */}
                   <div className={`absolute -left-[3px] md:-left-[3px] top-1.5 h-10 w-10 rounded-full border-4 bg-background flex items-center justify-center transition-all duration-500 group-hover:scale-125 z-10 cursor-pointer ${
@@ -364,18 +410,21 @@ export const TentangKami = () => {
                   {/* Kartu Konten Sejarah (3D Tilt & Shadow Hover Effect) */}
                   <div
                     className="history-parallax-card"
-                    style={{ transform: `translate3d(0, ${cardOffset}px, 0)` }}
+                    style={{ transform: `translate3d(0, ${cardOffset}px, 0) rotateX(${cardTilt}deg) scale(${cardScale})` }}
                   >
                     <div 
                       onClick={() => toggleExpand(idx)}
-                    className={`bg-white rounded-3xl border p-6 md:p-8 shadow-sm hover:shadow-2xl hover:-translate-y-1 transform transition-all duration-500 cursor-pointer relative overflow-hidden group/card ${
+                    className={`history-card-surface bg-white/95 rounded-3xl border p-6 md:p-8 shadow-sm hover:shadow-2xl hover:-translate-y-1 transform transition-all duration-500 cursor-pointer relative overflow-hidden group/card ${
                       isExpanded 
                         ? (activeTab === "ipnu" ? "border-primary/80 glow-active-green" : "border-gold/80 glow-active-gold") 
                         : "border-slate-100 hover:border-slate-300"
                     }`}
                   >
+                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/70 via-white/25 to-emerald-50/55 opacity-80" aria-hidden="true" />
+                    <div className="pointer-events-none absolute -right-16 -top-16 h-36 w-36 rounded-full bg-primary/5 blur-2xl transition-transform duration-700 group-hover/card:scale-125" aria-hidden="true" />
+                    <div className="relative z-10">
                     {/* Efek Garis Glow Pojok Atas */}
-                    <div className={`absolute top-0 left-0 right-0 h-1.5 transition-all duration-500 ${
+                    <div className={`absolute -left-6 -right-6 -top-6 h-1.5 transition-all duration-500 md:-left-8 md:-right-8 md:-top-8 ${
                       isExpanded 
                         ? (activeTab === "ipnu" ? "bg-primary" : "bg-gold") 
                         : "bg-transparent group-hover/card:bg-slate-300"
@@ -432,6 +481,7 @@ export const TentangKami = () => {
                       </div>
                     </div>
 
+                    </div>
                     </div>
                   </div>
 
