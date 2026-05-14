@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import {
+  ArrowRight,
   Award,
   BookOpen,
   Calendar,
@@ -10,10 +11,12 @@ import {
   Users,
   type LucideIcon,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 import tentangHeroBg from "@/assets/hero-news.jpg";
 import historyParallaxBg from "@/assets/news-12.jpg";
+import aboutSideImage from "@/assets/news-10.jpg";
 
 type HistoryItem = {
   org: "IPNU" | "IPPNU";
@@ -184,24 +187,20 @@ export const TentangKami = () => {
               }
               @keyframes aboutKineticText {
                 0% {
-                  opacity: 0;
-                  transform: translate3d(0, 54px, 0) scale(.96);
-                  filter: blur(14px);
+                  opacity: .42;
+                  transform: translate3d(0, 34px, 0) scale(.985);
                 }
                 28% {
                   opacity: 1;
                   transform: translate3d(0, 0, 0) scale(1);
-                  filter: blur(0) drop-shadow(0 0 18px rgba(34, 197, 94, .28));
                 }
                 62% {
                   opacity: 1;
                   transform: translate3d(0, -4px, 0) scale(1);
-                  filter: blur(0) drop-shadow(0 0 28px rgba(255, 215, 0, .18));
                 }
                 100% {
-                  opacity: .18;
-                  transform: translate3d(0, -48px, 0) scale(.985);
-                  filter: blur(8px);
+                  opacity: .96;
+                  transform: translate3d(0, -10px, 0) scale(1);
                 }
               }
               @keyframes aboutGlowWord {
@@ -215,7 +214,7 @@ export const TentangKami = () => {
                 animation: aboutKineticText linear both;
                 animation-timeline: view();
                 animation-range: entry 0% exit 100%;
-                will-change: transform, opacity, filter;
+                will-change: transform, opacity;
               }
               .about-glow-word { animation: aboutGlowWord 3.6s ease-in-out infinite; }
               .about-noise {
@@ -296,18 +295,63 @@ export const TentangKami = () => {
           </div>
 
           <div className="container-news relative z-10">
-            <div className="mx-auto max-w-3xl text-center">
-              <p className="text-[10px] font-black uppercase tracking-[0.28em] text-primary">Lorong Waktu</p>
-              <h2 className="mt-4 font-display text-3xl font-black uppercase leading-tight sm:text-5xl">
-                Sejarah yang bergerak bersama scroll
-              </h2>
-              <p className="mt-5 text-sm font-semibold leading-7 text-muted-foreground">
-                Tidak ada tombol di bagian ini. Cukup turun perlahan, biarkan tiap fragmen sejarah
-                menyala, menetap sebentar, lalu memudar saat kisah berikutnya datang.
-              </p>
+            <div className="grid gap-10 lg:grid-cols-[0.92fr_1.08fr] lg:items-center">
+              <div>
+                <p className="text-[10px] font-black uppercase tracking-[0.28em] text-primary">Lorong Waktu</p>
+                <h2 className="mt-4 font-display text-3xl font-black uppercase leading-tight sm:text-5xl">
+                  Jejak kaderisasi yang hidup di Bekasi
+                </h2>
+                <p className="mt-5 text-sm font-semibold leading-7 text-muted-foreground">
+                  Dari akar sejarah IPNU IPPNU sampai kerja kader hari ini, halaman ini merangkum
+                  napas organisasi: belajar dengan tekun, bergerak bersama, dan berkhidmah untuk pelajar.
+                </p>
+                <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+                  <Link
+                    to="/struktural"
+                    data-nav-loader-label="Struktural"
+                    className="inline-flex items-center justify-center gap-2 bg-primary px-5 py-3 text-[11px] font-black uppercase tracking-[0.18em] text-primary-foreground shadow-elevated transition-all hover:-translate-y-0.5 hover:bg-primary-deep dark:hover:bg-primary"
+                  >
+                    Lihat Struktural
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                  <a
+                    href="#sejarah-ipnu-ippnu"
+                    className="inline-flex items-center justify-center border border-border bg-card px-5 py-3 text-[11px] font-black uppercase tracking-[0.18em] text-foreground transition-all hover:-translate-y-0.5 hover:border-primary hover:text-primary"
+                  >
+                    Baca Sejarah
+                  </a>
+                </div>
+              </div>
+
+              <div className="relative min-h-[340px] overflow-hidden border border-border bg-card shadow-2xl shadow-black/10 dark:shadow-black/40 sm:min-h-[420px]">
+                <img
+                  src={aboutSideImage}
+                  alt="Kader IPNU IPPNU Kota Bekasi berbagi paket kegiatan sosial"
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-[#020806]/90 via-[#020806]/25 to-transparent" />
+                <div className="absolute inset-x-0 bottom-0 p-6 sm:p-8">
+                  <p className="text-[10px] font-black uppercase tracking-[0.26em] text-gold">Khidmah Pelajar</p>
+                  <h3 className="mt-3 max-w-md font-display text-2xl font-black uppercase leading-tight text-white sm:text-3xl">
+                    Ruang belajar, gerak sosial, dan kepemimpinan muda NU
+                  </h3>
+                  <div className="mt-5 grid grid-cols-3 border border-white/10 bg-white/[0.08] text-center backdrop-blur-sm">
+                    {[
+                      ["12", "PAC"],
+                      ["2", "Ikatan"],
+                      ["1", "Khidmah"],
+                    ].map(([number, label]) => (
+                      <div key={label} className="border-r border-white/10 px-3 py-4 last:border-r-0">
+                        <p className="font-display text-2xl font-black text-gold">{number}</p>
+                        <p className="mt-1 text-[9px] font-black uppercase tracking-[0.18em] text-white/72">{label}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div className="relative mx-auto mt-24 max-w-6xl">
+            <div id="sejarah-ipnu-ippnu" className="relative mx-auto mt-24 max-w-6xl scroll-mt-28">
               <div className="about-line-glow absolute left-4 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-primary to-transparent md:left-1/2" />
 
               {historyData.map((item, index) => {
