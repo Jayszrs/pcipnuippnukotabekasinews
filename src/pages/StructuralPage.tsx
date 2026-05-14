@@ -49,74 +49,74 @@ const CadreCard = ({ kader }: { kader: any }) => {
         </div>
 
         {/* ================= BAGIAN BELAKANG (BIODATA & GRADIASI SEMPURNA) ================= */}
-        <div className="absolute inset-0 w-full h-full rounded-[2rem] p-8 bg-gradient-to-br from-emerald-100/70 via-white to-white border border-emerald-200/50 shadow-2xl shadow-emerald-950/5 [backface-visibility:hidden] [transform:rotateY(180deg)] z-10 flex flex-col justify-between overflow-hidden text-left">
+        <div className="absolute inset-0 w-full h-full rounded-[2rem] p-8 bg-gradient-to-br from-emerald-100/70 via-white to-white border border-emerald-200/50 shadow-2xl shadow-emerald-950/5 [backface-visibility:hidden] [transform:rotateY(180deg)] z-10 flex flex-col justify-between overflow-hidden text-left dark:from-emerald-950/95 dark:via-[#07140d] dark:to-[#020806] dark:border-emerald-400/20 dark:shadow-black/50">
           
           <div className="space-y-4">
             <div className="flex justify-between items-start">
               <span className="px-3 py-1 bg-primary/10 text-primary border border-primary/20 text-[9px] font-brand font-black tracking-widest uppercase rounded-full shrink-0 z-10">
                 {kader.organization || "IPNU"}
               </span>
-              <span className="text-[9px] text-muted-foreground font-bold uppercase tracking-wider shrink-0 z-10">
+              <span className="text-[9px] text-slate-500 font-bold uppercase tracking-wider shrink-0 z-10 dark:text-emerald-100/70">
                 Khidmah {displayPeriodStart(kader.period_start)}—{kader.period_end || "2028"}
               </span>
             </div>
 
             {/* Nama & Jabatan */}
             <div className="space-y-1 z-10">
-              <h3 className="text-xl font-brand font-black text-foreground uppercase tracking-tight leading-none mb-1">
+              <h3 className="text-xl font-brand font-black text-slate-950 uppercase tracking-tight leading-none mb-1 dark:text-white">
                 {kader.name}
               </h3>
-              <p className="text-xs font-bold text-primary uppercase tracking-wider">
+              <p className="text-xs font-bold text-primary uppercase tracking-wider dark:text-emerald-300">
                 {kader.position}
               </p>
               <div className="h-1 w-12 bg-gold rounded-full mt-2"></div>
             </div>
 
             {/* Detail Biodata Belakang */}
-            <div className="space-y-3.5 pt-5 text-foreground/80 z-10">
+            <div className="space-y-3.5 pt-5 z-10">
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-white rounded-xl shadow-sm text-primary border border-emerald-200/50 shrink-0">
+                <div className="p-2 bg-white rounded-xl shadow-sm text-primary border border-emerald-200/50 shrink-0 dark:bg-emerald-400/10 dark:text-emerald-300 dark:border-emerald-300/20">
                   <MapPin className="h-4 w-4 shrink-0" />
                 </div>
                 <div>
-                  <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-wider">Asal / Pimpinan</p>
-                  <p className="text-xs font-bold text-foreground leading-snug">{kader.origin || "Kota Bekasi"}</p>
+                  <p className="text-[9px] text-slate-500 font-bold uppercase tracking-wider dark:text-emerald-100/65">Asal / Pimpinan</p>
+                  <p className="text-xs font-bold text-slate-900 leading-snug dark:text-emerald-50">{kader.origin || "Kota Bekasi"}</p>
                 </div>
               </div>
 
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-white rounded-xl shadow-sm text-primary border border-emerald-200/50 shrink-0">
+                <div className="p-2 bg-white rounded-xl shadow-sm text-primary border border-emerald-200/50 shrink-0 dark:bg-emerald-400/10 dark:text-emerald-300 dark:border-emerald-300/20">
                   <Calendar className="h-4 w-4 shrink-0" />
                 </div>
                 <div>
-                  <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-wider">Tempat, Tanggal Lahir</p>
-                  <p className="text-xs font-bold text-foreground leading-snug">{kader.birth_info || "-"}</p>
+                  <p className="text-[9px] text-slate-500 font-bold uppercase tracking-wider dark:text-emerald-100/65">Tempat, Tanggal Lahir</p>
+                  <p className="text-xs font-bold text-slate-900 leading-snug dark:text-emerald-50">{kader.birth_info || "-"}</p>
                 </div>
               </div>
 
               <div className="flex items-center gap-3">
-                <div className="p-2 bg-white rounded-xl shadow-sm text-primary border border-emerald-200/50 shrink-0">
+                <div className="p-2 bg-white rounded-xl shadow-sm text-primary border border-emerald-200/50 shrink-0 dark:bg-emerald-400/10 dark:text-emerald-300 dark:border-emerald-300/20">
                   <Shield className="h-4 w-4 shrink-0" />
                 </div>
                 <div>
-                  <p className="text-[9px] text-muted-foreground font-bold uppercase tracking-wider">Departemen / Divisi</p>
-                  <p className="text-xs font-bold text-foreground leading-snug">{kader.division || "-"}</p>
+                  <p className="text-[9px] text-slate-500 font-bold uppercase tracking-wider dark:text-emerald-100/65">Departemen / Divisi</p>
+                  <p className="text-xs font-bold text-slate-900 leading-snug dark:text-emerald-50">{kader.division || "-"}</p>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Bagian Quote */}
-          <div className="border-t border-emerald-200/50 pt-4 text-center z-10">
-            <Quote className="h-4 w-4 text-primary/20 mx-auto mb-1.5" />
-            <p className="text-xs font-medium text-muted-foreground italic leading-relaxed line-clamp-3 px-2">
+          <div className="border-t border-emerald-200/50 pt-4 text-center z-10 dark:border-emerald-300/20">
+            <Quote className="h-4 w-4 text-primary/20 mx-auto mb-1.5 dark:text-emerald-300/35" />
+            <p className="text-xs font-medium text-slate-500 italic leading-relaxed line-clamp-3 px-2 dark:text-emerald-50/75">
               "{kader.quote || "Belajar, Berjuang, Bertaqwa."}"
             </p>
           </div>
 
           {/* Efek Glow Tipis di background belakang */}
-          <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-100 rounded-full blur-3xl opacity-60 z-0 translate-x-10 -translate-y-10" />
-          <div className="absolute bottom-0 left-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl opacity-60 z-0 -translate-x-10 translate-y-10" />
+          <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-100 rounded-full blur-3xl opacity-60 z-0 translate-x-10 -translate-y-10 dark:bg-emerald-400/20 dark:opacity-70" />
+          <div className="absolute bottom-0 left-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl opacity-60 z-0 -translate-x-10 translate-y-10 dark:bg-gold/10 dark:opacity-70" />
 
         </div>
       </div>
