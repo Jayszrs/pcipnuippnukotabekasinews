@@ -185,24 +185,6 @@ export const TentangKami = () => {
                 0%, 100% { opacity: .36; filter: drop-shadow(0 0 0 rgba(34, 197, 94, 0)); }
                 50% { opacity: 1; filter: drop-shadow(0 0 16px rgba(34, 197, 94, .48)); }
               }
-              @keyframes aboutKineticText {
-                0% {
-                  opacity: .42;
-                  transform: translate3d(0, 34px, 0) scale(.985);
-                }
-                28% {
-                  opacity: 1;
-                  transform: translate3d(0, 0, 0) scale(1);
-                }
-                62% {
-                  opacity: 1;
-                  transform: translate3d(0, -4px, 0) scale(1);
-                }
-                100% {
-                  opacity: .96;
-                  transform: translate3d(0, -10px, 0) scale(1);
-                }
-              }
               @keyframes aboutGlowWord {
                 0%, 100% { text-shadow: 0 0 0 transparent; }
                 50% { text-shadow: 0 0 22px rgba(255, 215, 0, .42), 0 0 42px rgba(34, 197, 94, .2); }
@@ -211,10 +193,10 @@ export const TentangKami = () => {
               .about-float-b { animation: aboutFloat 11s ease-in-out infinite reverse; }
               .about-line-glow { animation: aboutPulseLine 4s ease-in-out infinite; }
               .about-slide-copy {
-                animation: aboutKineticText linear both;
-                animation-timeline: view();
-                animation-range: entry 0% exit 100%;
-                will-change: transform, opacity;
+                opacity: 1;
+                transform: none !important;
+                filter: none !important;
+                will-change: auto;
               }
               .about-glow-word { animation: aboutGlowWord 3.6s ease-in-out infinite; }
               .about-noise {
@@ -227,8 +209,7 @@ export const TentangKami = () => {
                 .about-float-a,
                 .about-float-b,
                 .about-line-glow,
-                .about-glow-word,
-                .about-slide-copy {
+                .about-glow-word {
                   animation-duration: 1ms;
                   animation-iteration-count: 1;
                 }
@@ -250,10 +231,7 @@ export const TentangKami = () => {
           <div className="about-float-a absolute left-[8%] top-[18%] h-52 w-52 rounded-full bg-gold/20 blur-3xl" />
           <div className="about-float-b absolute right-[10%] bottom-[18%] h-72 w-72 rounded-full bg-primary/30 blur-3xl" />
 
-          <div
-            className="container-news relative z-10 flex min-h-[calc(100vh-4rem)] flex-col justify-center py-24"
-            style={{ transform: `translate3d(0, ${clamp(parallaxY * -0.08, -58, 0)}px, 0)` }}
-          >
+          <div className="container-news relative z-10 flex min-h-[calc(100vh-4rem)] flex-col justify-center py-24">
             <div className="max-w-5xl">
               <p className="text-[10px] sm:text-xs font-black uppercase tracking-[0.34em] text-gold">
                 Tentang Kami
@@ -265,6 +243,22 @@ export const TentangKami = () => {
                 PC IPNU IPPNU Kota Bekasi adalah ruang kaderisasi pelajar NU yang merawat ilmu,
                 akhlak, organisasi, dan keberanian sosial dalam satu napas perjuangan.
               </p>
+              <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+                <Link
+                  to="/struktural"
+                  data-nav-loader-label="Struktural"
+                  className="inline-flex items-center justify-center gap-2 bg-gold px-5 py-3 text-[11px] font-black uppercase tracking-[0.18em] text-gold-foreground shadow-gold transition-all hover:-translate-y-0.5 hover:bg-gold-soft"
+                >
+                  Lihat Struktural
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+                <a
+                  href="#sejarah-ipnu-ippnu"
+                  className="inline-flex items-center justify-center border border-white/20 bg-white/[0.08] px-5 py-3 text-[11px] font-black uppercase tracking-[0.18em] text-white transition-all hover:-translate-y-0.5 hover:border-gold hover:text-gold"
+                >
+                  Baca Sejarah
+                </a>
+              </div>
             </div>
 
             <div className="mt-16 grid gap-4 sm:grid-cols-3">
@@ -273,7 +267,7 @@ export const TentangKami = () => {
                 ["Literasi", "Daya baca, daya pikir, dan daya cipta."],
                 ["Khidmah", "Kerja sunyi untuk umat dan pelajar."],
               ].map(([title, text]) => (
-                <div key={title} className="border border-white/10 bg-white/[0.06] p-5 backdrop-blur-md">
+                <div key={title} className="border border-white/10 bg-white/[0.06] p-5">
                   <p className="font-display text-xl font-black text-gold">{title}</p>
                   <p className="mt-2 text-xs font-semibold leading-6 text-white/68">{text}</p>
                 </div>
@@ -335,7 +329,7 @@ export const TentangKami = () => {
                   <h3 className="mt-3 max-w-md font-display text-2xl font-black uppercase leading-tight text-white sm:text-3xl">
                     Ruang belajar, gerak sosial, dan kepemimpinan muda NU
                   </h3>
-                  <div className="mt-5 grid grid-cols-3 border border-white/10 bg-white/[0.08] text-center backdrop-blur-sm">
+                  <div className="mt-5 grid grid-cols-3 border border-white/10 bg-white/[0.08] text-center">
                     {[
                       ["12", "PAC"],
                       ["2", "Ikatan"],
@@ -358,17 +352,13 @@ export const TentangKami = () => {
                 const Icon = item.icon;
                 const isGold = item.accent === "gold";
                 const isRight = index % 2 === 1;
-                const offset = clamp((parallaxY - 820 - index * 430) * (isRight ? 0.028 : -0.028), -28, 28);
 
                 return (
                   <article
                     key={`${item.org}-${item.year}-${item.title}`}
                     className={`relative min-h-[76vh] py-12 md:grid md:grid-cols-2 md:gap-16 ${isRight ? "md:[&>*:first-child]:col-start-2" : ""}`}
                   >
-                    <div
-                      className="about-slide-copy relative ml-10 md:ml-0"
-                      style={{ transform: `translate3d(0, ${offset}px, 0)` }}
-                    >
+                    <div className="about-slide-copy relative ml-10 md:ml-0">
                       <div
                         className={`absolute -left-[3.15rem] top-3 grid h-10 w-10 place-items-center rounded-full border bg-background md:left-auto ${
                           isRight ? "md:-left-[5.6rem]" : "md:-right-[5.6rem]"
@@ -377,7 +367,7 @@ export const TentangKami = () => {
                         <Icon className="h-4 w-4" />
                       </div>
 
-                      <div className="relative overflow-hidden border border-border/70 bg-card/88 p-6 shadow-2xl shadow-black/5 backdrop-blur-md dark:bg-card/72 sm:p-8 lg:p-10">
+                      <div className="relative overflow-hidden border border-border/70 bg-card/95 p-6 shadow-2xl shadow-black/5 dark:bg-card/92 sm:p-8 lg:p-10">
                         <div
                           className={`absolute inset-x-0 top-0 h-1.5 ${
                             isGold ? "bg-gradient-to-r from-gold via-yellow-300 to-gold" : "bg-gradient-to-r from-primary via-emerald-400 to-primary"
@@ -437,7 +427,7 @@ export const TentangKami = () => {
               </h2>
             </div>
             <div className="grid gap-5 sm:grid-cols-2">
-              <div className="about-slide-copy border border-white/10 bg-white/[0.06] p-7 backdrop-blur-md">
+              <div className="about-slide-copy border border-white/10 bg-white/[0.06] p-7">
                 <Sparkles className="h-7 w-7 text-gold" />
                 <h3 className="mt-5 font-display text-2xl font-black text-gold">Visi Juang</h3>
                 <p className="mt-4 text-sm font-semibold leading-8 text-white/74">
@@ -445,7 +435,7 @@ export const TentangKami = () => {
                   berakhlakul karimah, unggul secara intelektual, dan setia menjaga Aswaja serta NKRI.
                 </p>
               </div>
-              <div className="about-slide-copy border border-white/10 bg-white/[0.06] p-7 backdrop-blur-md">
+              <div className="about-slide-copy border border-white/10 bg-white/[0.06] p-7">
                 <BookOpen className="h-7 w-7 text-gold" />
                 <h3 className="mt-5 font-display text-2xl font-black text-gold">Misi Juang</h3>
                 <p className="mt-4 text-sm font-semibold leading-8 text-white/74">
