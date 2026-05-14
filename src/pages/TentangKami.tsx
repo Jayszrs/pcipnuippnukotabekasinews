@@ -1,116 +1,152 @@
-import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
-import { 
-  Users, 
-  Award, 
-  BookOpen, 
-  Calendar, 
-  ChevronRight, 
-  ChevronDown, 
-  Sparkles, 
-  Flag, 
+import { useEffect, useMemo, useState } from "react";
+import {
+  Award,
+  BookOpen,
+  Calendar,
+  Flag,
   Heart,
-  ArrowRight
+  MapPin,
+  Sparkles,
+  Users,
+  type LucideIcon,
 } from "lucide-react";
-import { Header } from "@/components/Header"; // <-- IMPORT HEADER ASLI LU
-import { Footer } from "@/components/Footer"; // <-- IMPORT FOOTER ASLI LU
+import { Header } from "@/components/Header";
+import { Footer } from "@/components/Footer";
 import tentangHeroBg from "@/assets/hero-news.jpg";
 import historyParallaxBg from "@/assets/news-12.jpg";
 
-// DATA SEJARAH YANG SUDAH DIPERKAYA & DISTRUKTURKAN
-const IPNU_HISTORY = [
+type HistoryItem = {
+  org: "IPNU" | "IPPNU";
+  accent: "green" | "gold";
+  year: string;
+  title: string;
+  date: string;
+  location: string;
+  summary: string;
+  details: string;
+  badge: string;
+  icon: LucideIcon;
+};
+
+const IPNU_HISTORY: HistoryItem[] = [
   {
+    org: "IPNU",
+    accent: "green",
     year: "1954",
     title: "Lahirnya Sang Ikatan",
-    date: "24 Februari 1954 (20 Jumadil Akhir 1373 H)",
+    date: "24 Februari 1954 / 20 Jumadil Akhir 1373 H",
     location: "Semarang, Jawa Tengah",
     summary: "Dideklarasikan pada Kongres LP Ma'arif NU sebagai wadah perjuangan kaum pelajar laki-laki.",
-    details: "Dipelopori oleh tokoh-tokoh muda hebat seperti Prof. Dr. KH. Tolchah Mansyur, Sofwan Kholil, dan Mustahal Ahmad. Pendirian ini berawal dari kegelisahan pentingnya mengorganisir santri dan pelajar agar memiliki benteng ideologi Ahlussunnah wal Jama'ah sejak dini.",
+    details:
+      "Dipelopori oleh tokoh muda seperti Prof. Dr. KH. Tolchah Mansyur, Sofwan Kholil, dan Mustahal Ahmad. Pendirian ini lahir dari kebutuhan mengorganisir santri dan pelajar agar memiliki benteng ideologi Ahlussunnah wal Jama'ah sejak dini.",
     badge: "Kelahiran",
-    icon: Flag
+    icon: Flag,
   },
   {
+    org: "IPNU",
+    accent: "green",
     year: "1966",
     title: "Menjadi Badan Otonom Mandiri",
     date: "Kongres Surabaya 1966",
     location: "Surabaya, Jawa Timur",
     summary: "Resmi melepaskan diri dari LP Ma'arif untuk bergerak lebih lincah dan mandiri.",
-    details: "Sebelumnya, IPNU berada di bawah koordinasi Lembaga Pendidikan Ma'arif NU. Seiring pesatnya perkembangan organisasi, Kongres Surabaya memutuskan IPNU berdiri tegak sebagai Badan Otonom (Banom) NU langsung agar bisa memperluas jaringan ke sekolah-sekolah umum, pesantren, hingga perguruan tinggi.",
+    details:
+      "Seiring pesatnya perkembangan organisasi, Kongres Surabaya memutuskan IPNU berdiri sebagai Badan Otonom NU langsung. Gerak kaderisasi pun meluas ke sekolah umum, pesantren, dan perguruan tinggi.",
     badge: "Kemandirian",
-    icon: Award
+    icon: Award,
   },
   {
+    org: "IPNU",
+    accent: "green",
     year: "1988",
-    title: "Represi Orde Baru & Deklarasi Jombang",
+    title: "Represi Orde Baru dan Deklarasi Jombang",
     date: "29-31 Januari 1988",
     location: "Jombang, Jawa Timur",
-    summary: "Berubah nama menjadi 'Ikatan Putera Nahdlatul Ulama' demi menyiasati UU Keormasan Orba.",
-    details: "Regulasi ketat dari rezim Orde Baru lewat UU No. 8/1985 melarang keras adanya organisasi pelajar selain OSIS di sekolah. Melalui Kongres ke-10 di Jombang, nama 'Pelajar' terpaksa diubah menjadi 'Putera' agar organisasi ini tetap legal dan kaderisasi di akar rumput tidak mati dibungkam negara.",
-    badge: "Siasat Politik",
-    icon: Calendar
+    summary: "Berubah nama menjadi Ikatan Putera Nahdlatul Ulama demi menyiasati regulasi Orde Baru.",
+    details:
+      "UU No. 8/1985 membatasi organisasi pelajar selain OSIS di sekolah. Melalui Kongres ke-10 di Jombang, kata Pelajar diubah menjadi Putera agar organisasi tetap legal dan kaderisasi akar rumput tetap hidup.",
+    badge: "Ketahanan",
+    icon: Calendar,
   },
   {
+    org: "IPNU",
+    accent: "green",
     year: "2003",
     title: "Kembalinya Khittah Pelajar",
     date: "18-22 Juni 2003",
     location: "Surabaya, Jawa Timur",
-    summary: "Mengembalikan nama 'Pelajar' pasca runtuhnya rezim totaliter Orde Baru.",
-    details: "Setelah gerbang reformasi dan kebebasan berserikat terbuka lebar, Kongres ke-14 IPNU di Surabaya secara bulat memutuskan mengembalikan nama luhur organisasi menjadi 'Ikatan Pelajar Nahdlatul Ulama'. Fokus kaderisasi dikembalikan seutuhnya untuk menggarap potensi intelektual pelajar, santri, dan mahasiswa.",
+    summary: "Mengembalikan nama Pelajar pasca runtuhnya rezim totaliter Orde Baru.",
+    details:
+      "Setelah reformasi membuka kebebasan berserikat, Kongres ke-14 IPNU di Surabaya memutuskan mengembalikan nama Ikatan Pelajar Nahdlatul Ulama. Fokus kaderisasi kembali diarahkan untuk pelajar, santri, dan mahasiswa.",
     badge: "Khittah",
-    icon: Sparkles
-  }
+    icon: Sparkles,
+  },
 ];
 
-const IPPNU_HISTORY = [
+const IPPNU_HISTORY: HistoryItem[] = [
   {
+    org: "IPPNU",
+    accent: "gold",
     year: "1955",
     title: "Fajar Baru Pelajar Putri",
-    date: "2 Maret 1955 (8 Rajab 1374 H)",
+    date: "2 Maret 1955 / 8 Rajab 1374 H",
     location: "Solo, Jawa Tengah",
-    summary: "Didirikan oleh para santriwati tangguh demi menjembatani perjuangan pelajar putri NU.",
-    details: "Dipelopori oleh Nyai Hj. Umroh Mahfudzah, Syarifah Syahrazad, dan rekan-rekanwati Solo lainnya. Kelahiran IPPNU disetujui secara resmi dalam muktamar untuk mengimbangi gerakan IPNU dan memberi ruang aktualisasi sosial keagamaan bagi perempuan muda NU.",
+    summary: "Didirikan oleh para santriwati tangguh untuk menjembatani perjuangan pelajar putri NU.",
+    details:
+      "Dipelopori oleh Nyai Hj. Umroh Mahfudzah, Syarifah Syahrazad, dan rekan-rekanwati Solo. Kelahiran IPPNU memberi ruang aktualisasi sosial keagamaan bagi perempuan muda NU.",
     badge: "Kelahiran",
-    icon: Heart
+    icon: Heart,
   },
   {
+    org: "IPPNU",
+    accent: "gold",
     year: "1966",
     title: "Berdiri Tegak Sebagai Banom",
     date: "Kongres Surabaya 1966",
     location: "Surabaya, Jawa Timur",
     summary: "IPPNU resmi diakui sebagai Badan Otonom mandiri setara dengan banom lainnya.",
-    details: "Sama halnya dengan IPNU, IPPNU melepas ketergantungannya dari struktural LP Ma'arif dan menjelma menjadi banom mandiri. Hal ini memicu gelombang emansipasi besar-besaran bagi kader perempuan NU di seluruh penjuru nusantara untuk memimpin organisasinya sendiri.",
+    details:
+      "IPPNU melepas ketergantungan struktural dari LP Ma'arif dan menjelma menjadi banom mandiri. Momentum ini memicu gelombang kepemimpinan kader perempuan NU di berbagai wilayah.",
     badge: "Kemandirian",
-    icon: Award
+    icon: Award,
   },
   {
+    org: "IPPNU",
+    accent: "gold",
     year: "1988",
-    title: "Era Penyesuaian 'Putri-Putri'",
-    date: "Kongres Jombang IX (1988)",
+    title: "Era Penyesuaian Putri-Putri",
+    date: "Kongres Jombang IX 1988",
     location: "Jombang, Jawa Timur",
-    summary: "Penyesuaian nama menjadi 'Ikatan Putri-Putri Nahdlatul Ulama' akibat regulasi Orba.",
-    details: "Guna menghindari pembubaran paksa oleh undang-undang kepemudaan rezim Orde Baru, IPPNU mengubah kepanjangannya menjadi 'Ikatan Putri-Putri Nahdlatul Ulama'. Fase ini menjadi saksi ketangguhan kaderwati dalam menjaga api perjuangan Aswaja di tengah tekanan militeristik politik.",
-    badge: "Ketahanan",
-    icon: Calendar
+    summary: "Penyesuaian nama menjadi Ikatan Putri-Putri Nahdlatul Ulama akibat regulasi Orde Baru.",
+    details:
+      "Demi menghindari pembubaran paksa oleh kebijakan keormasan, IPPNU menyesuaikan kepanjangannya. Fase ini menjadi saksi ketangguhan kaderwati menjaga api perjuangan Aswaja.",
+    badge: "Keteguhan",
+    icon: Calendar,
   },
   {
+    org: "IPPNU",
+    accent: "gold",
     year: "2003",
     title: "Kembalinya Marwah Pelajar Putri",
     date: "18-22 Juni 2003",
     location: "Surabaya, Jawa Timur",
-    summary: "Nama agung 'Pelajar Putri' resmi direbut kembali pada era reformasi.",
-    details: "Melalui Kongres ke-13 di Surabaya, IPPNU mengembalikan jati dirinya secara utuh menjadi 'Ikatan Pelajar Putri Nahdlatul Ulama'. Komitmen perjuangan difokuskan kembali pada pemberdayaan literasi, kepemimpinan perempuan muda, serta dakwah moderat di kalangan pelajar sekolah.",
+    summary: "Nama Pelajar Putri resmi direbut kembali pada era reformasi.",
+    details:
+      "Melalui Kongres ke-13 di Surabaya, IPPNU kembali menjadi Ikatan Pelajar Putri Nahdlatul Ulama. Komitmen perjuangan diarahkan pada literasi, kepemimpinan perempuan muda, dan dakwah moderat.",
     badge: "Khittah",
-    icon: Sparkles
-  }
+    icon: Sparkles,
+  },
 ];
 
+const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
+
 export const TentangKami = () => {
-  const [activeTab, setActiveTab] = useState<"ipnu" | "ippnu">("ipnu");
-  const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   const [parallaxY, setParallaxY] = useState(0);
 
+  const historyData = useMemo(() => [...IPNU_HISTORY, ...IPPNU_HISTORY], []);
+
   useEffect(() => {
-    document.title = "Tentang Kami — PC IPNU IPPNU Kota Bekasi";
+    document.title = "Tentang Kami - PC IPNU IPPNU Kota Bekasi";
     window.scrollTo(0, 0);
 
     let frame = 0;
@@ -130,424 +166,255 @@ export const TentangKami = () => {
     };
   }, []);
 
-  const historyData = activeTab === "ipnu" ? IPNU_HISTORY : IPPNU_HISTORY;
-
-  const toggleExpand = (index: number) => {
-    setExpandedIndex(expandedIndex === index ? null : index);
-  };
-
-  const getHistoryParallaxOffset = (index: number, strength = 1) => {
-    const sectionStart = 560;
-    const itemDistance = 260;
-    const rawOffset = (parallaxY - sectionStart - index * itemDistance) * 0.035 * strength;
-    return Math.max(-22, Math.min(22, rawOffset));
-  };
-
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
-      
-      {/* 1. RENDER HEADER UTAMA */}
       <Header />
 
-      {/* 2. RENDER MAIN CONTENT AREA */}
-      <main className="flex-grow pb-20 relative overflow-hidden z-10">
-        
-        {/* SUNTIKAN STYLE ANIMASI MAINSTREAM & MOTION EFFECT */}
-        <style dangerouslySetInnerHTML={{ __html: `
-          @keyframes drawLine {
-            from { height: 0%; }
-            to { height: 100%; }
-          }
-          @keyframes fadeInUp {
-            from {
-              opacity: 0;
-              transform: translateY(40px) scale(0.98);
-            }
-            to {
-              opacity: 1;
-              transform: translateY(0) scale(1);
-            }
-          }
-          @keyframes blobFloat {
-            0%, 100% { transform: translateY(0px) scale(1); }
-            50% { transform: translateY(-20px) scale(1.05); }
-          }
-          @keyframes parallaxReveal {
-            from {
-              opacity: 0;
-              filter: blur(8px);
-            }
-            to {
-              opacity: 1;
-              filter: blur(0);
-            }
-          }
-          @keyframes slowZoom {
-            from { opacity: 0.5; }
-            to { opacity: 0.62; }
-          }
-          @keyframes historyGlowDrift {
-            0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.55; }
-            50% { transform: translate3d(18px, -18px, 0) scale(1.08); opacity: 0.8; }
-          }
-          @keyframes historyLinePulse {
-            0%, 100% { filter: drop-shadow(0 0 0 rgba(3, 68, 27, 0)); }
-            50% { filter: drop-shadow(0 0 12px rgba(3, 68, 27, 0.35)); }
-          }
-          @keyframes pulseBorderGreen {
-            0%, 100% { border-color: rgba(3, 68, 27, 0.2); box-shadow: 0 0 0 0px rgba(3, 68, 27, 0.1); }
-            50% { border-color: rgba(3, 68, 27, 0.8); box-shadow: 0 0 15px 4px rgba(3, 68, 27, 0.15); }
-          }
-          @keyframes pulseBorderGold {
-            0%, 100% { border-color: rgba(212, 175, 55, 0.2); box-shadow: 0 0 0 0px rgba(212, 175, 55, 0.1); }
-            50% { border-color: rgba(212, 175, 55, 0.8); box-shadow: 0 0 15px 4px rgba(212, 175, 55, 0.15); }
-          }
-          .animate-draw-line {
-            animation: drawLine 2s cubic-bezier(0.16, 1, 0.3 1) forwards;
-          }
-          .animate-fade-up {
-            opacity: 0;
-            animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-          }
-          .animate-blob {
-            animation: blobFloat 8s ease-in-out infinite;
-          }
-          .glow-active-green {
-            animation: pulseBorderGreen 2s infinite;
-          }
-          .glow-active-gold {
-            animation: pulseBorderGold 2s infinite;
-          }
-          .tentang-hero-copy {
-            animation: parallaxReveal 900ms cubic-bezier(0.16, 1, 0.3, 1) both;
-          }
-          .tentang-hero-photo img {
-            animation: slowZoom 8s ease-in-out infinite alternate;
-          }
-          .history-parallax-card,
-          .history-parallax-year,
-          .history-parallax-node,
-          .history-parallax-bg {
-            will-change: transform;
-          }
-          .history-parallax-shell {
-            perspective: 1400px;
-            transform-style: preserve-3d;
-          }
-          .history-parallax-card {
-            transform-style: preserve-3d;
-            transition: transform 180ms linear;
-          }
-          .history-card-surface {
-            transform: translateZ(22px);
-            backdrop-filter: blur(12px);
-          }
-          .history-parallax-year span {
-            text-shadow: 0 18px 42px rgba(3, 68, 27, 0.14);
-          }
-          .history-parallax-watermark {
-            -webkit-text-stroke: 1px rgba(3, 68, 27, 0.1);
-            color: transparent;
-            will-change: transform;
-          }
-          .history-parallax-glow {
-            animation: historyGlowDrift 9s ease-in-out infinite;
-          }
-          .history-timeline-line {
-            animation: historyLinePulse 3.8s ease-in-out infinite;
-          }
-        `}} />
+      <main className="relative flex-grow overflow-hidden">
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `
+              @keyframes aboutFloat {
+                0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+                50% { transform: translate3d(18px, -22px, 0) scale(1.06); }
+              }
+              @keyframes aboutPulseLine {
+                0%, 100% { opacity: .36; filter: drop-shadow(0 0 0 rgba(34, 197, 94, 0)); }
+                50% { opacity: 1; filter: drop-shadow(0 0 16px rgba(34, 197, 94, .48)); }
+              }
+              @keyframes aboutKineticText {
+                0% {
+                  opacity: 0;
+                  transform: translate3d(0, 54px, 0) scale(.96);
+                  filter: blur(14px);
+                }
+                28% {
+                  opacity: 1;
+                  transform: translate3d(0, 0, 0) scale(1);
+                  filter: blur(0) drop-shadow(0 0 18px rgba(34, 197, 94, .28));
+                }
+                62% {
+                  opacity: 1;
+                  transform: translate3d(0, -4px, 0) scale(1);
+                  filter: blur(0) drop-shadow(0 0 28px rgba(255, 215, 0, .18));
+                }
+                100% {
+                  opacity: .18;
+                  transform: translate3d(0, -48px, 0) scale(.985);
+                  filter: blur(8px);
+                }
+              }
+              @keyframes aboutGlowWord {
+                0%, 100% { text-shadow: 0 0 0 transparent; }
+                50% { text-shadow: 0 0 22px rgba(255, 215, 0, .42), 0 0 42px rgba(34, 197, 94, .2); }
+              }
+              .about-float-a { animation: aboutFloat 9s ease-in-out infinite; }
+              .about-float-b { animation: aboutFloat 11s ease-in-out infinite reverse; }
+              .about-line-glow { animation: aboutPulseLine 4s ease-in-out infinite; }
+              .about-slide-copy {
+                animation: aboutKineticText linear both;
+                animation-timeline: view();
+                animation-range: entry 0% exit 100%;
+                will-change: transform, opacity, filter;
+              }
+              .about-glow-word { animation: aboutGlowWord 3.6s ease-in-out infinite; }
+              .about-noise {
+                background-image:
+                  linear-gradient(115deg, transparent 0 44%, hsl(var(--gold) / .09) 44% 45%, transparent 45% 100%),
+                  radial-gradient(circle at 22% 18%, hsl(var(--gold) / .18), transparent 22rem),
+                  radial-gradient(circle at 82% 82%, hsl(var(--primary) / .24), transparent 28rem);
+              }
+              @media (prefers-reduced-motion: reduce) {
+                .about-float-a,
+                .about-float-b,
+                .about-line-glow,
+                .about-glow-word,
+                .about-slide-copy {
+                  animation-duration: 1ms;
+                  animation-iteration-count: 1;
+                }
+              }
+            `,
+          }}
+        />
 
-        {/* BACKGROUND DEKORATIF GLOWING BLOB */}
-        <div className="absolute top-1/3 left-[10%] w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-blob pointer-events-none -z-10"></div>
-        <div className="absolute top-2/3 right-[10%] w-96 h-96 bg-gold/5 rounded-full blur-3xl animate-blob pointer-events-none -z-10" style={{ animationDelay: '3s' }}></div>
-
-        {/* HERO SECTION */}
-        <section className="relative min-h-[460px] overflow-hidden bg-primary-deep py-20 text-primary-foreground sm:min-h-[500px] lg:py-24">
+        <section className="relative min-h-[calc(100vh-4rem)] overflow-hidden bg-[#03150b] text-white">
           <div
-            className="tentang-hero-photo absolute -inset-x-6 -top-16 bottom-[-7rem]"
-            style={{ transform: `translate3d(0, ${Math.min(parallaxY * 0.18, 90)}px, 0) scale(1.08)` }}
+            className="absolute -inset-x-8 -top-16 bottom-[-8rem]"
+            style={{ transform: `translate3d(0, ${clamp(parallaxY * 0.18, 0, 120)}px, 0) scale(1.08)` }}
             aria-hidden="true"
           >
-            <img
-              src={tentangHeroBg}
-              alt=""
-              className="h-full w-full object-cover opacity-55 mix-blend-luminosity"
-            />
+            <img src={tentangHeroBg} alt="" className="h-full w-full object-cover opacity-45 mix-blend-luminosity" />
           </div>
-          <div className="absolute inset-0 bg-gradient-to-br from-[#022b12]/95 via-[#03441b]/88 to-[#0b6623]/72" />
-          <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(255,215,0,0.22),transparent_26rem),radial-gradient(circle_at_82%_76%,rgba(255,255,255,0.13),transparent_24rem)]"></div>
-          <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-background to-transparent"></div>
+          <div className="about-noise absolute inset-0" />
+          <div className="absolute inset-0 bg-gradient-to-b from-[#020806]/65 via-[#032313]/86 to-background" />
+          <div className="about-float-a absolute left-[8%] top-[18%] h-52 w-52 rounded-full bg-gold/20 blur-3xl" />
+          <div className="about-float-b absolute right-[10%] bottom-[18%] h-72 w-72 rounded-full bg-primary/30 blur-3xl" />
+
           <div
-            className="tentang-hero-copy container mx-auto px-5 lg:px-8 text-center relative z-10 flex min-h-[300px] flex-col items-center justify-center space-y-5"
-            style={{ transform: `translate3d(0, ${Math.max(parallaxY * -0.08, -42)}px, 0)` }}
+            className="container-news relative z-10 flex min-h-[calc(100vh-4rem)] flex-col justify-center py-24"
+            style={{ transform: `translate3d(0, ${clamp(parallaxY * -0.08, -58, 0)}px, 0)` }}
           >
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-gold/20 bg-gold/20 px-4 py-1.5 text-[10px] font-black uppercase tracking-[0.22em] text-gold shadow-lg backdrop-blur-md sm:text-xs">
-              <Sparkles className="h-3.5 w-3.5 animate-spin" /> Kenali Jati Diri Kami
-            </span>
-            <h1 className="mx-auto max-w-5xl font-display text-3xl font-black uppercase italic leading-[1.05] tracking-normal transition-all duration-700 hover:scale-[1.01] sm:text-5xl lg:text-6xl">
-              Belajar, Berjuang, <span className="text-gold">Bertaqwa</span>
-            </h1>
-            <p className="mx-auto max-w-2xl text-sm font-semibold leading-relaxed text-primary-foreground/85 lg:text-base">
-              Pimpinan Cabang Ikatan Pelajar Nahdlatul Ulama & Ikatan Pelajar Putri Nahdlatul Ulama Kota Bekasi merupakan wadah perjuangan intelektual muda Aswaja di tanah patriot.
-            </p>
-          </div>
-        </section>
-
-        {/* INTERACTIVE HISTORY SECTION */}
-        <section className="history-parallax-shell relative z-10 mt-20 overflow-hidden py-16">
-          <div
-            className="history-parallax-bg pointer-events-none absolute inset-x-0 top-0 bottom-0 -z-10 opacity-100"
-            style={{ transform: `translate3d(0, ${Math.max(Math.min((parallaxY - 520) * -0.065, 34), -64)}px, 0) scale(1.04)` }}
-            aria-hidden="true"
-          >
-            <img
-              src={historyParallaxBg}
-              alt=""
-              className="absolute inset-0 h-full w-full object-cover opacity-[0.1] mix-blend-multiply"
-            />
-            <div className="absolute inset-0 bg-gradient-to-b from-background via-emerald-50/85 to-background dark:via-emerald-950/10" />
-            <div className="absolute inset-0 bg-[linear-gradient(115deg,transparent_0_30%,rgba(3,68,27,0.06)_30%_31%,transparent_31%_100%)]" />
-            <div className="history-parallax-glow absolute left-[8%] top-20 h-72 w-72 rounded-full bg-primary/12 blur-3xl" />
-            <div className="history-parallax-glow absolute right-[10%] bottom-24 h-80 w-80 rounded-full bg-gold/12 blur-3xl" style={{ animationDelay: "2.2s" }} />
-            <div className="absolute left-1/2 top-1/2 h-[42rem] w-[42rem] -translate-x-1/2 -translate-y-1/2 rounded-full border border-primary/5" />
-          </div>
-          <div className="container mx-auto px-5 lg:px-8 max-w-5xl relative z-10">
-          
-          {/* Header Sejarah */}
-          <div className="text-center space-y-2 mb-12">
-            <h2 className="font-display font-black text-3xl lg:text-5xl text-primary uppercase tracking-tight">
-              Gerbang Lorong Waktu
-            </h2>
-            <p className="text-xs lg:text-sm text-muted-foreground uppercase font-black tracking-[0.2em]">
-              Alur Perjalanan Sejarah Berdirinya IPNU & IPPNU dari Masa ke Masa
-            </p>
-          </div>
-
-          {/* TAB SWITCHER (IPNU / IPPNU) */}
-          <div className="flex justify-center mb-16 px-1">
-            <div className="grid w-full max-w-xl grid-cols-2 bg-slate-100 p-1.5 sm:p-2 rounded-full relative shadow-inner border border-slate-200 dark:bg-card dark:border-border">
-              <button
-                onClick={() => { setActiveTab("ipnu"); setExpandedIndex(null); }}
-                className={`justify-center px-3 sm:px-10 py-3.5 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all duration-500 flex items-center gap-2 sm:gap-2.5 ${
-                  activeTab === "ipnu"
-                    ? "bg-primary text-white shadow-xl transform scale-105"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <Users className="h-4 w-4" /> IPNU (Putera)
-              </button>
-              <button
-                onClick={() => { setActiveTab("ippnu"); setExpandedIndex(null); }}
-                className={`justify-center px-3 sm:px-10 py-3.5 rounded-full text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all duration-500 flex items-center gap-2 sm:gap-2.5 ${
-                  activeTab === "ippnu"
-                    ? "bg-gold text-gold-foreground shadow-xl transform scale-105"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <Heart className="h-4 w-4" /> IPPNU (Putri)
-              </button>
-            </div>
-          </div>
-
-          {/* VERTIKAL TIMELINE DENGAN ANIMASI PROGRESSIVE DRAW */}
-          <div className="relative ml-4 md:ml-32 space-y-16 py-4">
-            
-            {/* Garis Tengah Belakang (Animasi Draw-Line) */}
-            <div className="absolute left-[15px] top-4 bottom-4 w-1 overflow-hidden rounded-full bg-slate-200/80 shadow-inner">
-              <div className={`history-timeline-line w-full bg-gradient-to-b animate-draw-line ${
-                activeTab === 'ipnu' ? 'from-primary to-emerald-800' : 'from-gold to-yellow-600'
-              }`} style={{ height: '100%' }}></div>
-            </div>
-            
-            {historyData.map((item, idx) => {
-              const IconComponent = item.icon;
-              const isExpanded = expandedIndex === idx;
-              const cardOffset = getHistoryParallaxOffset(idx, idx % 2 === 0 ? -0.75 : 0.55);
-              const yearOffset = getHistoryParallaxOffset(idx, idx % 2 === 0 ? 0.95 : -0.8);
-              const nodeOffset = getHistoryParallaxOffset(idx, idx % 2 === 0 ? -0.35 : 0.35);
-              const cardTilt = Math.max(-2.2, Math.min(2.2, cardOffset * 0.08));
-              const cardScale = 1 - Math.min(Math.abs(cardOffset) * 0.0012, 0.025);
-              const watermarkOffset = getHistoryParallaxOffset(idx, idx % 2 === 0 ? -1.35 : 1.15);
-
-              return (
-                <div 
-                  key={idx} 
-                  className="relative group pl-8 md:pl-16 animate-fade-up"
-                  style={{ animationDelay: `${idx * 200}ms` }}
-                >
-                  <div
-                    className="history-parallax-watermark pointer-events-none absolute -right-4 -top-14 hidden select-none font-display text-[8rem] font-black leading-none opacity-45 md:block"
-                    style={{ transform: `translate3d(0, ${watermarkOffset}px, -80px)` }}
-                    aria-hidden="true"
-                  >
-                    {item.year}
-                  </div>
-                  
-                  {/* Node Bulat Timeline (Tahun) */}
-                  <div className={`absolute -left-[3px] md:-left-[3px] top-1.5 h-10 w-10 rounded-full border-4 bg-background flex items-center justify-center transition-all duration-500 group-hover:scale-125 z-10 cursor-pointer ${
-                    isExpanded 
-                      ? (activeTab === "ipnu" ? "bg-primary text-white border-primary shadow-lg shadow-primary/20" : "bg-gold text-gold-foreground border-gold shadow-lg shadow-gold/20") 
-                      : "border-slate-200 text-slate-400 hover:border-slate-400 hover:text-slate-600 dark:border-border dark:text-muted-foreground dark:hover:text-foreground"
-                  } history-parallax-node`} style={{ top: `calc(0.375rem + ${nodeOffset}px)` }}>
-                    <IconComponent className="h-4 w-4" />
-                  </div>
-
-                  {/* Label Tahun di Sebelah Kiri (Desktop Only) */}
-                  <div
-                    className="history-parallax-year hidden md:block absolute -left-36 top-2 text-right w-28"
-                    style={{ transform: `translate3d(0, ${yearOffset}px, 0)` }}
-                  >
-                    <span className={`text-3xl font-black font-display tracking-tight transition-all duration-500 block ${
-                      isExpanded 
-                        ? (activeTab === "ipnu" ? "text-primary text-4xl scale-105" : "text-gold text-4xl scale-105") 
-                        : "text-slate-300 group-hover:text-slate-800 dark:text-muted-foreground/35 dark:group-hover:text-primary"
-                    }`}>
-                      {item.year}
-                    </span>
-                  </div>
-
-                  {/* Kartu Konten Sejarah (3D Tilt & Shadow Hover Effect) */}
-                  <div
-                    className="history-parallax-card"
-                    style={{ transform: `translate3d(0, ${cardOffset}px, 0) rotateX(${cardTilt}deg) scale(${cardScale})` }}
-                  >
-                    <div 
-                      onClick={() => toggleExpand(idx)}
-                    className={`history-card-surface bg-white/95 dark:bg-card/95 rounded-3xl border p-5 sm:p-6 md:p-8 shadow-sm hover:shadow-2xl hover:-translate-y-1 transform transition-all duration-500 cursor-pointer relative overflow-hidden group/card ${
-                      isExpanded 
-                        ? (activeTab === "ipnu" ? "border-primary/80 glow-active-green" : "border-gold/80 glow-active-gold") 
-                        : "border-slate-100 hover:border-slate-300 dark:border-border dark:hover:border-primary/50"
-                    }`}
-                  >
-                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-white/70 via-white/25 to-emerald-50/55 opacity-80 dark:from-white/5 dark:via-transparent dark:to-emerald-950/35" aria-hidden="true" />
-                    <div className="pointer-events-none absolute -right-16 -top-16 h-36 w-36 rounded-full bg-primary/5 dark:bg-primary/15 blur-2xl transition-transform duration-700 group-hover/card:scale-125" aria-hidden="true" />
-                    <div className="relative z-10">
-                    {/* Efek Garis Glow Pojok Atas */}
-                    <div className={`absolute -left-6 -right-6 -top-6 h-1.5 transition-all duration-500 md:-left-8 md:-right-8 md:-top-8 ${
-                      isExpanded 
-                        ? (activeTab === "ipnu" ? "bg-primary" : "bg-gold") 
-                        : "bg-transparent group-hover/card:bg-slate-300"
-                    }`}></div>
-
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-3">
-                          {/* Label Tahun Mobile */}
-                          <span className="md:hidden text-2xl font-black text-primary font-display">{item.year}</span>
-                          <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-full ${
-                            activeTab === 'ipnu' ? 'bg-primary/10 text-primary' : 'bg-gold/10 text-gold-foreground'
-                          }`}>
-                            {item.badge}
-                          </span>
-                        </div>
-                        <h3 className="font-display font-black text-xl md:text-2xl text-foreground group-hover/card:text-primary transition-colors">
-                          {item.title}
-                        </h3>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] flex items-center gap-2 dark:text-muted-foreground">
-                          <Calendar className="h-3.5 w-3.5" /> {item.date}
-                        </p>
-                      </div>
-                      
-                      {/* Tombol Panah Buka Tutup */}
-                      <div className="flex items-center gap-2.5 self-end sm:self-center">
-                        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest hidden sm:inline-block opacity-0 group-hover/card:opacity-100 transition-opacity dark:text-muted-foreground">
-                          {isExpanded ? "Tutup" : "Baca Detail"}
-                        </span>
-                        <div className={`p-3 rounded-full transition-all duration-500 ${
-                          isExpanded 
-                            ? (activeTab === "ipnu" ? "bg-primary text-white shadow-lg shadow-primary/20" : "bg-gold text-gold-foreground shadow-lg shadow-gold/20") 
-                            : "bg-slate-100 text-slate-500 group-hover/card:bg-primary group-hover/card:text-white dark:bg-muted dark:text-muted-foreground"
-                        }`}>
-                          {isExpanded ? <ChevronDown className="h-5 w-5" /> : <ChevronRight className="h-5 w-5" />}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Ringkasan Singkat */}
-                    <p className="mt-4 text-sm lg:text-base text-slate-600 leading-relaxed font-semibold dark:text-foreground/78">
-                      {item.summary}
-                    </p>
-
-                    {/* Kisah Detail (Mulus Expand & Collapse) */}
-                    <div className={`transition-all duration-700 ease-in-out overflow-hidden ${
-                      isExpanded ? "max-h-[800px] opacity-100 mt-6 pt-6 border-t border-dashed border-slate-200 dark:border-border" : "max-h-0 opacity-0 pointer-events-none"
-                    }`}>
-                      <div className="space-y-4 text-sm lg:text-base leading-relaxed text-slate-700 dark:text-foreground/86">
-                        <p className="font-medium">{item.details}</p>
-                        <div className="flex flex-wrap gap-4 pt-3 text-xs uppercase font-black text-slate-500 dark:text-muted-foreground">
-                          <span className="flex items-center gap-1">📍 Lokasi: <strong className="text-slate-800 font-black dark:text-foreground">{item.location}</strong></span>
-                        </div>
-                      </div>
-                    </div>
-
-                    </div>
-                    </div>
-                  </div>
-
-                </div>
-              );
-            })}
-
-          </div>
-          </div>
-        </section>
-
-        {/* VISI & MISI DAN STRUKTURAL BANNER */}
-        <section className="container mx-auto px-5 lg:px-8 mt-32 max-w-5xl relative z-10">
-          <div className="grid md:grid-cols-2 gap-8">
-            
-            {/* Card Visi */}
-            <div className="bg-primary-deep text-primary-foreground p-10 rounded-3xl relative overflow-hidden shadow-2xl shadow-emerald-950/10 group transform transition-transform duration-500 hover:scale-[1.02]">
-              <div className="absolute -bottom-8 -right-8 h-32 w-32 rounded-full bg-white/5 blur-xl group-hover:scale-125 transition-transform duration-700"></div>
-              <h3 className="font-display font-black text-2xl lg:text-3xl uppercase tracking-tight text-gold flex items-center gap-2">
-                <Sparkles className="h-6 w-6 animate-pulse" /> Visi Juang
-              </h3>
-              <p className="mt-5 text-sm lg:text-base text-primary-foreground/85 leading-relaxed font-medium">
-                Terwujudnya kader pelajar, santri, dan mahasiswa NU Kota Bekasi yang bertakwa kepada Allah SWT, berakhlakul karimah, unggul dalam intelektualitas, tangguh dalam organisasi, serta setia menjaga kedaulatan paham Aswaja dan NKRI.
+            <div className="max-w-5xl">
+              <p className="text-[10px] sm:text-xs font-black uppercase tracking-[0.34em] text-gold">
+                Tentang Kami
+              </p>
+              <h1 className="mt-5 max-w-5xl font-display text-4xl font-black uppercase leading-[0.96] sm:text-6xl lg:text-7xl">
+                Belajar, Berjuang, <span className="about-glow-word text-gold">Bertaqwa</span>
+              </h1>
+              <p className="mt-7 max-w-2xl text-sm font-semibold leading-8 text-white/78 sm:text-base">
+                PC IPNU IPPNU Kota Bekasi adalah ruang kaderisasi pelajar NU yang merawat ilmu,
+                akhlak, organisasi, dan keberanian sosial dalam satu napas perjuangan.
               </p>
             </div>
 
-            {/* Card Misi */}
-            <div className="bg-white dark:bg-card border border-slate-100 dark:border-border p-10 rounded-3xl relative overflow-hidden shadow-sm hover:shadow-xl group transform transition-transform duration-500 hover:scale-[1.02]">
-              <h3 className="font-display font-black text-2xl lg:text-3xl uppercase tracking-tight text-primary flex items-center gap-2">
-                <BookOpen className="h-6 w-6" /> Misi Juang
-              </h3>
-              <ul className="mt-5 space-y-4 text-sm lg:text-base text-slate-600 dark:text-foreground/78 leading-relaxed list-none">
-                <li className="flex items-start gap-2.5">
-                  <span className="h-2 w-2 rounded-full bg-primary mt-2 shrink-0"></span>
-                  <span>Membangun basis pertahanan kaderisasi di sekolah umum, pesantren, dan kampus.</span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <span className="h-2 w-2 rounded-full bg-primary mt-2 shrink-0"></span>
-                  <span>Mendorong literasi digital cerdas bagi pemuda NU di wilayah Kota Bekasi.</span>
-                </li>
-                <li className="flex items-start gap-2.5">
-                  <span className="h-2 w-2 rounded-full bg-primary mt-2 shrink-0"></span>
-                  <span>Mengawal pemahaman dakwah Islam wasathiyah (moderat) demi keutuhan NKRI.</span>
-                </li>
-              </ul>
+            <div className="mt-16 grid gap-4 sm:grid-cols-3">
+              {[
+                ["Aswaja", "Akar nilai yang menjaga arah gerak."],
+                ["Literasi", "Daya baca, daya pikir, dan daya cipta."],
+                ["Khidmah", "Kerja sunyi untuk umat dan pelajar."],
+              ].map(([title, text]) => (
+                <div key={title} className="border border-white/10 bg-white/[0.06] p-5 backdrop-blur-md">
+                  <p className="font-display text-xl font-black text-gold">{title}</p>
+                  <p className="mt-2 text-xs font-semibold leading-6 text-white/68">{text}</p>
+                </div>
+              ))}
             </div>
-
           </div>
-
-          {/* CALL TO ACTION BUTTON KE HALAMAN STRUKTURAL */}
-          <div className="mt-20 text-center">
-            <Link 
-              to="/struktural" 
-              className="inline-flex items-center gap-3 px-10 py-5 bg-primary hover:bg-[#023314] text-white rounded-full font-brand font-black text-sm uppercase tracking-widest transition-all shadow-xl shadow-emerald-950/20 hover:shadow-emerald-900/30 active:scale-95 group hover:-translate-y-0.5"
-            >
-              Lihat Struktur Kepengurusan Kami <ArrowRight className="h-4 w-4 group-hover:translate-x-2 transition-transform" />
-            </Link>
-          </div>
-
         </section>
 
+        <section className="relative overflow-hidden bg-background py-28 lg:py-36">
+          <div
+            className="pointer-events-none absolute inset-0 opacity-80"
+            style={{ transform: `translate3d(0, ${clamp((parallaxY - 520) * -0.05, -80, 48)}px, 0) scale(1.04)` }}
+            aria-hidden="true"
+          >
+            <img src={historyParallaxBg} alt="" className="absolute inset-0 h-full w-full object-cover opacity-[0.08] mix-blend-multiply dark:opacity-[0.13]" />
+            <div className="absolute inset-0 bg-gradient-to-b from-background via-emerald-50/70 to-background dark:via-emerald-950/18" />
+            <div className="about-float-a absolute left-[10%] top-24 h-72 w-72 rounded-full bg-primary/12 blur-3xl" />
+            <div className="about-float-b absolute right-[8%] bottom-36 h-80 w-80 rounded-full bg-gold/12 blur-3xl" />
+          </div>
+
+          <div className="container-news relative z-10">
+            <div className="mx-auto max-w-3xl text-center">
+              <p className="text-[10px] font-black uppercase tracking-[0.28em] text-primary">Lorong Waktu</p>
+              <h2 className="mt-4 font-display text-3xl font-black uppercase leading-tight sm:text-5xl">
+                Sejarah yang bergerak bersama scroll
+              </h2>
+              <p className="mt-5 text-sm font-semibold leading-7 text-muted-foreground">
+                Tidak ada tombol di bagian ini. Cukup turun perlahan, biarkan tiap fragmen sejarah
+                menyala, menetap sebentar, lalu memudar saat kisah berikutnya datang.
+              </p>
+            </div>
+
+            <div className="relative mx-auto mt-24 max-w-6xl">
+              <div className="about-line-glow absolute left-4 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-primary to-transparent md:left-1/2" />
+
+              {historyData.map((item, index) => {
+                const Icon = item.icon;
+                const isGold = item.accent === "gold";
+                const isRight = index % 2 === 1;
+                const offset = clamp((parallaxY - 820 - index * 430) * (isRight ? 0.028 : -0.028), -28, 28);
+
+                return (
+                  <article
+                    key={`${item.org}-${item.year}-${item.title}`}
+                    className={`relative min-h-[76vh] py-12 md:grid md:grid-cols-2 md:gap-16 ${isRight ? "md:[&>*:first-child]:col-start-2" : ""}`}
+                  >
+                    <div
+                      className="about-slide-copy relative ml-10 md:ml-0"
+                      style={{ transform: `translate3d(0, ${offset}px, 0)` }}
+                    >
+                      <div
+                        className={`absolute -left-[3.15rem] top-3 grid h-10 w-10 place-items-center rounded-full border bg-background md:left-auto ${
+                          isRight ? "md:-left-[5.6rem]" : "md:-right-[5.6rem]"
+                        } ${isGold ? "border-gold text-gold shadow-gold/30" : "border-primary text-primary shadow-primary/30"} shadow-lg`}
+                      >
+                        <Icon className="h-4 w-4" />
+                      </div>
+
+                      <div className="relative overflow-hidden border border-border/70 bg-card/88 p-6 shadow-2xl shadow-black/5 backdrop-blur-md dark:bg-card/72 sm:p-8 lg:p-10">
+                        <div
+                          className={`absolute inset-x-0 top-0 h-1.5 ${
+                            isGold ? "bg-gradient-to-r from-gold via-yellow-300 to-gold" : "bg-gradient-to-r from-primary via-emerald-400 to-primary"
+                          }`}
+                        />
+                        <div className={`absolute -right-20 -top-20 h-44 w-44 rounded-full blur-3xl ${isGold ? "bg-gold/16" : "bg-primary/16"}`} />
+                        <p className={`font-display text-5xl font-black leading-none sm:text-6xl ${isGold ? "text-gold" : "text-primary"}`}>
+                          {item.year}
+                        </p>
+                        <div className="mt-5 flex flex-wrap items-center gap-2">
+                          <span
+                            className={`px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] ${
+                              isGold ? "bg-gold/15 text-gold-foreground dark:text-gold" : "bg-primary/10 text-primary"
+                            }`}
+                          >
+                            {item.org}
+                          </span>
+                          <span className="px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
+                            {item.badge}
+                          </span>
+                        </div>
+                        <h3 className="mt-5 font-display text-2xl font-black leading-tight sm:text-3xl">
+                          {item.title}
+                        </h3>
+                        <p className="mt-4 text-base font-bold leading-8 text-foreground/78">
+                          {item.summary}
+                        </p>
+                        <p className="mt-5 text-sm font-medium leading-8 text-muted-foreground">
+                          {item.details}
+                        </p>
+                        <div className="mt-7 grid gap-3 border-t border-dashed border-border pt-5 text-[11px] font-black uppercase tracking-[0.16em] text-muted-foreground sm:grid-cols-2">
+                          <span className="flex items-center gap-2">
+                            <Calendar className="h-3.5 w-3.5 text-primary" />
+                            {item.date}
+                          </span>
+                          <span className="flex items-center gap-2">
+                            <MapPin className="h-3.5 w-3.5 text-primary" />
+                            {item.location}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+
+        <section className="relative overflow-hidden bg-[#04140b] py-28 text-white">
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_12%_18%,hsl(var(--gold)_/_0.18),transparent_24rem),radial-gradient(circle_at_88%_76%,hsl(var(--primary)_/_0.34),transparent_30rem)]" />
+          <div className="container-news relative z-10 grid gap-12 lg:grid-cols-[0.8fr_1.2fr] lg:items-end">
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gold">Arah Gerak</p>
+              <h2 className="mt-4 font-display text-3xl font-black uppercase leading-tight sm:text-5xl">
+                Visi yang tidak berhenti di poster
+              </h2>
+            </div>
+            <div className="grid gap-5 sm:grid-cols-2">
+              <div className="about-slide-copy border border-white/10 bg-white/[0.06] p-7 backdrop-blur-md">
+                <Sparkles className="h-7 w-7 text-gold" />
+                <h3 className="mt-5 font-display text-2xl font-black text-gold">Visi Juang</h3>
+                <p className="mt-4 text-sm font-semibold leading-8 text-white/74">
+                  Terwujudnya kader pelajar, santri, dan mahasiswa NU Kota Bekasi yang bertakwa,
+                  berakhlakul karimah, unggul secara intelektual, dan setia menjaga Aswaja serta NKRI.
+                </p>
+              </div>
+              <div className="about-slide-copy border border-white/10 bg-white/[0.06] p-7 backdrop-blur-md">
+                <BookOpen className="h-7 w-7 text-gold" />
+                <h3 className="mt-5 font-display text-2xl font-black text-gold">Misi Juang</h3>
+                <p className="mt-4 text-sm font-semibold leading-8 text-white/74">
+                  Menguatkan kaderisasi sekolah, pesantren, dan kampus; mendorong literasi digital;
+                  serta mengawal dakwah Islam wasathiyah di ruang pelajar.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
 
-      {/* 3. RENDER FOOTER UTAMA */}
       <Footer />
-
     </div>
   );
 };

@@ -1,10 +1,9 @@
 import { useState, useEffect } from "react";
 import { AdminLayout } from "@/components/AdminLayout";
 import { supabase } from "@/integrations/firebase/supabaseCompat";
-import { auth } from "@/integrations/firebase/client";
 import { 
   Star, Trash2, MessageSquare, Send, Loader2, 
-  MapPin, CheckCircle, ShieldCheck, Mail, Link as LinkIcon
+  MapPin, CheckCircle, ShieldCheck, Mail
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -14,10 +13,6 @@ export const RatingManager = () => {
   const [loading, setLoading] = useState(true);
   const [submittingId, setSubmittingId] = useState<string | null>(null);
   const [feedbackText, setFeedbackText] = useState("");
-  const [emailSubject, setEmailSubject] = useState("Berita terbaru PC IPNU IPPNU Kota Bekasi");
-  const [emailMessage, setEmailMessage] = useState("");
-  const [emailActionUrl, setEmailActionUrl] = useState("");
-  const [sendingNewsletter, setSendingNewsletter] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -104,52 +99,6 @@ export const RatingManager = () => {
       fetchData();
     } catch (err: any) {
       toast.error("Gagal menghapus email");
-    }
-  };
-
-  const activeSubscribers = subscribers.filter((sub) => (sub.status || "active") === "active" && sub.email);
-
-  const handleSendNewsletter = async () => {
-    if (!activeSubscribers.length) return toast.error("Belum ada email langganan aktif.");
-    if (!emailSubject.trim()) return toast.error("Subjek email wajib diisi.");
-    if (!emailMessage.trim()) return toast.error("Isi pesan email wajib diisi.");
-
-    const token = await auth?.currentUser?.getIdToken();
-    if (!token) return toast.error("Sesi admin tidak ditemukan. Silakan login ulang.");
-
-    setSendingNewsletter(true);
-    try {
-      const endpoint = import.meta.env.VITE_NEWSLETTER_SEND_URL || "/api/newsletter-send";
-      const response = await fetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          recipients: activeSubscribers.map((sub) => sub.email),
-          subject: emailSubject.trim(),
-          message: emailMessage.trim(),
-          actionUrl: emailActionUrl.trim(),
-        }),
-      });
-      const result = await response.json();
-
-      if (!response.ok && response.status !== 207) {
-        throw new Error(result.error || "Gagal mengirim newsletter.");
-      }
-
-      if (result.failed > 0) {
-        toast.warning(`Email terkirim ke ${result.sent} penerima, gagal ${result.failed}.`);
-      } else {
-        toast.success(`Newsletter terkirim ke ${result.sent} email.`);
-        setEmailMessage("");
-        setEmailActionUrl("");
-      }
-    } catch (err: any) {
-      toast.error("Gagal mengirim newsletter: " + (err?.message || "Coba lagi nanti."));
-    } finally {
-      setSendingNewsletter(false);
     }
   };
 
@@ -263,46 +212,6 @@ export const RatingManager = () => {
           <div className="flex items-center gap-2 border-b pb-3">
             <Mail className="h-5.5 w-5.5 text-primary" />
             <h3 className="font-brand font-black text-base uppercase text-slate-800">Daftar Langganan Email ({subscribers.length})</h3>
-          </div>
-
-          <div className="space-y-3 rounded-[1.5rem] border border-emerald-100 bg-emerald-50/40 p-4">
-            <div>
-              <h4 className="font-brand font-black text-xs uppercase tracking-widest text-primary flex items-center gap-2">
-                <Send className="h-4 w-4" /> Kirim Newsletter
-              </h4>
-              <p className="mt-1 text-[10px] font-bold text-slate-500 uppercase tracking-wide">
-                Penerima aktif: {activeSubscribers.length} email
-              </p>
-            </div>
-            <input
-              value={emailSubject}
-              onChange={(e) => setEmailSubject(e.target.value)}
-              className="w-full rounded-2xl border bg-white px-3 py-3 text-xs font-bold outline-none focus:border-primary"
-              placeholder="Subjek email"
-            />
-            <textarea
-              value={emailMessage}
-              onChange={(e) => setEmailMessage(e.target.value)}
-              className="min-h-28 w-full resize-none rounded-2xl border bg-white px-3 py-3 text-xs font-semibold leading-relaxed outline-none focus:border-primary"
-              placeholder="Tulis ringkasan berita atau pengumuman yang akan dikirim ke subscriber..."
-            />
-            <div className="relative">
-              <LinkIcon className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-slate-400" />
-              <input
-                value={emailActionUrl}
-                onChange={(e) => setEmailActionUrl(e.target.value)}
-                className="w-full rounded-2xl border bg-white py-3 pl-9 pr-3 text-xs font-bold outline-none focus:border-primary"
-                placeholder="Link berita, opsional"
-              />
-            </div>
-            <button
-              onClick={handleSendNewsletter}
-              disabled={sendingNewsletter || !activeSubscribers.length}
-              className="w-full rounded-2xl bg-primary px-4 py-3 text-[10px] font-brand font-black uppercase tracking-widest text-white hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-60 flex items-center justify-center gap-2"
-            >
-              {sendingNewsletter ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-              Kirim ke Subscriber
-            </button>
           </div>
 
           {loading ? (

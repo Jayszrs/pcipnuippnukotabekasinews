@@ -2,8 +2,10 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { AdminLayout } from "@/components/AdminLayout";
 import { supabase } from "@/integrations/firebase/supabaseCompat";
+import { auth } from "@/integrations/firebase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQueryClient } from "@tanstack/react-query"; // <-- 1. IMPORT PENGHANCUR DELAY CACHE
+import { SITE_CONFIG } from "@/config/site";
 import { 
   ArrowLeft, Save, Send, X, Loader2, 
   Image as ImageIcon, Video, Link2, 
@@ -64,6 +66,8 @@ const NewsForm = () => {
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(isEdit);
   const [existingDates, setExistingDates] = useState<string[]>([]);
+  const [originalStatus, setOriginalStatus] = useState<"draft" | "published" | null>(null);
+  const [currentSlug, setCurrentSlug] = useState("");
 
   // AUTOSAVE: AMBIL DRAF JIKA ADA (HANYA UNTUK TULIS BARU)
   useEffect(() => {
@@ -124,6 +128,8 @@ const NewsForm = () => {
       setExcerpt(data.excerpt);
       setContent(data.content);
       setCategory(normalizeCategory(data.category));
+      setOriginalStatus(data.status || "draft");
+      setCurrentSlug(data.slug || "");
       setTags((data.tags ?? []).join(", "));
       setPublishedAt(new Date(data.published_at || data.created_at).toISOString().slice(0, 16));
       
@@ -184,11 +190,56 @@ const NewsForm = () => {
     } catch (err) { toast.error("Gagal upload"); } finally { setUploading(null); }
   };
 
+  const sendPublishedNewsEmail = async (article: { title: string; excerpt: string; slug: string }) => {
+    const token = await auth?.currentUser?.getIdToken();
+    if (!token) throw new Error("Sesi admin tidak ditemukan untuk mengirim email.");
+
+    const { data, error } = await supabase
+      .from("newsletter_subscriptions")
+      .select("email,status")
+      .eq("status", "active");
+
+    if (error) throw error;
+
+    const recipients = (data || [])
+      .map((item: any) => String(item.email || "").trim().toLowerCase())
+      .filter(Boolean);
+
+    if (recipients.length === 0) return { sent: 0, failed: 0 };
+
+    const endpoint = import.meta.env.VITE_NEWSLETTER_SEND_URL || "/api/newsletter-send";
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        recipients,
+        subject: `Berita terbaru: ${article.title}`,
+        message: article.excerpt,
+        actionUrl: `${SITE_CONFIG.siteUrl}/berita/${article.slug}`,
+      }),
+    });
+    const result = await response.json();
+
+    if (!response.ok && response.status !== 207) {
+      throw new Error(result.error || "Gagal mengirim email berita.");
+    }
+
+    return {
+      sent: Number(result.sent || 0),
+      failed: Number(result.failed || 0),
+    };
+  };
+
   const save = async (status: "draft" | "published") => {
     const parsed = schema.safeParse({ title, excerpt, content, category });
     if (!parsed.success) return toast.error(parsed.error.issues[0].message);
     setSaving(true);
-    const slug = isEdit ? undefined : `${slugify(title)}-${Date.now().toString(36)}`;
+    const generatedSlug = `${slugify(title)}-${Date.now().toString(36)}`;
+    const slug = isEdit ? (currentSlug ? undefined : generatedSlug) : generatedSlug;
+    const finalSlug = currentSlug || generatedSlug;
     const finalVideoUrl = videoUrlInput.trim() !== "" ? videoUrlInput : (videos[0] || null);
 
     const payload = {
@@ -221,8 +272,33 @@ const NewsForm = () => {
         console.error("Gagal refresh cache:", err);
       }
 
+      const shouldSendEmail = status === "published" && (!isEdit || originalStatus !== "published");
+
+      if (shouldSendEmail) {
+        try {
+          const result = await sendPublishedNewsEmail({
+            title: parsed.data.title,
+            excerpt: parsed.data.excerpt,
+            slug: finalSlug,
+          });
+
+          if (result.sent > 0 && result.failed > 0) {
+            toast.warning(`Berita terbit. Email terkirim ke ${result.sent} subscriber, gagal ${result.failed}.`);
+          } else if (result.sent > 0) {
+            toast.success(`Berita terbit dan email terkirim ke ${result.sent} subscriber.`);
+          } else {
+            toast.success("Berita terbit. Belum ada subscriber aktif untuk dikirimi email.");
+          }
+        } catch (err: any) {
+          toast.warning("Berita terbit, tapi email otomatis gagal dikirim.", {
+            description: err?.message || "Periksa konfigurasi RESEND_API_KEY dan NEWSLETTER_FROM_EMAIL.",
+          });
+        }
+      } else {
+        toast.success(status === "published" ? "Berita Terbit!" : "Draft Disimpan");
+      }
+
       setSaving(false);
-      toast.success(status === "published" ? "Berita Terbit!" : "Draft Disimpan"); 
       navigate("/admin/dashboard"); 
     } else {
       setSaving(false);
