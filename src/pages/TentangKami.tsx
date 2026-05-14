@@ -198,8 +198,8 @@ export const TentangKami = () => {
         });
       },
       {
-        rootMargin: "-24% 0px -30% 0px",
-        threshold: [0, 0.2, 0.55],
+        rootMargin: "-18% 0px -26% 0px",
+        threshold: [0, 0.28, 0.62],
       }
     );
 
@@ -308,17 +308,17 @@ export const TentangKami = () => {
               }
               .history-reveal {
                 opacity: 0;
-                transform: translate3d(0, 18px, 0);
+                transform: translate3d(0, 22px, 0);
                 transition:
-                  opacity .58s cubic-bezier(.22, 1, .36, 1),
-                  transform .58s cubic-bezier(.22, 1, .36, 1);
+                  opacity .9s cubic-bezier(.22, 1, .36, 1),
+                  transform .9s cubic-bezier(.22, 1, .36, 1);
                 will-change: opacity, transform;
               }
               .history-type {
                 display: inline-block;
                 max-width: 100%;
                 clip-path: inset(0 100% 0 0);
-                transition: clip-path .92s steps(28, end);
+                transition: clip-path 1.45s steps(34, end);
               }
               .history-card-copy.is-history-visible .history-reveal {
                 opacity: 1;
@@ -331,13 +331,13 @@ export const TentangKami = () => {
               .history-card-copy:not(.is-history-visible) .history-type {
                 transition-delay: 0ms !important;
               }
-              .history-reveal-year { transition-delay: 40ms; }
-              .history-reveal-badges { transition-delay: 130ms; }
-              .history-reveal-title { transition-delay: 210ms; }
-              .history-reveal-title .history-type { transition-delay: 280ms; }
-              .history-reveal-summary { transition-delay: 420ms; }
-              .history-reveal-details { transition-delay: 540ms; }
-              .history-reveal-meta { transition-delay: 660ms; }
+              .history-reveal-year { transition-delay: 80ms; }
+              .history-reveal-badges { transition-delay: 260ms; }
+              .history-reveal-title { transition-delay: 460ms; }
+              .history-reveal-title .history-type { transition-delay: 620ms; }
+              .history-reveal-summary { transition-delay: 980ms; }
+              .history-reveal-details { transition-delay: 1280ms; }
+              .history-reveal-meta { transition-delay: 1580ms; }
               @media (prefers-reduced-motion: reduce) {
                 .about-float-a,
                 .about-float-b,
