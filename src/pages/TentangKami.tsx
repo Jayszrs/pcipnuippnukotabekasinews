@@ -145,6 +145,7 @@ const clamp = (value: number, min: number, max: number) => Math.min(Math.max(val
 
 export const TentangKami = () => {
   const [parallaxY, setParallaxY] = useState(0);
+  const [visibleHistory, setVisibleHistory] = useState<Set<number>>(() => new Set());
 
   const historyData = useMemo(() => [...IPNU_HISTORY, ...IPPNU_HISTORY], []);
 
@@ -168,6 +169,44 @@ export const TentangKami = () => {
       if (frame) window.cancelAnimationFrame(frame);
     };
   }, []);
+
+  useEffect(() => {
+    const cards = Array.from(document.querySelectorAll<HTMLElement>("[data-history-index]"));
+
+    if (!("IntersectionObserver" in window)) {
+      setVisibleHistory(new Set(cards.map((card) => Number(card.dataset.historyIndex))));
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        setVisibleHistory((current) => {
+          const next = new Set(current);
+
+          entries.forEach((entry) => {
+            const index = Number((entry.target as HTMLElement).dataset.historyIndex);
+            if (Number.isNaN(index)) return;
+
+            if (entry.isIntersecting) {
+              next.add(index);
+            } else {
+              next.delete(index);
+            }
+          });
+
+          return next;
+        });
+      },
+      {
+        rootMargin: "-24% 0px -30% 0px",
+        threshold: [0, 0.2, 0.55],
+      }
+    );
+
+    cards.forEach((card) => observer.observe(card));
+
+    return () => observer.disconnect();
+  }, [historyData.length]);
 
   return (
     <div className="min-h-screen flex flex-col bg-background text-foreground">
@@ -267,6 +306,38 @@ export const TentangKami = () => {
               .history-card-halo {
                 animation: historyHaloDrift 7s ease-in-out infinite;
               }
+              .history-reveal {
+                opacity: 0;
+                transform: translate3d(0, 18px, 0);
+                transition:
+                  opacity .58s cubic-bezier(.22, 1, .36, 1),
+                  transform .58s cubic-bezier(.22, 1, .36, 1);
+                will-change: opacity, transform;
+              }
+              .history-type {
+                display: inline-block;
+                max-width: 100%;
+                clip-path: inset(0 100% 0 0);
+                transition: clip-path .92s steps(28, end);
+              }
+              .history-card-copy.is-history-visible .history-reveal {
+                opacity: 1;
+                transform: translate3d(0, 0, 0);
+              }
+              .history-card-copy.is-history-visible .history-type {
+                clip-path: inset(0 0 0 0);
+              }
+              .history-card-copy:not(.is-history-visible) .history-reveal,
+              .history-card-copy:not(.is-history-visible) .history-type {
+                transition-delay: 0ms !important;
+              }
+              .history-reveal-year { transition-delay: 40ms; }
+              .history-reveal-badges { transition-delay: 130ms; }
+              .history-reveal-title { transition-delay: 210ms; }
+              .history-reveal-title .history-type { transition-delay: 280ms; }
+              .history-reveal-summary { transition-delay: 420ms; }
+              .history-reveal-details { transition-delay: 540ms; }
+              .history-reveal-meta { transition-delay: 660ms; }
               @media (prefers-reduced-motion: reduce) {
                 .about-float-a,
                 .about-float-b,
@@ -277,6 +348,13 @@ export const TentangKami = () => {
                 .history-card-halo {
                   animation-duration: 1ms;
                   animation-iteration-count: 1;
+                }
+                .history-reveal,
+                .history-type {
+                  opacity: 1;
+                  transform: none;
+                  clip-path: none;
+                  transition: none;
                 }
               }
             `,
@@ -432,12 +510,14 @@ export const TentangKami = () => {
                 const Icon = item.icon;
                 const isGold = item.accent === "gold";
                 const isRight = index % 2 === 1;
+                const isVisible = visibleHistory.has(index);
                 const borderShift = clamp((parallaxY - 820 - index * 360) * (isRight ? -0.05 : 0.05), -34, 34);
                 const haloShift = clamp((parallaxY - 760 - index * 380) * (isRight ? 0.04 : -0.04), -42, 42);
 
                 return (
                   <article
                     key={`${item.org}-${item.year}-${item.title}`}
+                    data-history-index={index}
                     className={`relative min-h-[76vh] py-12 md:grid md:grid-cols-2 md:gap-16 ${isRight ? "md:[&>*:first-child]:col-start-2" : ""}`}
                   >
                     <div className="about-slide-copy relative ml-10 md:ml-0">
@@ -458,7 +538,9 @@ export const TentangKami = () => {
 
                       <div
                         data-year={item.year}
-                        className={`history-card-frame relative overflow-hidden border p-6 shadow-2xl shadow-black/25 sm:p-8 lg:p-10 ${
+                        className={`history-card-frame history-card-copy relative overflow-hidden border p-6 shadow-2xl shadow-black/25 sm:p-8 lg:p-10 ${
+                          isVisible ? "is-history-visible" : ""
+                        } ${
                           isGold ? "is-gold border-gold/35" : "border-primary/35"
                         }`}
                       >
@@ -476,10 +558,10 @@ export const TentangKami = () => {
                           style={{ transform: `translate3d(0, ${borderShift * 0.45}px, 0)` }}
                           aria-hidden="true"
                         />
-                        <p className={`font-display text-5xl font-black leading-none sm:text-6xl ${isGold ? "text-gold" : "text-primary"}`}>
+                        <p className={`history-reveal history-reveal-year font-display text-5xl font-black leading-none sm:text-6xl ${isGold ? "text-gold" : "text-primary"}`}>
                           {item.year}
                         </p>
-                        <div className="mt-5 flex flex-wrap items-center gap-2">
+                        <div className="history-reveal history-reveal-badges mt-5 flex flex-wrap items-center gap-2">
                           <span
                             className={`px-3 py-1 text-[10px] font-black uppercase tracking-[0.2em] ${
                               isGold ? "bg-gold/15 text-gold-foreground dark:text-gold" : "bg-primary/10 text-primary"
@@ -491,16 +573,16 @@ export const TentangKami = () => {
                             {item.badge}
                           </span>
                         </div>
-                        <h3 className="mt-5 font-display text-2xl font-black leading-tight sm:text-3xl">
-                          {item.title}
+                        <h3 className="history-reveal history-reveal-title mt-5 font-display text-2xl font-black leading-tight sm:text-3xl">
+                          <span className="history-type">{item.title}</span>
                         </h3>
-                        <p className="mt-4 text-base font-bold leading-8 text-foreground/78">
+                        <p className="history-reveal history-reveal-summary mt-4 text-base font-bold leading-8 text-foreground/78">
                           {item.summary}
                         </p>
-                        <p className="mt-5 text-sm font-medium leading-8 text-muted-foreground">
+                        <p className="history-reveal history-reveal-details mt-5 text-sm font-medium leading-8 text-muted-foreground">
                           {item.details}
                         </p>
-                        <div className="mt-7 grid gap-3 border-t border-dashed border-border pt-5 text-[11px] font-black uppercase tracking-[0.16em] text-muted-foreground sm:grid-cols-2">
+                        <div className="history-reveal history-reveal-meta mt-7 grid gap-3 border-t border-dashed border-border pt-5 text-[11px] font-black uppercase tracking-[0.16em] text-muted-foreground sm:grid-cols-2">
                           <span className="flex items-center gap-2">
                             <Calendar className="h-3.5 w-3.5 text-primary" />
                             {item.date}
