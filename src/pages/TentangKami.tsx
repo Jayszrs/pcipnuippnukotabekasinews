@@ -273,8 +273,24 @@ export const TentangKami = () => {
               .history-card-frame {
                 isolation: isolate;
                 background:
+                  linear-gradient(135deg, rgba(231, 245, 235, .97), rgba(212, 234, 220, .94)),
+                  radial-gradient(circle at 100% 0%, rgba(3, 68, 27, .16), transparent 18rem);
+                color: hsl(150 20% 12%);
+                box-shadow: 0 24px 80px -52px rgba(3, 68, 27, .62);
+              }
+              .history-card-frame.is-gold {
+                background:
+                  linear-gradient(135deg, rgba(248, 242, 205, .97), rgba(224, 238, 211, .94)),
+                  radial-gradient(circle at 100% 0%, rgba(255, 215, 0, .18), transparent 18rem);
+                color: hsl(48 22% 12%);
+                box-shadow: 0 24px 80px -52px rgba(117, 95, 0, .50);
+              }
+              .dark .history-card-frame {
+                background:
                   linear-gradient(135deg, hsl(var(--card) / .98), hsl(var(--card) / .92)),
                   radial-gradient(circle at 100% 0%, hsl(var(--primary) / .18), transparent 18rem);
+                color: hsl(var(--foreground));
+                box-shadow: 0 24px 80px -52px rgba(0, 0, 0, .9);
               }
               .history-card-frame::before {
                 content: "";
@@ -487,7 +503,7 @@ export const TentangKami = () => {
                   <h3 className="mt-3 max-w-md font-display text-2xl font-black uppercase leading-tight text-white sm:text-3xl">
                     Ruang belajar, gerak sosial, dan kepemimpinan muda NU
                   </h3>
-                  <div className="mt-5 grid grid-cols-3 border border-white/10 bg-white/[0.08] text-center">
+                  <div className="mt-5 grid grid-cols-3 border border-white/15 bg-black/35 text-center">
                     {[
                       ["12", "PAC"],
                       ["2", "Ikatan"],
@@ -495,7 +511,7 @@ export const TentangKami = () => {
                     ].map(([number, label]) => (
                       <div key={label} className="border-r border-white/10 px-3 py-4 last:border-r-0">
                         <p className="font-display text-2xl font-black text-gold">{number}</p>
-                        <p className="mt-1 text-[9px] font-black uppercase tracking-[0.18em] text-white/72">{label}</p>
+                        <p className="mt-1 text-[9px] font-black uppercase tracking-[0.18em] !text-white drop-shadow-sm">{label}</p>
                       </div>
                     ))}
                   </div>
