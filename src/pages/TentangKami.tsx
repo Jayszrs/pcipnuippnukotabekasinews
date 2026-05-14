@@ -189,6 +189,24 @@ export const TentangKami = () => {
                 0%, 100% { text-shadow: 0 0 0 transparent; }
                 50% { text-shadow: 0 0 22px rgba(255, 215, 0, .42), 0 0 42px rgba(34, 197, 94, .2); }
               }
+              @keyframes historyBorderDrift {
+                0%, 100% {
+                  opacity: .38;
+                  transform: translate3d(-18%, 0, 0) scaleX(.82);
+                }
+                50% {
+                  opacity: 1;
+                  transform: translate3d(18%, 0, 0) scaleX(1.04);
+                }
+              }
+              @keyframes historyHaloDrift {
+                0%, 100% { opacity: .52; }
+                50% { opacity: .92; }
+              }
+              @keyframes historyGridFlow {
+                0% { background-position: 0 0, 0 0; }
+                100% { background-position: 0 72px, 72px 0; }
+              }
               .about-float-a { animation: aboutFloat 9s ease-in-out infinite; }
               .about-float-b { animation: aboutFloat 11s ease-in-out infinite reverse; }
               .about-line-glow { animation: aboutPulseLine 4s ease-in-out infinite; }
@@ -205,11 +223,58 @@ export const TentangKami = () => {
                   radial-gradient(circle at 22% 18%, hsl(var(--gold) / .18), transparent 22rem),
                   radial-gradient(circle at 82% 82%, hsl(var(--primary) / .24), transparent 28rem);
               }
+              .history-grid {
+                background-image:
+                  linear-gradient(hsl(var(--primary) / .09) 1px, transparent 1px),
+                  linear-gradient(90deg, hsl(var(--gold) / .08) 1px, transparent 1px);
+                background-size: 72px 72px;
+                animation: historyGridFlow 18s linear infinite;
+                mask-image: radial-gradient(circle at 50% 18%, black 0 38%, transparent 78%);
+              }
+              .history-card-frame {
+                isolation: isolate;
+                background:
+                  linear-gradient(135deg, hsl(var(--card) / .98), hsl(var(--card) / .92)),
+                  radial-gradient(circle at 100% 0%, hsl(var(--primary) / .18), transparent 18rem);
+              }
+              .history-card-frame::before {
+                content: "";
+                position: absolute;
+                inset-inline: 0;
+                top: 0;
+                height: 3px;
+                z-index: 3;
+                background: linear-gradient(90deg, transparent, hsl(var(--primary)), hsl(var(--gold)), transparent);
+                transform-origin: center;
+                animation: historyBorderDrift 5.8s ease-in-out infinite;
+              }
+              .history-card-frame::after {
+                content: attr(data-year);
+                position: absolute;
+                right: -0.18em;
+                bottom: -0.34em;
+                z-index: -1;
+                font-family: var(--font-display);
+                font-size: clamp(6rem, 16vw, 13rem);
+                font-weight: 950;
+                line-height: 1;
+                color: hsl(var(--foreground) / .035);
+                pointer-events: none;
+              }
+              .history-card-frame.is-gold::before {
+                background: linear-gradient(90deg, transparent, hsl(var(--gold)), hsl(var(--primary)), transparent);
+              }
+              .history-card-halo {
+                animation: historyHaloDrift 7s ease-in-out infinite;
+              }
               @media (prefers-reduced-motion: reduce) {
                 .about-float-a,
                 .about-float-b,
                 .about-line-glow,
-                .about-glow-word {
+                .about-glow-word,
+                .history-grid,
+                .history-card-frame::before,
+                .history-card-halo {
                   animation-duration: 1ms;
                   animation-iteration-count: 1;
                 }
@@ -276,26 +341,41 @@ export const TentangKami = () => {
           </div>
         </section>
 
-        <section className="relative overflow-hidden bg-background py-28 lg:py-36">
+        <section className="relative overflow-hidden bg-[#07130d] py-28 lg:py-36 dark:bg-[#020806]">
           <div
-            className="pointer-events-none absolute inset-0 opacity-80"
-            style={{ transform: `translate3d(0, ${clamp((parallaxY - 520) * -0.05, -80, 48)}px, 0) scale(1.04)` }}
+            className="pointer-events-none absolute -inset-x-10 -top-28 bottom-[-10rem]"
+            style={{ transform: `translate3d(0, ${clamp((parallaxY - 520) * -0.08, -110, 62)}px, 0) scale(1.08)` }}
             aria-hidden="true"
           >
-            <img src={historyParallaxBg} alt="" className="absolute inset-0 h-full w-full object-cover opacity-[0.08] mix-blend-multiply dark:opacity-[0.13]" />
-            <div className="absolute inset-0 bg-gradient-to-b from-background via-emerald-50/70 to-background dark:via-emerald-950/18" />
-            <div className="about-float-a absolute left-[10%] top-24 h-72 w-72 rounded-full bg-primary/12 blur-3xl" />
-            <div className="about-float-b absolute right-[8%] bottom-36 h-80 w-80 rounded-full bg-gold/12 blur-3xl" />
+            <img src={historyParallaxBg} alt="" className="absolute inset-0 h-full w-full object-cover opacity-24 mix-blend-luminosity" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_16%,hsl(var(--gold)_/_0.20),transparent_22rem),radial-gradient(circle_at_78%_38%,hsl(var(--primary)_/_0.34),transparent_30rem),linear-gradient(180deg,#020806_0%,rgba(7,19,13,.90)_34%,rgba(7,19,13,.96)_72%,#020806_100%)]" />
+            <div className="history-grid absolute inset-0 opacity-70" />
+            <div className="about-float-a absolute left-[7%] top-20 h-80 w-80 rounded-full bg-primary/20 blur-3xl" />
+            <div className="about-float-b absolute right-[7%] bottom-28 h-96 w-96 rounded-full bg-gold/14 blur-3xl" />
+          </div>
+          <div
+            className="pointer-events-none absolute left-[-4vw] top-24 font-display text-[15vw] font-black uppercase leading-none text-white/[0.035]"
+            style={{ transform: `translate3d(0, ${clamp((parallaxY - 560) * 0.045, -28, 92)}px, 0)` }}
+            aria-hidden="true"
+          >
+            IPNU
+          </div>
+          <div
+            className="pointer-events-none absolute right-[-8vw] top-[28rem] font-display text-[13vw] font-black uppercase leading-none text-gold/[0.07]"
+            style={{ transform: `translate3d(0, ${clamp((parallaxY - 720) * -0.04, -70, 42)}px, 0)` }}
+            aria-hidden="true"
+          >
+            IPPNU
           </div>
 
           <div className="container-news relative z-10">
             <div className="grid gap-10 lg:grid-cols-[0.92fr_1.08fr] lg:items-center">
               <div>
-                <p className="text-[10px] font-black uppercase tracking-[0.28em] text-primary">Lorong Waktu</p>
-                <h2 className="mt-4 font-display text-3xl font-black uppercase leading-tight sm:text-5xl">
-                  Jejak kaderisasi yang hidup di Bekasi
+                <p className="text-[10px] font-black uppercase tracking-[0.28em] text-gold">Sejarah IPNU & IPPNU</p>
+                <h2 className="mt-4 font-display text-3xl font-black uppercase leading-tight text-white sm:text-5xl">
+                  Jejak kaderisasi yang bergerak bersama zaman
                 </h2>
-                <p className="mt-5 text-sm font-semibold leading-7 text-muted-foreground">
+                <p className="mt-5 text-sm font-semibold leading-7 text-white/70">
                   Dari akar sejarah IPNU IPPNU sampai kerja kader hari ini, halaman ini merangkum
                   napas organisasi: belajar dengan tekun, bergerak bersama, dan berkhidmah untuk pelajar.
                 </p>
@@ -310,7 +390,7 @@ export const TentangKami = () => {
                   </Link>
                   <a
                     href="#sejarah-ipnu-ippnu"
-                    className="inline-flex items-center justify-center border border-border bg-card px-5 py-3 text-[11px] font-black uppercase tracking-[0.18em] text-foreground transition-all hover:-translate-y-0.5 hover:border-primary hover:text-primary"
+                    className="inline-flex items-center justify-center border border-white/15 bg-white/[0.06] px-5 py-3 text-[11px] font-black uppercase tracking-[0.18em] text-white transition-all hover:-translate-y-0.5 hover:border-gold hover:text-gold"
                   >
                     Baca Sejarah
                   </a>
@@ -352,6 +432,8 @@ export const TentangKami = () => {
                 const Icon = item.icon;
                 const isGold = item.accent === "gold";
                 const isRight = index % 2 === 1;
+                const borderShift = clamp((parallaxY - 820 - index * 360) * (isRight ? -0.05 : 0.05), -34, 34);
+                const haloShift = clamp((parallaxY - 760 - index * 380) * (isRight ? 0.04 : -0.04), -42, 42);
 
                 return (
                   <article
@@ -360,6 +442,13 @@ export const TentangKami = () => {
                   >
                     <div className="about-slide-copy relative ml-10 md:ml-0">
                       <div
+                        className={`pointer-events-none absolute top-8 hidden h-[calc(100%-4rem)] w-px md:block ${
+                          isRight ? "-left-10" : "-right-10"
+                        } ${isGold ? "bg-gradient-to-b from-transparent via-gold/70 to-transparent" : "bg-gradient-to-b from-transparent via-primary/70 to-transparent"}`}
+                        style={{ transform: `translate3d(0, ${borderShift}px, 0)` }}
+                        aria-hidden="true"
+                      />
+                      <div
                         className={`absolute -left-[3.15rem] top-3 grid h-10 w-10 place-items-center rounded-full border bg-background md:left-auto ${
                           isRight ? "md:-left-[5.6rem]" : "md:-right-[5.6rem]"
                         } ${isGold ? "border-gold text-gold shadow-gold/30" : "border-primary text-primary shadow-primary/30"} shadow-lg`}
@@ -367,13 +456,26 @@ export const TentangKami = () => {
                         <Icon className="h-4 w-4" />
                       </div>
 
-                      <div className="relative overflow-hidden border border-border/70 bg-card/95 p-6 shadow-2xl shadow-black/5 dark:bg-card/92 sm:p-8 lg:p-10">
+                      <div
+                        data-year={item.year}
+                        className={`history-card-frame relative overflow-hidden border p-6 shadow-2xl shadow-black/25 sm:p-8 lg:p-10 ${
+                          isGold ? "is-gold border-gold/35" : "border-primary/35"
+                        }`}
+                      >
                         <div
-                          className={`absolute inset-x-0 top-0 h-1.5 ${
-                            isGold ? "bg-gradient-to-r from-gold via-yellow-300 to-gold" : "bg-gradient-to-r from-primary via-emerald-400 to-primary"
-                          }`}
+                          className={`history-card-halo absolute -right-20 -top-20 h-44 w-44 rounded-full blur-3xl ${isGold ? "bg-gold/18" : "bg-primary/20"}`}
+                          style={{ transform: `translate3d(${haloShift}px, ${haloShift * -0.55}px, 0)` }}
+                          aria-hidden="true"
                         />
-                        <div className={`absolute -right-20 -top-20 h-44 w-44 rounded-full blur-3xl ${isGold ? "bg-gold/16" : "bg-primary/16"}`} />
+                        <div
+                          className={`pointer-events-none absolute bottom-0 left-0 h-24 w-full ${
+                            isGold
+                              ? "bg-gradient-to-t from-gold/10 to-transparent"
+                              : "bg-gradient-to-t from-primary/12 to-transparent"
+                          }`}
+                          style={{ transform: `translate3d(0, ${borderShift * 0.45}px, 0)` }}
+                          aria-hidden="true"
+                        />
                         <p className={`font-display text-5xl font-black leading-none sm:text-6xl ${isGold ? "text-gold" : "text-primary"}`}>
                           {item.year}
                         </p>
